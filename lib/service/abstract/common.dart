@@ -14,4 +14,6 @@ abstract class CommonService {
         query: query,
         queryParameters: queryParameters,
       );
+
+  final Dio dio = Dio();
 }

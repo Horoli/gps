@@ -18,8 +18,6 @@ class ServiceUser extends CommonService {
   }) async {
     Completer<MUser> completer = Completer<MUser>();
 
-    final Dio dio = Dio();
-
     dio.options.extra['withCredentials'] = true;
 
     final Response response =
@@ -36,10 +34,42 @@ class ServiceUser extends CommonService {
             ));
 
     if (!completer.isCompleted) {
+      // TODO : ForegroundTask에서 사용하기 위해 쿠키를 저장
+      await CookieManager.saveCookies(response);
       MUser getUser = MUser.fromMap(response.data);
       _subject.add(getUser);
 
       completer.complete(getUser);
+    }
+
+    return completer.future;
+  }
+
+  Future<void> location(
+      {required double lng,
+      required double lat,
+      required DateTime timestamp}) async {
+    Completer completer = Completer();
+
+    dio.options.extra['withCredentials'] = true;
+
+    final Response response = await dio.post(
+        '${URL.BASE_URL}/${URL.USER_LOCATION}',
+        data: {
+          "lng": lng,
+          "lat": lat,
+          "timestamp": timestamp.toIso8601String()
+        },
+        options: Options(
+          extra: {'withCredentials': true},
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        ));
+
+    if (!completer.isCompleted) {
+      print(response);
+      completer.complete(response);
     }
 
     return completer.future;

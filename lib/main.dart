@@ -3,8 +3,8 @@ import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'gps_test.dart';
 
 Future<void> main() async {
-  FlutterForegroundTask.initCommunicationPort();
   await initService();
+  FlutterForegroundTask.initCommunicationPort();
   await init();
 
   runApp(const AppRoot());

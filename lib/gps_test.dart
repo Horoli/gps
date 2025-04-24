@@ -15,6 +15,7 @@ import 'package:gps_test/preset/url.dart' as URL;
 import 'package:gps_test/preset/title.dart' as TITLE;
 import 'package:gps_test/preset/path.dart' as PATH;
 import 'package:rxdart/rxdart.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 part 'model/user.dart';
 part 'model/checklist.dart';
@@ -27,8 +28,10 @@ part 'extensions.dart';
 part 'app_root.dart';
 
 part 'foreground/task_handler.dart';
+
 part 'view/login.dart';
 part 'view/checklist.dart';
+part 'view/worklist.dart';
 
 part 'global.dart';
 
