@@ -10,14 +10,21 @@ class AppRoot extends StatefulWidget {
 class AppRootState extends State<AppRoot> {
   @override
   Widget build(BuildContext context) {
+    Map<String, Widget Function(BuildContext)> routes = {
+      PATH.ROUTE_LOGIN: (BuildContext context) => const ViewLogin(),
+      PATH.ROUTE_CHECKLIST: (BuildContext context) => const ViewChecklist(),
+    };
+
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: MyHomePage(),
-    );
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.deepPurple,
+          ),
+          useMaterial3: true,
+        ),
+        initialRoute: PATH.ROUTE_LOGIN,
+        routes: routes);
   }
 }
 
