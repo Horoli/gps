@@ -15,6 +15,18 @@ class CookieManager {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getStringList('auth_cookies') ?? [];
   }
+
+  // SharedPreferences에서 쿠키 삭제
+  static Future<void> clearCookies() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('auth_cookies');
+
+      print('쿠키 삭제 완료');
+    } catch (e) {
+      print('쿠키 삭제 오류: $e');
+    }
+  }
 }
 
 @pragma('vm:entry-point')

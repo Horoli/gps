@@ -45,6 +45,8 @@ class ServiceUser extends CommonService {
     return completer.future;
   }
 
+  Future<void> logout() async {}
+
   Future<void> location(
       {required double lng,
       required double lat,
