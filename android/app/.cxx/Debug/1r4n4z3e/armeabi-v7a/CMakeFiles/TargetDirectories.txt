@@ -1,0 +1,2 @@
+C:/Users/BCRH/Desktop/study/gps/android/app/.cxx/Debug/1r4n4z3e/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/BCRH/Desktop/study/gps/android/app/.cxx/Debug/1r4n4z3e/armeabi-v7a/CMakeFiles/rebuild_cache.dir

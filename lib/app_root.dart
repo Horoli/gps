@@ -29,31 +29,40 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  GeolocatorPlatform geolocatorPlatform = GeolocatorPlatform.instance;
-
+//  with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: ElevatedButton(
-          child: Text('gps'),
-          onPressed: () async {
-            LocationPermission permission =
-                await checkAndRequestLocationPermission();
-            print('permission $permission');
+        child: Row(
+          children: [
+            ElevatedButton(
+              child: Text('gps'),
+              onPressed: () async {
+                LocationPermission permission =
+                    await checkAndRequestLocationPermission();
+                print('permission $permission');
 
-            if (permission == LocationPermission.always) {
-              Position position = await Geolocator.getCurrentPosition();
-              print(position.accuracy);
-            }
-          },
+                if (permission == LocationPermission.always) {
+                  Position position = await Geolocator.getCurrentPosition();
+                  print(position.accuracy);
+                }
+              },
+            ),
+            ElevatedButton(
+              child: Text('start'),
+              onPressed: () async {
+                await startService();
+              },
+            ),
+            ElevatedButton(
+              child: Text('end'),
+              onPressed: () async {
+                await endService();
+              },
+            )
+          ],
         ),
-      ),
-      floatingActionButton: ElevatedButton(
-        child: Text('a'),
-        onPressed: () async {
-          await startService();
-        },
       ),
     );
   }
@@ -132,6 +141,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    // WidgetsBinding.instance.addObserver(this);
     FlutterForegroundTask.addTaskDataCallback(onReceiveTaskData);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ForegroundTaskHandler.requestPermissions();
@@ -149,11 +159,20 @@ class _MyHomePageState extends State<MyHomePage> {
         notificationText: 'Tap to return to the app',
         notificationIcon: null,
         notificationButtons: [
-          const NotificationButton(id: 'btn_hello', text: 'hello'),
+          const NotificationButton(id: 'btn_hello', text: 'end location share'),
         ],
         notificationInitialRoute: '/',
         callback: startCallback,
       );
+    }
+  }
+
+  Future endService() async {
+    if (await FlutterForegroundTask.isRunningService) {
+      print('stop service');
+      FlutterForegroundTask.stopService();
+    } else {
+      return;
     }
   }
 
@@ -167,6 +186,14 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     }
   }
+
+  // @override
+  // void didChangeAppLifecycleState(AppLifecycleState state) {
+  //   print(state);
+  //   if (state == AppLifecycleState.detached) {
+  //     print('detached');
+  //   }
+  // }
 
   @override
   void dispose() {
