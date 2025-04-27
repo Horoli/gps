@@ -21,12 +21,14 @@ class ServiceWorklist extends CommonService {
     final List<String> cookies = await CookieManager.loadCookies();
 
     dio.options.extra['withCredentials'] = true;
-    final Map<String, dynamic> headers = {
-      'Content-Type': 'application/json',
-    };
-    if (cookies.isNotEmpty) {
-      headers['cookie'] = cookies.join('; ');
-    }
+    final Map<String, dynamic> headers = DioConnector.headersByCookie(cookies);
+
+    // final Map<String, dynamic> headers = {
+    //   'Content-Type': 'application/json',
+    // };
+    // if (cookies.isNotEmpty) {
+    //   headers['cookie'] = cookies.join('; ');
+    // }
 
     final Response response = await dio.get(
       '${URL.BASE_URL}/${URL.WORK_LIST}',

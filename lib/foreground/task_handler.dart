@@ -105,12 +105,14 @@ class ForegroundTaskHandler extends TaskHandler {
     final Dio dio = Dio();
     dio.options.extra['withCredentials'] = true;
 
-    final Map<String, dynamic> headers = {
-      'Content-Type': 'application/json',
-    };
-    if (cookies.isNotEmpty) {
-      headers['cookie'] = cookies.join('; ');
-    }
+    Map<String, dynamic> headers = DioConnector.headersByCookie(cookies);
+
+    // final Map<String, dynamic> headers = {
+    //   'Content-Type': 'application/json',
+    // };
+    // if (cookies.isNotEmpty) {
+    //   headers['cookie'] = cookies.join('; ');
+    // }
 
     final Response response = await dio
         .post('${URL.BASE_URL}/${URL.USER_LOCATION}',
