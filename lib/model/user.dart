@@ -1,6 +1,6 @@
 part of gps_test;
 
-class MUser {
+class MUser extends CommonModel<MUser> {
   final String uuid;
   final String username;
   final String phoneNumber;
@@ -27,6 +27,7 @@ class MUser {
   }
 
   // User 객체를 JSON으로 변환하는 메서드
+  @override
   Map<String, dynamic> toJson() {
     return {
       'uuid': uuid,
@@ -44,6 +45,7 @@ class MUser {
   }
 
   // 객체 복사 및 일부 필드 변경을 위한 copyWith 메서드
+  @override
   MUser copyWith({
     String? uuid,
     String? username,

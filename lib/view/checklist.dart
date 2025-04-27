@@ -19,47 +19,29 @@ class ViewChecklistState extends State<ViewChecklist> {
                 future: GServiceChecklist.get(),
                 builder: (
                   BuildContext context,
-                  AsyncSnapshot<List<MChecklist>> snapshot,
+                  AsyncSnapshot<List<MChecklistData>> snapshot,
                 ) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
+                    return StreamExceptionWidgets.waiting(
+                      context: context,
                     );
                   }
 
                   if (snapshot.hasError) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            Icons.error_outline,
-                            color: Colors.red,
-                            size: 60,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            '오류가 발생했습니다',
-                            style: Theme.of(context).textTheme.titleLarge,
-                          ),
-                          const SizedBox(height: 8),
-                          ElevatedButton(
-                            onPressed: () {
-                              setState(() {});
-                            },
-                            child: const Text('다시 시도'),
-                          ),
-                        ],
-                      ),
+                    return StreamExceptionWidgets.hasError(
+                      context: context,
+                      refreshPressed: () {
+                        setState(() {});
+                      },
                     );
                   }
                   if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Center(
-                      child: Text('체크리스트가 없습니다'),
+                    return StreamExceptionWidgets.noData(
+                      title: '체크리스트가 없습니다',
                     );
                   }
 
-                  final List<MChecklist> checklists = snapshot.data!;
+                  final List<MChecklistData> checklists = snapshot.data!;
 
                   return ListView.separated(
                     padding: const EdgeInsets.all(16),
@@ -67,47 +49,24 @@ class ViewChecklistState extends State<ViewChecklist> {
                     separatorBuilder: (context, index) =>
                         const SizedBox(height: 16),
                     itemBuilder: (context, int index) {
-                      final MChecklist item = checklists[index];
+                      final MChecklistData item = checklists[index];
                       return buildChecklistItem(item, index + 1);
                     },
                   );
                 }).expand(),
-            buildNavigationButton(),
+            buildNavigationButton(
+              context: context,
+              title: TITLE.CONFIRM,
+              routerName: PATH.ROUTE_WORKLIST,
+              useReplacement: false,
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget buildNavigationButton() {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: SizedBox(
-        width: double.infinity,
-        height: 50,
-        child: ElevatedButton(
-          onPressed: () async {
-            await Navigator.pushNamed(context, PATH.ROUTE_WORKLIST);
-          },
-          style: ElevatedButton.styleFrom(
-            // backgroundColor: const Color(0xFF4B5EFC), // 파란색 버튼
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(4),
-            ),
-          ),
-          child: const Text(
-            '확인',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget buildChecklistItem(MChecklist item, int number) {
+  Widget buildChecklistItem(MChecklistData item, int number) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -235,13 +194,15 @@ class ViewChecklistState extends State<ViewChecklist> {
     super.initState();
     checkAndRequestLocationPermission();
 
-    FlutterForegroundTask.addTaskDataCallback(
-        ForegroundTaskHandler.onReceiveTaskData);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ForegroundTaskHandler.requestPermissions();
-      ForegroundTaskHandler.initTask();
-    });
-    ForegroundTaskHandler.startService();
+    if (useForeground) {
+      FlutterForegroundTask.addTaskDataCallback(
+          ForegroundTaskHandler.onReceiveTaskData);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ForegroundTaskHandler.requestPermissions();
+        ForegroundTaskHandler.initTask();
+      });
+      ForegroundTaskHandler.startService();
+    }
   }
 
   // Future<ServiceRequestResult> startService() async {
@@ -284,8 +245,10 @@ class ViewChecklistState extends State<ViewChecklist> {
 
   @override
   void dispose() {
-    FlutterForegroundTask.removeTaskDataCallback(
-        ForegroundTaskHandler.onReceiveTaskData);
+    if (useForeground) {
+      FlutterForegroundTask.removeTaskDataCallback(
+          ForegroundTaskHandler.onReceiveTaskData);
+    }
     super.dispose();
   }
 }

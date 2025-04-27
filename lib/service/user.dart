@@ -35,7 +35,7 @@ class ServiceUser extends CommonService {
 
     if (!completer.isCompleted) {
       // TODO : ForegroundTask에서 사용하기 위해 쿠키를 저장
-      await CookieManager.saveCookies(response);
+      // await CookieManager.saveCookies(response);
       MUser getUser = MUser.fromMap(response.data);
       _subject.add(getUser);
 
@@ -70,7 +70,7 @@ class ServiceUser extends CommonService {
         ));
 
     if (!completer.isCompleted) {
-      print(response);
+      print('gps complete $response');
       completer.complete(response);
     }
 

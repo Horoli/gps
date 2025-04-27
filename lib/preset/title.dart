@@ -3,3 +3,6 @@ const String PHONE_NUMBER = 'Phone Number';
 const String EMPLOYEE_ID = 'Employee ID';
 const String LOGIN = '로그인';
 const String CHECKLIST = '체크리스트';
+const String CONFIRM = '확인';
+const String WORKLIST = '작업리스트';
+const String CREATE_GROUP = '그룹 생성';

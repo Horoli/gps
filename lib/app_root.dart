@@ -14,6 +14,8 @@ class AppRootState extends State<AppRoot> {
       PATH.ROUTE_LOGIN: (BuildContext context) => const ViewLogin(),
       PATH.ROUTE_CHECKLIST: (BuildContext context) => const ViewChecklist(),
       PATH.ROUTE_WORKLIST: (BuildContext context) => const ViewWorklist(),
+      PATH.ROUTE_CREATE_GROUP: (BuildContext context) =>
+          const ViewCreateGroup(),
     };
 
     return MaterialApp(

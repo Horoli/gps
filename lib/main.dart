@@ -18,6 +18,8 @@ Future<void> init() async {
 Future<void> initService() async {
   GServiceUser = ServiceUser.getInstance();
   GServiceChecklist = ServiceChecklist.getInstance();
+  GServiceWorklist = ServiceWorklist.getInstance();
+  GServiceWork = ServiceWork.getInstance();
 }
 
 // TODO : 플랫폼 추가(device info plus)
