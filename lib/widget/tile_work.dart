@@ -3,13 +3,11 @@ part of gps_test;
 class TileWork extends StatelessWidget {
   final MWorkData workItem;
   final bool isFirst;
-  // final Function(WorkStatus) onStatusChange;
 
   const TileWork({
     super.key,
     required this.workItem,
     this.isFirst = false,
-    // required this.onStatusChange,
   });
 
   @override

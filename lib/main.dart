@@ -20,6 +20,7 @@ Future<void> initService() async {
   GServiceChecklist = ServiceChecklist.getInstance();
   GServiceWorklist = ServiceWorklist.getInstance();
   GServiceWork = ServiceWork.getInstance();
+  GServiceMember = ServiceMember.getInstance();
 }
 
 // TODO : 플랫폼 추가(device info plus)

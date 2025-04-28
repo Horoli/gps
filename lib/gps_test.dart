@@ -21,12 +21,15 @@ part 'model/user.dart';
 part 'model/checklist.dart';
 part 'model/work.dart';
 part 'model/worklist.dart';
+part 'model/member.dart';
+part 'model/work_current.dart';
 
 part 'service/abstract/common.dart';
 part 'service/user.dart';
 part 'service/checklist.dart';
 part 'service/worklist.dart';
 part 'service/work.dart';
+part 'service/member.dart';
 
 part 'extensions.dart';
 part 'app_root.dart';
@@ -38,9 +41,12 @@ part 'view/login.dart';
 part 'view/checklist.dart';
 part 'view/worklist.dart';
 part 'view/create_group.dart';
+part 'view/work_detail.dart';
 
 part 'global.dart';
 
 part 'widget/common.dart';
+part 'widget/dialog.dart';
 part 'widget/tile_work.dart';
+part 'widget/tile_member.dart';
 part 'widget/stream_exception.dart';

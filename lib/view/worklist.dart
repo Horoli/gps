@@ -77,5 +77,10 @@ class ViewWorklistState extends State<ViewWorklist> {
 
   Future<void> getData() async {
     await GServiceWorklist.get();
+
+    // currentWork가 있으면 자동으로 WORK_VIEW로 이동
+    if (GServiceWorklist.lastValue?.currentWork != null) {
+      await Navigator.pushReplacementNamed(context, PATH.ROUTE_WORK_DETAIL);
+    }
   }
 }

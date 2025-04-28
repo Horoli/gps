@@ -35,7 +35,7 @@ class ServiceUser extends CommonService {
 
     if (!completer.isCompleted) {
       // TODO : ForegroundTask에서 사용하기 위해 쿠키를 저장
-      // await CookieManager.saveCookies(response);
+      await CookieManager.saveCookies(response);
       MUser getUser = MUser.fromMap(response.data);
       _subject.add(getUser);
 
@@ -45,6 +45,9 @@ class ServiceUser extends CommonService {
     return completer.future;
   }
 
+  /// TODO : foreground service종료
+  /// TODO : localStorage user정보 및 쿠키 제거
+  ///
   Future<void> logout() async {}
 
   Future<void> location(

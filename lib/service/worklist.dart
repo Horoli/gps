@@ -12,26 +12,19 @@ class ServiceWorklist extends CommonService {
 
   Stream<MWorkList?> get stream => _subject.stream;
 
-  // MWorkList? get currentWork => _subject.valueOrNull;
+  MWorkList? get lastValue => _subject.valueOrNull;
 
   Future<MWorkList> get() async {
     Completer<MWorkList> completer = Completer<MWorkList>();
-
-    final Dio dio = Dio();
     final List<String> cookies = await CookieManager.loadCookies();
 
-    dio.options.extra['withCredentials'] = true;
-    final Map<String, dynamic> headers = DioConnector.headersByCookie(cookies);
+    print('cookies $cookies');
 
-    // final Map<String, dynamic> headers = {
-    //   'Content-Type': 'application/json',
-    // };
-    // if (cookies.isNotEmpty) {
-    //   headers['cookie'] = cookies.join('; ');
-    // }
+    final Map<String, dynamic> headers = DioConnector.headersByCookie(cookies);
+    dio.options.extra['withCredentials'] = true;
 
     final Response response = await dio.get(
-      '${URL.BASE_URL}/${URL.WORK_LIST}',
+      '${URL.BASE_URL}/${URL.GET_WORK_LIST}',
       options: Options(
         extra: {'withCredentials': true},
         headers: headers,
@@ -41,11 +34,28 @@ class ServiceWorklist extends CommonService {
     if (!completer.isCompleted) {
       final Map<String, dynamic> data = response.data as Map<String, dynamic>;
 
+      // currentWork 파싱 (null일 수 있음)
+      CurrentWork? currentWork;
+      if (data.containsKey('currentWork') && data['currentWork'] != null) {
+        try {
+          final Map<String, dynamic> currentWorkData =
+              data['currentWork'] as Map<String, dynamic>;
+          currentWork = CurrentWork.fromMap(currentWorkData);
+          print('현재 작업 파싱 성공: ${currentWork.uuid}');
+        } catch (e) {
+          print('현재 작업 파싱 오류: $e');
+          // 파싱 오류가 있어도 전체 결과에는 영향을 주지 않도록 함
+          currentWork = null;
+        }
+      }
+      print('currentWork $currentWork');
+
       // workList 파싱
       final List<MWorkData> works = (data['workList'] as List<dynamic>)
           .map(
               (workItem) => MWorkData.fromMap(workItem as Map<String, dynamic>))
           .toList();
+      print('works $works');
 
       // step 파싱
       final List<String> steps = (data['step'] as List<dynamic>)
@@ -57,6 +67,7 @@ class ServiceWorklist extends CommonService {
 
       // MWorkListData 객체 생성
       final MWorkList result = MWorkList(
+        currentWork: currentWork,
         works: works,
         step: steps,
         date: date,
@@ -67,5 +78,36 @@ class ServiceWorklist extends CommonService {
     }
 
     return completer.future;
+  }
+
+  Future<void> completeProcedure() async {
+    final List<String> cookies = await CookieManager.loadCookies();
+    final Map<String, dynamic> headers = DioConnector.headersByCookie(cookies);
+    dio.options.extra['withCredentials'] = true;
+
+    // 현재 시간을 ISO 8601 형식의 문자열로 변환
+    String uuid = lastValue!.currentWork!.uuid;
+    Position position = await Geolocator.getCurrentPosition();
+    final String timestamp = DateTime.now().toIso8601String();
+
+    final Response response = await dio.post(
+      '${URL.BASE_URL}/api/user/work/$uuid/procedure/complete',
+      data: {
+        "lng": position.longitude,
+        "lat": position.latitude,
+        "description": '',
+        "timestamp": timestamp
+      },
+      options: Options(
+        extra: {'withCredentials': true},
+        headers: headers,
+      ),
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      await get();
+    } else {
+      throw Exception('작업 완료 요청 실패 :${response.statusCode}');
+    }
   }
 }
