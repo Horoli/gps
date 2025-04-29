@@ -1,5 +1,16 @@
 part of gps_test;
 
+class SSEEvent {
+  final String id;
+  final String event;
+  final Map<String, dynamic> data;
+
+  SSEEvent({required this.id, required this.event, required this.data});
+
+  @override
+  String toString() => 'SSEEvent(id: $id, event: $event, data: $data)';
+}
+
 class ServiceSSE extends CommonService {
   static ServiceSSE? _instance;
   factory ServiceSSE.getInstance() => _instance ??= ServiceSSE._internal();
@@ -9,10 +20,43 @@ class ServiceSSE extends CommonService {
   late Stream eventStream;
   StreamSubscription? _eventSub;
   final StreamTransformer _transformer =
-      StreamTransformer<Uint8List, String>.fromHandlers(
+      StreamTransformer<Uint8List, Map<String, dynamic>>.fromHandlers(
     handleData: (data, sink) {
       print('stream $data');
-      sink.add(utf8.decode((data)));
+
+      try {
+        final String rawData = utf8.decode(data);
+        final List<String> splitData = rawData.split('\n');
+        String id = '';
+        String event = '';
+        String dataStr = '';
+
+        for (String line in splitData) {
+          if (line.startsWith('id:')) {
+            id = line.substring(3).trim();
+          } else if (line.startsWith('event:')) {
+            event = line.substring(6).trim();
+          } else if (line.startsWith('data:')) {
+            dataStr = line.substring(5).trim();
+          }
+        }
+
+        if (dataStr.isNotEmpty) {
+          Map<String, dynamic> parsedData = {};
+          try {
+            parsedData = json.decode(dataStr);
+          } catch (e) {
+            print('JSON parsing error: $e');
+            parsedData = {'raw': dataStr};
+          }
+
+          sink.add(parsedData);
+        }
+      } catch (e) {
+        print('SSE parsing error :$e');
+      }
+
+      // sink.add(utf8.decode((data)));
     },
     handleError: (error, stackTrace, sink) {
       print('error $error');
@@ -41,15 +85,116 @@ class ServiceSSE extends CommonService {
       eventStream = tmpStream.transform(_transformer);
       _eventSub?.cancel();
       _eventSub = eventStream.listen((dynamic data) {
-        print('ddddddddddddddddddd ');
-        print('data $data');
-        print(data.runtimeType);
-        print(jsonDecode(data));
-        // Map asd = unflatten(data);
-        // print(asd);
-        print('zzzzzzzzzzzz');
-        Navigator.of(GNavigationKey.currentState!.context)
-            .pushReplacementNamed(PATH.ROUTE_WORK_DETAIL);
+        CurrentWork? getCurrentWork = GServiceWorklist.lastValue!.currentWork;
+
+        // stream을 구독하고 있으면서 currentWork가 존재하는 user는
+        // WORK_DETAIL로 이동
+        if (getCurrentWork != null) {
+          Navigator.of(GNavigationKey.currentState!.context)
+              .pushReplacementNamed(PATH.ROUTE_WORK_DETAIL);
+        }
+
+        String uuid = data['uuid'];
+        print('check uuid... ${getCurrentWork?.uuid == uuid}');
+        if (getCurrentWork != null && getCurrentWork.uuid == uuid) {
+          print('valid uuid');
+          Map<String, dynamic> unflattenedData = unflatten(data['update']);
+
+          print('unflattenedData $unflattenedData');
+          if (unflattenedData.containsKey('procedures') &&
+              unflattenedData['procedures'] is List) {
+            List updatedProcedures = List.from(unflattenedData['procedures']);
+
+            int getIndex = List.from(updatedProcedures).indexWhere((e) {
+              return e != null;
+            });
+            print('getIndexaaav $getIndex');
+            print('work ${GServiceWorklist.lastValue!.currentWork}');
+            if (getIndex < 4) {
+              // 현재 작업 가져오기
+              CurrentWork currentWork = getCurrentWork;
+              print('step 1');
+
+              // 현재 작업의 procedures 가져오기
+              List<MProcedureInCurrentWork> currentProcedures =
+                  currentWork.procedures;
+              print('step 2');
+
+              // 업데이트할 procedures 가져오기
+              // 가져온 updatedProcedures[getIndex]를 포메팅해줘야함
+              Map<String, dynamic> updatedProcedureData = {};
+              if (updatedProcedures[getIndex] != null) {
+                Map originalMap = updatedProcedures[getIndex] as Map;
+                originalMap.forEach((key, value) {
+                  updatedProcedureData[key.toString()] = value;
+                });
+              }
+              print('step 3');
+
+              // 기존 procedure가져오기
+              MProcedureInCurrentWork existingProcedure =
+                  currentProcedures[getIndex];
+
+              DateTime? updatedDate = updatedProcedureData.containsKey('date')
+                  ? DateTime.parse(updatedProcedureData['date'] as String)
+                  : existingProcedure.date;
+
+              List<double>? updatedLocation;
+              if (updatedProcedureData.containsKey('location') &&
+                  updatedProcedureData['location'] is List) {
+                List locationList = updatedProcedureData['location'];
+                if (locationList.length >= 2) {
+                  updatedLocation = [
+                    locationList[0] is double
+                        ? locationList[0]
+                        : (locationList[0] as num).toDouble(),
+                    locationList[1] is double
+                        ? locationList[1]
+                        : (locationList[1] as num).toDouble()
+                  ];
+                }
+              } else {
+                updatedLocation = existingProcedure.location;
+              }
+
+              print('step 4');
+
+              // 업데이트된 procedure를 저장
+              MProcedureInCurrentWork updatedProcedure =
+                  existingProcedure.copyWith(
+                date: updatedDate,
+                location: updatedLocation,
+              );
+
+              print('step 5');
+
+              // 현재 작업의 procedure에 업데이트된 procedure를 할당
+              currentProcedures[getIndex] = updatedProcedure;
+              print('step 6');
+
+              // 현재 작업을 업데이트
+              CurrentWork updatedCurrentWork =
+                  currentWork.copyWith(procedures: currentProcedures);
+
+              print('step 7');
+
+              // 작업리스트를 업데이트
+              MWorkList updatedWorkList = GServiceWorklist.lastValue!
+                  .copyWith(currentWork: updatedCurrentWork);
+              print('step 8');
+
+              GServiceWorklist.subject.add(updatedWorkList);
+              print('stream complete');
+            }
+
+            // 마지막 작업이 완료되면 getCurrentWork가 null이 되기 때문에
+            // 마지막 작업이 완료되면 ViewWorklist로 이동
+            if (getIndex == 4) {
+              Navigator.of(GNavigationKey.currentState!.context)
+                  .pushReplacementNamed(PATH.ROUTE_WORKLIST);
+            }
+          }
+        }
       });
     } on DioException catch (e) {
       if (e.response != null) {
@@ -57,6 +202,7 @@ class ServiceSSE extends CommonService {
 
         print('error statusCode : ${e.response?.statusCode}');
         print('error message : ${errorBody.statusMessage}');
+        throw errorBody;
       }
     }
   }

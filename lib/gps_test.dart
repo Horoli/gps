@@ -16,6 +16,7 @@ import 'package:gps_test/preset/url.dart' as URL;
 import 'package:gps_test/preset/title.dart' as TITLE;
 import 'package:gps_test/preset/path.dart' as PATH;
 import 'package:gps_test/preset/state.dart' as STATE;
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -42,6 +43,7 @@ part 'foreground/task_handler.dart';
 part 'foreground/cookie_manager.dart';
 
 part 'view/login.dart';
+part 'view/preferences.dart';
 part 'view/checklist.dart';
 part 'view/worklist.dart';
 part 'view/create_group.dart';

@@ -7,3 +7,5 @@ const String CONFIRM = '확인';
 const String WORKLIST = '작업리스트';
 const String CREATE_GROUP = '그룹 생성';
 const String WORK = '작업';
+
+const String PREFERENCES = '설정';

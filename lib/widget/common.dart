@@ -4,7 +4,17 @@ PreferredSizeWidget CommonAppBar({
   required String title,
   bool useTrailing = true,
 }) {
-  List<Widget> actions = useTrailing ? [] : [];
+  List<Widget> actions = useTrailing
+      ? [
+          IconButton(
+            onPressed: () async {
+              Navigator.of(GNavigationKey.currentState!.context)
+                  .pushNamed(PATH.ROUTE_PREFERENCES);
+            },
+            icon: const Icon(Icons.settings),
+          )
+        ]
+      : [];
   return AppBar(
     title: Text(title),
     centerTitle: true,

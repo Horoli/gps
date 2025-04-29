@@ -143,17 +143,17 @@ class ViewLoginState extends State<ViewLogin> {
       Navigator.pushReplacementNamed(context, PATH.ROUTE_CHECKLIST);
 
       // TODO : ViewChecklist로 navigation.replace
-      showSnackbar(MSG.LOGIN_SUCCESS);
+      ShowInfomationWidgets.snackbar(context, MSG.LOGIN_SUCCESS);
     }).catchError((e) {
-      showSnackbar(MSG.LOGIN_FAILED);
+      ShowInfomationWidgets.snackbar(context, MSG.LOGIN_FAILED);
     });
   }
 
-  Future<void> showSnackbar(String text) async {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(text)),
-    );
-  }
+  // Future<void> showSnackbar(String text) async {
+  //   ScaffoldMessenger.of(context).showSnackBar(
+  //     SnackBar(content: Text(text)),
+  //   );
+  // }
 
   @override
   void dispose() {

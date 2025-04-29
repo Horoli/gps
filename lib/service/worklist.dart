@@ -7,12 +7,12 @@ class ServiceWorklist extends CommonService {
 
   ServiceWorklist._internal();
 
-  final BehaviorSubject<MWorkList?> _subject =
+  final BehaviorSubject<MWorkList?> subject =
       BehaviorSubject<MWorkList?>.seeded(null);
 
-  Stream<MWorkList?> get stream => _subject.stream;
+  Stream<MWorkList?> get stream => subject.stream;
 
-  MWorkList? get lastValue => _subject.valueOrNull;
+  MWorkList? get lastValue => subject.valueOrNull;
 
   Future<MWorkList> get() async {
     Completer<MWorkList> completer = Completer<MWorkList>();
@@ -73,7 +73,7 @@ class ServiceWorklist extends CommonService {
         date: date,
       );
 
-      _subject.add(result);
+      subject.add(result);
       completer.complete(result);
     }
 
@@ -83,33 +83,39 @@ class ServiceWorklist extends CommonService {
   // 현재 작업 완료 함수
   // 현재 작업 완료 처리 후 화면을 갱신해야 하기 때문에 get()을 실행
   Future<void> completeProcedure() async {
-    final List<String> cookies = await CookieManager.loadCookies();
-    final Map<String, dynamic> headers = DioConnector.headersByCookie(cookies);
-    dio.options.extra['withCredentials'] = true;
+    try {
+      final List<String> cookies = await CookieManager.loadCookies();
+      final Map<String, dynamic> headers =
+          DioConnector.headersByCookie(cookies);
+      dio.options.extra['withCredentials'] = true;
+      print('cookies $cookies');
 
-    // 현재 시간을 ISO 8601 형식의 문자열로 변환
-    String uuid = lastValue!.currentWork!.uuid;
-    Position position = await Geolocator.getCurrentPosition();
-    final String timestamp = DateTime.now().toIso8601String();
+      // 현재 시간을 ISO 8601 형식의 문자열로 변환
+      String uuid = lastValue!.currentWork!.uuid;
+      Position position = await Geolocator.getCurrentPosition();
+      final String timestamp = DateTime.now().toIso8601String();
 
-    final Response response = await dio.post(
-      '${URL.BASE_URL}/api/user/work/$uuid/procedure/complete',
-      data: {
-        "lng": position.longitude,
-        "lat": position.latitude,
-        "description": '',
-        "timestamp": timestamp
-      },
-      options: Options(
-        extra: {'withCredentials': true},
-        headers: headers,
-      ),
-    );
+      final Response response = await dio.post(
+        '${URL.BASE_URL}/api/user/work/$uuid/procedure/complete',
+        data: {
+          "lng": position.longitude,
+          "lat": position.latitude,
+          "description": '',
+          "timestamp": timestamp
+        },
+        options: Options(
+          extra: {'withCredentials': true},
+          headers: headers,
+        ),
+      );
+    } on DioException catch (e) {
+      if (e.response != null) {
+        ResponseBody errorBody = e.response?.data as ResponseBody;
 
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      await GServiceWorklist.get();
-    } else {
-      throw Exception('작업 완료 요청 실패 :${response.statusCode}');
+        print('error statusCode : ${e.response?.statusCode}');
+        print('error message : ${errorBody.statusMessage}');
+        throw errorBody;
+      }
     }
   }
 }

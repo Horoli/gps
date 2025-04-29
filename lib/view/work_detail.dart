@@ -240,34 +240,30 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
           actions: [
             Row(
               children: [
-                Expanded(
-                  child: TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop(); // 다이얼로그 닫기
-                    },
-                    child: const Text(
-                      '아니오',
-                      style: TextStyle(color: Colors.black),
-                    ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(); // 다이얼로그 닫기
+                  },
+                  child: const Text(
+                    '아니오',
+                    style: TextStyle(color: Colors.black),
                   ),
-                ),
+                ).expand(),
                 Container(
                   width: 1,
                   height: 24,
                   color: Colors.grey.shade300,
                 ),
-                Expanded(
-                  child: TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop(); // 다이얼로그 닫기
-                      completeProcedure(); // 작업 완료 처리
-                    },
-                    child: const Text(
-                      '네',
-                      style: TextStyle(color: Color(0xFF4B5EFC)),
-                    ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(); // 다이얼로그 닫기
+                    completeProcedure(); // 작업 완료 처리
+                  },
+                  child: const Text(
+                    '네',
+                    style: TextStyle(color: Color(0xFF4B5EFC)),
                   ),
-                ),
+                ).expand(),
               ],
             ),
           ],
@@ -287,7 +283,6 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
 
       // 작업 완료 API 호출
       await GServiceWorklist.completeProcedure();
-      // await GServiceWork.event();
       if (GServiceWorklist.lastValue?.currentWork == null) {
         await Navigator.pushReplacementNamed(context, PATH.ROUTE_WORKLIST);
       }

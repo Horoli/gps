@@ -16,7 +16,10 @@ class ShowInfomationWidgets {
 
   static Future<void> snackbar(BuildContext context, String message) async {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
+      SnackBar(
+        duration: const Duration(milliseconds: 100),
+        content: Text(message),
+      ),
     );
   }
 }
