@@ -80,6 +80,8 @@ class ServiceWorklist extends CommonService {
     return completer.future;
   }
 
+  // 현재 작업 완료 함수
+  // 현재 작업 완료 처리 후 화면을 갱신해야 하기 때문에 get()을 실행
   Future<void> completeProcedure() async {
     final List<String> cookies = await CookieManager.loadCookies();
     final Map<String, dynamic> headers = DioConnector.headersByCookie(cookies);
