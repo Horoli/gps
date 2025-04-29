@@ -5,6 +5,7 @@ String CHECK_LIST = 'api/config/checklist';
 String GET_WORK_LIST = 'api/user/work';
 String POST_WORK_LIST = 'api/user/work';
 String MEMBER_LIST = 'api/user/work/members/available';
+String STREAM = 'api/stream';
 
 String PREFIX_PROCEDURE_COMPLETE = 'api/user/work';
 String SUFFIX_PROCEDURE_COMPLETE = 'procedure/complete';

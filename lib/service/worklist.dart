@@ -107,7 +107,7 @@ class ServiceWorklist extends CommonService {
     );
 
     if (response.statusCode == 200 || response.statusCode == 201) {
-      await get();
+      await GServiceWorklist.get();
     } else {
       throw Exception('작업 완료 요청 실패 :${response.statusCode}');
     }

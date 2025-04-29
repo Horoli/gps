@@ -170,6 +170,14 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
               textAlign: TextAlign.center,
             ),
 
+            // StreamBuilder(
+            //   stream: GServiceWork.event(),
+            //   builder: (context, snapshot) {
+            //     print('snapshot $snapshot');
+            //     return Container(child: Text('$snapshot'));
+            //   },
+            // ),
+
             const Spacer(),
             // 현재 작업 완료 버튼
             SizedBox(
@@ -177,7 +185,7 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
               height: 50,
               child: ElevatedButton(
                 onPressed: () {
-                  _showConfirmationDialog(
+                  showConfirmationDialog(
                       context, procedures[_currentProcedureIndex].name);
                 },
                 style: ElevatedButton.styleFrom(
@@ -205,9 +213,14 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
   @override
   void initState() {
     super.initState();
+    getData();
   }
 
-  void _showConfirmationDialog(BuildContext context, String procedureName) {
+  Future<void> getData() async {
+    await GServiceWorklist.get();
+  }
+
+  void showConfirmationDialog(BuildContext context, String procedureName) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -247,7 +260,7 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
                   child: TextButton(
                     onPressed: () {
                       Navigator.of(context).pop(); // 다이얼로그 닫기
-                      _completeProcedure(); // 작업 완료 처리
+                      completeProcedure(); // 작업 완료 처리
                     },
                     child: const Text(
                       '네',
@@ -266,7 +279,7 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
   }
 
   // 작업 완료 처리
-  void _completeProcedure() async {
+  void completeProcedure() async {
     // 여기에 작업 완료 API 호출 로직 구현
     try {
       // 현재 위치 가져오기
@@ -274,24 +287,20 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
 
       // 작업 완료 API 호출
       await GServiceWorklist.completeProcedure();
-      //   procedureIndex: _currentProcedureIndex,
-      //   location: [position.longitude, position.latitude],
-      // );
+      // await GServiceWork.event();
+      if (GServiceWorklist.lastValue?.currentWork == null) {
+        await Navigator.pushReplacementNamed(context, PATH.ROUTE_WORKLIST);
+      }
 
       // 성공 메시지
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('작업이 완료되었습니다')),
-        );
+        ShowInfomationWidgets.snackbar(context, '작업이 완료되었습니다');
       }
 
       // 작업 목록 새로고침
-      // await GServiceWorklist.get();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('작업 완료 처리 중 오류가 발생했습니다: $e')),
-        );
+        ShowInfomationWidgets.snackbar(context, '작업 완료 처리 중 오류가 발생했습니다: $e');
       }
     }
   }

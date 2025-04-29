@@ -1,6 +1,7 @@
 library gps_test;
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -8,11 +9,13 @@ import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:dio/dio.dart';
+import 'package:flat/flat.dart';
 
 import 'package:gps_test/preset/msg.dart' as MSG;
 import 'package:gps_test/preset/url.dart' as URL;
 import 'package:gps_test/preset/title.dart' as TITLE;
 import 'package:gps_test/preset/path.dart' as PATH;
+import 'package:gps_test/preset/state.dart' as STATE;
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -30,6 +33,7 @@ part 'service/checklist.dart';
 part 'service/worklist.dart';
 part 'service/work.dart';
 part 'service/member.dart';
+part 'service/sse_event.dart';
 
 part 'extensions.dart';
 part 'app_root.dart';

@@ -58,7 +58,7 @@ class ViewChecklistState extends State<ViewChecklist> {
               context: context,
               title: TITLE.CONFIRM,
               routerName: PATH.ROUTE_WORKLIST,
-              useReplacement: false,
+              useReplacement: true,
             ),
           ],
         ),

@@ -1,7 +1,7 @@
 part of gps_test;
 
-class ShowDialogWidgets {
-  static Future<void> error(BuildContext context, String message) async {
+class ShowInfomationWidgets {
+  static Future<void> errorDialog(BuildContext context, String message) async {
     showDialog(
       context: context,
       builder: (context) {
@@ -13,4 +13,10 @@ class ShowDialogWidgets {
   }
 
   static Future<void> confirm(BuildContext context) async {}
+
+  static Future<void> snackbar(BuildContext context, String message) async {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
 }

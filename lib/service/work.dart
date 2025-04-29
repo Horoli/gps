@@ -23,35 +23,45 @@ class ServiceWork extends CommonService {
   Future<void> create({
     required List<String> members,
   }) async {
-    Completer completer = Completer();
+    try {
+      final List<String> cookies = await CookieManager.loadCookies();
+      print('cookies $cookies');
+      final Map<String, dynamic> headers =
+          DioConnector.headersByCookie(cookies);
+      dio.options.extra['withCredentials'] = true;
 
-    final List<String> cookies = await CookieManager.loadCookies();
-    print('cookies $cookies');
-    final Map<String, dynamic> headers = DioConnector.headersByCookie(cookies);
-    dio.options.extra['withCredentials'] = true;
+      Position position = await Geolocator.getCurrentPosition();
 
-    Position position = await Geolocator.getCurrentPosition();
+      if (selectedWork == null) {
+        return;
+      }
 
-    if (selectedWork == null) {
-      return;
-    }
-
-    final Response response = await dio.post(
-      '${URL.BASE_URL}/${URL.GET_WORK_LIST}',
-      data: {
+      Map<String, dynamic> data = {
         "members": members,
         "lng": position.longitude,
         "lat": position.latitude,
         "aircraftName": selectedWork!.name,
         "aircraftDepartureTime": selectedWork!.departureTime,
         "timestamp": DateTime.now().toIso8601String(),
-      },
-      options: Options(
-        extra: {'withCredentials': true},
-        headers: headers,
-      ),
-    );
+      };
 
-    completer.future;
+      print('create $data');
+
+      final Response response = await dio.post(
+        '${URL.BASE_URL}/${URL.GET_WORK_LIST}',
+        data: data,
+        options: Options(
+          extra: {'withCredentials': true},
+          headers: headers,
+        ),
+      );
+    } catch (e) {
+      if (e is DioException) {
+        if (e.response != null) {
+          print('error statusCode : ${e.response?.statusCode}');
+          print('error data : ${e.response?.data}');
+        }
+      }
+    }
   }
 }

@@ -21,6 +21,7 @@ Future<void> initService() async {
   GServiceWorklist = ServiceWorklist.getInstance();
   GServiceWork = ServiceWork.getInstance();
   GServiceMember = ServiceMember.getInstance();
+  GServiceSSE = ServiceSSE.getInstance();
 }
 
 // TODO : 플랫폼 추가(device info plus)

@@ -55,9 +55,9 @@ class ViewCreateGroupState extends State<ViewCreateGroup> {
             // context: context,
             title: '완료',
             onPressed: () async {
-              bool useReplacement = true;
+              // bool useReplacement = true;
               if (GServiceMember.selectedMember == null) {
-                await ShowDialogWidgets.error(
+                await ShowInfomationWidgets.errorDialog(
                   context,
                   '멤버를 선택하세요',
                 );
@@ -68,15 +68,17 @@ class ViewCreateGroupState extends State<ViewCreateGroup> {
               // Position position = await Geolocator.getCurrentPosition();
               // print(position.longitude);
 
+              print(GServiceMember.selectedMember!.uuid);
               await GServiceWork.create(
                   members: [GServiceMember.selectedMember!.uuid]);
 
               await GServiceWorklist.get();
 
-              useReplacement
-                  ? await Navigator.pushReplacementNamed(
-                      context, PATH.ROUTE_WORK_DETAIL)
-                  : await Navigator.pushNamed(context, PATH.ROUTE_WORK_DETAIL);
+              // useReplacement
+              // ?
+              await Navigator.pushReplacementNamed(
+                  context, PATH.ROUTE_WORK_DETAIL);
+              // : await Navigator.pushNamed(context, PATH.ROUTE_WORK_DETAIL);
             },
           )
         ],
