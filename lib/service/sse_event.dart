@@ -24,6 +24,7 @@ class ServiceSSE extends CommonService {
     handleData: (data, sink) {
       try {
         final String rawData = utf8.decode(data);
+        print('rawData $rawData');
         final List<String> splitData = rawData.split('\n');
         String id = '';
         String event = '';
@@ -82,8 +83,12 @@ class ServiceSSE extends CommonService {
       Stream tmpStream = response.data.stream as Stream;
       eventStream = tmpStream.transform(_transformer);
       _eventSub?.cancel();
-      _eventSub = eventStream.listen((dynamic data) {
+      _eventSub = eventStream.listen((dynamic data) async {
+        print('event received : $data');
+        await GServiceWorklist.get();
         CurrentWork? getCurrentWork = GServiceWorklist.lastValue!.currentWork;
+
+        print('in stream currentWork : $getCurrentWork');
 
         // stream을 구독하고 있으면서
         // currentWork를 갖고 있지만 WORK_DETAIL 화면이 아닌 user는
@@ -127,12 +132,16 @@ class ServiceSSE extends CommonService {
                 });
               }
 
+              print('updatedProcedureData $updatedProcedureData');
+
               // 기존 procedure가져오기
               MProcedureInCurrentWork existingProcedure =
                   currentProcedures[getIndex];
 
               DateTime? updatedDate = updatedProcedureData.containsKey('date')
-                  ? DateTime.parse(updatedProcedureData['date'] as String)
+                  ? updatedProcedureData['date'] == null
+                      ? null // work가 최초 생성됐을 경우엔 null임
+                      : DateTime.parse(updatedProcedureData['date'] as String)
                   : existingProcedure.date;
 
               List<double>? updatedLocation;

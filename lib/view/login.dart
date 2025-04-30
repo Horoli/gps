@@ -70,6 +70,18 @@ class ViewLoginState extends State<ViewLogin> {
                   ),
                 ),
               ),
+              ElevatedButton(
+                  onPressed: () {
+                    _phoneController.text = '01041850688';
+                    _employeeIdController.text = 'devel';
+                  },
+                  child: Text('박선하')),
+              ElevatedButton(
+                  onPressed: () {
+                    _phoneController.text = '01011112222';
+                    _employeeIdController.text = '100';
+                  },
+                  child: Text('홍길동')),
             ],
           ),
         ),
