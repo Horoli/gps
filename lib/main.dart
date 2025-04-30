@@ -5,7 +5,6 @@ import 'gps_test.dart';
 
 Future<void> main() async {
   await initService();
-  await initPlatformInfo();
 
   FlutterForegroundTask.initCommunicationPort();
   await init();
@@ -15,6 +14,7 @@ Future<void> main() async {
 
 Future<void> init() async {
   WidgetsFlutterBinding.ensureInitialized();
+  packageInfo = await PackageInfo.fromPlatform();
   // TODO : sharedPreferences 추가
 }
 
@@ -25,10 +25,6 @@ Future<void> initService() async {
   GServiceWork = ServiceWork.getInstance();
   GServiceMember = ServiceMember.getInstance();
   GServiceSSE = ServiceSSE.getInstance();
-}
-
-Future<void> initPlatformInfo() async {
-  packageInfo = await PackageInfo.fromPlatform();
 }
 
 // TODO : 플랫폼 추가(device info plus)

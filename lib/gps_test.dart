@@ -35,6 +35,7 @@ part 'service/worklist.dart';
 part 'service/work.dart';
 part 'service/member.dart';
 part 'service/sse_event.dart';
+part 'service/route_manager.dart';
 
 part 'extensions.dart';
 part 'app_root.dart';

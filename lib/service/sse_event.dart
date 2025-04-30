@@ -22,8 +22,6 @@ class ServiceSSE extends CommonService {
   final StreamTransformer _transformer =
       StreamTransformer<Uint8List, Map<String, dynamic>>.fromHandlers(
     handleData: (data, sink) {
-      print('stream $data');
-
       try {
         final String rawData = utf8.decode(data);
         final List<String> splitData = rawData.split('\n');
@@ -87,9 +85,10 @@ class ServiceSSE extends CommonService {
       _eventSub = eventStream.listen((dynamic data) {
         CurrentWork? getCurrentWork = GServiceWorklist.lastValue!.currentWork;
 
-        // stream을 구독하고 있으면서 currentWork가 존재하는 user는
-        // WORK_DETAIL로 이동
-        if (getCurrentWork != null) {
+        // stream을 구독하고 있으면서
+        // currentWork를 갖고 있지만 WORK_DETAIL 화면이 아닌 user는
+        // WORK_DETAIL 화면으로 이동
+        if (getCurrentWork != null && !RouterManager().isWorkDetail()) {
           Navigator.of(GNavigationKey.currentState!.context)
               .pushReplacementNamed(PATH.ROUTE_WORK_DETAIL);
         }
@@ -108,17 +107,15 @@ class ServiceSSE extends CommonService {
             int getIndex = List.from(updatedProcedures).indexWhere((e) {
               return e != null;
             });
-            print('getIndexaaav $getIndex');
+            print('getIndex $getIndex');
             print('work ${GServiceWorklist.lastValue!.currentWork}');
             if (getIndex < 4) {
               // 현재 작업 가져오기
               CurrentWork currentWork = getCurrentWork;
-              print('step 1');
 
               // 현재 작업의 procedures 가져오기
               List<MProcedureInCurrentWork> currentProcedures =
                   currentWork.procedures;
-              print('step 2');
 
               // 업데이트할 procedures 가져오기
               // 가져온 updatedProcedures[getIndex]를 포메팅해줘야함
@@ -129,7 +126,6 @@ class ServiceSSE extends CommonService {
                   updatedProcedureData[key.toString()] = value;
                 });
               }
-              print('step 3');
 
               // 기존 procedure가져오기
               MProcedureInCurrentWork existingProcedure =
@@ -157,8 +153,6 @@ class ServiceSSE extends CommonService {
                 updatedLocation = existingProcedure.location;
               }
 
-              print('step 4');
-
               // 업데이트된 procedure를 저장
               MProcedureInCurrentWork updatedProcedure =
                   existingProcedure.copyWith(
@@ -166,22 +160,16 @@ class ServiceSSE extends CommonService {
                 location: updatedLocation,
               );
 
-              print('step 5');
-
               // 현재 작업의 procedure에 업데이트된 procedure를 할당
               currentProcedures[getIndex] = updatedProcedure;
-              print('step 6');
 
               // 현재 작업을 업데이트
               CurrentWork updatedCurrentWork =
                   currentWork.copyWith(procedures: currentProcedures);
 
-              print('step 7');
-
               // 작업리스트를 업데이트
               MWorkList updatedWorkList = GServiceWorklist.lastValue!
                   .copyWith(currentWork: updatedCurrentWork);
-              print('step 8');
 
               GServiceWorklist.subject.add(updatedWorkList);
               print('stream complete');

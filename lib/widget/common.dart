@@ -69,9 +69,15 @@ Widget buildNavigationButton({
           if (onPressed != null) {
             onPressed();
           }
+          // useReplacement
+          //     ? await Navigator.pushReplacementNamed(context, routerName)
+          //     : await Navigator.pushNamed(context, routerName);
+
           useReplacement
-              ? await Navigator.pushReplacementNamed(context, routerName)
-              : await Navigator.pushNamed(context, routerName);
+              ? await Navigator.pushReplacementNamed(
+                  GNavigationKey.currentContext!, routerName)
+              : await Navigator.pushNamed(
+                  GNavigationKey.currentContext!, routerName);
         },
         style: ElevatedButton.styleFrom(
           // backgroundColor: const Color(0xFF4B5EFC), // 파란색 버튼

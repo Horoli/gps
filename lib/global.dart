@@ -6,6 +6,7 @@ late ServiceWorklist GServiceWorklist;
 late ServiceWork GServiceWork;
 late ServiceMember GServiceMember;
 late ServiceSSE GServiceSSE;
+late RouterManager GServiceRouterManager;
 
 late PackageInfo packageInfo;
 bool useForeground = false;

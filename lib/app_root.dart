@@ -23,6 +23,7 @@ class AppRootState extends State<AppRoot> {
     return MaterialApp(
       title: 'Flutter Demo',
       navigatorKey: GNavigationKey,
+      navigatorObservers: [AppRouteObserver()],
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.deepPurple,
