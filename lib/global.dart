@@ -7,6 +7,7 @@ late ServiceWork GServiceWork;
 late ServiceMember GServiceMember;
 late ServiceSSE GServiceSSE;
 
+late PackageInfo packageInfo;
 bool useForeground = false;
 
 final GlobalKey<NavigatorState> GNavigationKey = GlobalKey();

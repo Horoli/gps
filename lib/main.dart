@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'gps_test.dart';
 
 Future<void> main() async {
   await initService();
+  await initPlatformInfo();
+
   FlutterForegroundTask.initCommunicationPort();
   await init();
 
@@ -22,6 +25,10 @@ Future<void> initService() async {
   GServiceWork = ServiceWork.getInstance();
   GServiceMember = ServiceMember.getInstance();
   GServiceSSE = ServiceSSE.getInstance();
+}
+
+Future<void> initPlatformInfo() async {
+  packageInfo = await PackageInfo.fromPlatform();
 }
 
 // TODO : 플랫폼 추가(device info plus)
