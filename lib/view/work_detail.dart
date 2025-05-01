@@ -32,7 +32,8 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
           }
 
           if (!snapshot.hasData || snapshot.data?.currentWork == null) {
-            return StreamExceptionWidgets.noData(title: '작업 정보가 없습니다');
+            return StreamExceptionWidgets.noData(
+                context: context, title: '작업 정보가 없습니다');
           }
 
           final CurrentWork currentWork = snapshot.data!.currentWork!;
@@ -169,6 +170,17 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
               ),
               textAlign: TextAlign.center,
             ),
+
+            ElevatedButton(
+                onPressed: () async {
+                  await GServiceSSE.innerTest();
+                },
+                child: Text('sse connect')),
+            ElevatedButton(
+                onPressed: () async {
+                  await GServiceSSE.disconnect();
+                },
+                child: Text('sse disconnect')),
 
             // StreamBuilder(
             //   stream: GServiceWork.event(),

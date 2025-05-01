@@ -9,9 +9,14 @@ class ViewLogin extends StatefulWidget {
 
 class ViewLoginState extends State<ViewLogin> {
   final TextEditingController _phoneController =
-      TextEditingController(text: '01041850688');
+      TextEditingController(text: tmpNumber);
   final TextEditingController _employeeIdController =
-      TextEditingController(text: 'devel');
+      TextEditingController(text: tmpID);
+
+  // final TextEditingController _phoneController =
+  //     TextEditingController(text: '01041850688');
+  // final TextEditingController _employeeIdController =
+  //     TextEditingController(text: 'devel');
 
   @override
   Widget build(BuildContext context) {

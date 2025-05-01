@@ -15,6 +15,28 @@ class ServiceSSE extends CommonService {
   static ServiceSSE? _instance;
   factory ServiceSSE.getInstance() => _instance ??= ServiceSSE._internal();
 
+  Dio? _dio;
+
+  Dio _getNewDioInstance() {
+    final Dio newDio = Dio(BaseOptions(
+      baseUrl: URL.BASE_URL,
+      // connectTimeout: const Duration(seconds: 30),
+      // receiveTimeout: const Duration(seconds: 30),
+      // sendTimeout: const Duration(seconds: 30),
+    ));
+
+    return newDio;
+  }
+
+// 연결 상태를 추적하기 위한 변수들 추가
+  bool _isConnected = false;
+  DateTime? _lastEventTime;
+  Timer? _healthCheckTimer;
+  int _reconnectAttempts = 0;
+  final int _maxReconnectAttempts = 5;
+  final Duration _reconnectDelay = Duration(seconds: 2);
+  final Duration _healthCheckInterval = Duration(seconds: 30);
+
   ServiceSSE._internal();
 
   late Stream eventStream;
@@ -63,15 +85,25 @@ class ServiceSSE extends CommonService {
     },
   );
 
+  // 테스트용으로 로그인 후 재연결 시도를 해 봄
+  // 계정별로 1세션 / 1커넥션만 승인되는것 같음
+  Future<void> innerTest({bool reconnect = true}) async {
+    await GServiceUser.login(id: tmpID, phoneNumber: tmpNumber).then((user) {
+      GServiceSSE.connect(reconnect: reconnect);
+    });
+  }
+
   Future<void> connect({bool reconnect = true}) async {
     try {
-      // TODO :reconnect 관련 코드 추가
+      _dio = _getNewDioInstance();
       final List<String> cookies = await CookieManager.loadCookies();
       print('cookies $cookies');
       final Map<String, dynamic> headers =
           DioConnector.streamHeadersByCookie(cookies);
       dio.options.extra['withCredentials'] = true;
-      final Response response = await dio.get(
+      print('stream step 1');
+      print('headers $headers');
+      final Response response = await _dio!.get(
         '${URL.BASE_URL}/${URL.STREAM}',
         options: Options(
           responseType: ResponseType.stream,
@@ -80,11 +112,18 @@ class ServiceSSE extends CommonService {
         ),
       );
 
+      print('stream step 2');
+
       Stream tmpStream = response.data.stream as Stream;
       eventStream = tmpStream.transform(_transformer);
+      print('stream step 3');
+
+      _isConnected = true;
+      _lastEventTime = DateTime.now();
       _eventSub?.cancel();
       _eventSub = eventStream.listen((dynamic data) async {
         print('event received : $data');
+        _lastEventTime = DateTime.now();
         await GServiceWorklist.get();
         CurrentWork? getCurrentWork = GServiceWorklist.lastValue!.currentWork;
 
@@ -192,21 +231,142 @@ class ServiceSSE extends CommonService {
             }
           }
         }
+      }, onError: (error) {
+        print('SSE stream error : $error');
+        _isConnected = false;
+        if (reconnect) {
+          healthCheck();
+        }
+      }, onDone: () {
+        print('SSE stream closed');
+        _isConnected = false;
+        if (reconnect) {
+          healthCheck();
+        }
       });
+
+      if (reconnect) {
+        healthCheck();
+      }
     } on DioException catch (e) {
+      _isConnected = false;
+      // rethrow;
+
       if (e.response != null) {
         ResponseBody errorBody = e.response?.data as ResponseBody;
 
         print('error statusCode : ${e.response?.statusCode}');
         print('error message : ${errorBody.statusMessage}');
-        throw errorBody;
+        // throw errorBody;
+        rethrow;
       }
+      rethrow;
     }
   }
 
-  // TODO : 로그아웃 시 disconnect 실행
-  Future<void> disconnect() async {}
-
   // TODO : 재연결 관련 연결상태 체크
-  Future<void> healthCheck() async {}
+  Future<void> healthCheck() async {
+    // 이미 타이머가 실행 중이면 중지
+    _healthCheckTimer?.cancel();
+
+    // 주기적으로 연결 상태 확인
+    _healthCheckTimer = Timer.periodic(_healthCheckInterval, (timer) async {
+      print('Performing SSE health check...');
+
+      // 마지막 이벤트 수신 시간 확인
+      final now = DateTime.now();
+      final timeSinceLastEvent = _lastEventTime != null
+          ? now.difference(_lastEventTime!)
+          : Duration(hours: 1); // 초기값으로 큰 값 설정
+
+      // 연결 상태 확인 조건:
+      // 1. _isConnected가 false이거나
+      // 2. 마지막 이벤트 수신 후 일정 시간(1분) 이상 지났거나
+      // 3. _eventSub이 null이거나 closed 상태인 경우
+      bool needsReconnect = !_isConnected ||
+          timeSinceLastEvent > Duration(minutes: 1) ||
+          _eventSub == null;
+
+      // 재연결이 필요한 경우
+      if (needsReconnect) {
+        print('SSE connection needs reconnection. Attempting to reconnect...');
+
+        // 기존 연결 해제
+        // await _cleanupConnection();
+
+        // 재연결 시도 횟수 제한 확인
+        if (_reconnectAttempts < _maxReconnectAttempts) {
+          _reconnectAttempts++;
+
+          // 지수 백오프를 사용한 재연결 지연 시간 계산
+          final delay = Duration(
+              milliseconds: _reconnectDelay.inMilliseconds *
+                  (1 << (_reconnectAttempts - 1)));
+          print(
+              'Reconnect attempt $_reconnectAttempts of $_maxReconnectAttempts after ${delay.inSeconds}s');
+
+          // 지연 후 재연결 시도
+          await Future.delayed(delay);
+          try {
+            await disconnect();
+            await innerTest();
+            // await connect(reconnect: true);
+            _reconnectAttempts = 0; // 성공 시 재시도 횟수 초기화
+            print('SSE reconnection successful');
+          } catch (e) {
+            print('SSE reconnection failed: $e');
+            // 다음 healthCheck에서 다시 시도
+          }
+        } else {
+          print(
+              'Max reconnection attempts reached. Stopping reconnection attempts.');
+          timer.cancel(); // 최대 시도 횟수 초과 시 타이머 중지
+        }
+      } else {
+        print('SSE connection is healthy');
+        _reconnectAttempts = 0; // 정상 상태면 재시도 횟수 초기화
+      }
+    });
+  }
+
+  // // 연결 정리 및 리소스 해제
+  // Future<void> _cleanupConnection() async {
+  //   try {
+  //     await _eventSub?.cancel();
+
+  //     _eventSub = null;
+  //     _isConnected = false;
+  //   } catch (e) {
+  //     print('Error during connection cleanup: $e');
+  //   }
+  // }
+
+  Future<void> disconnect() async {
+    print('Performing full reset of SSE service...');
+
+    try {
+      // 1. 타이머 취소
+      _healthCheckTimer?.cancel();
+      _healthCheckTimer = null;
+
+      // 2. 이벤트 구독 취소
+      await _eventSub?.cancel();
+      _eventSub = null;
+
+      // 3. 상태 초기화
+      _isConnected = false;
+      _lastEventTime = null;
+      _reconnectAttempts = 0;
+
+      // 4. Dio 인스턴스 교체
+      _dio = _getNewDioInstance();
+
+      // 5. 잠시 대기
+      await Future.delayed(Duration(seconds: 2));
+
+      print('Full reset completed');
+    } catch (e) {
+      print('Error during full reset: $e');
+    }
+  }
 }

@@ -37,7 +37,7 @@ class StreamExceptionWidgets {
     );
   }
 
-  static Widget noData({required String title}) {
+  static Widget noData({required BuildContext context, required String title}) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -51,6 +51,12 @@ class StreamExceptionWidgets {
           Text(
             title,
             style: const TextStyle(fontSize: 18),
+          ),
+          ElevatedButton(
+            child: Text('작업목록으로 가기'),
+            onPressed: () {
+              Navigator.of(context).pushReplacementNamed(PATH.ROUTE_WORKLIST);
+            },
           ),
         ],
       ),

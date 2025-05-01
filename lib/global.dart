@@ -8,8 +8,10 @@ late ServiceMember GServiceMember;
 late ServiceSSE GServiceSSE;
 late RouterManager GServiceRouterManager;
 
-late PackageInfo packageInfo;
 bool useForeground = false;
+
+const String tmpNumber = "01041850688";
+const String tmpID = 'devel';
 
 final GlobalKey<NavigatorState> GNavigationKey = GlobalKey();
 

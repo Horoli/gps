@@ -26,7 +26,10 @@ class ViewWorklistState extends State<ViewWorklist> {
 
           // 데이터 없음 처리
           if (!snapshot.hasData) {
-            return StreamExceptionWidgets.noData(title: '작업리스트가 없습니다');
+            return StreamExceptionWidgets.noData(
+              context: context,
+              title: '작업리스트가 없습니다',
+            );
           }
 
           // 데이터가 있지만 works 리스트가 비어있는 경우

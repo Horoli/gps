@@ -25,7 +25,10 @@ class ViewCreateGroupState extends State<ViewCreateGroup> {
           isLoading
               ? StreamExceptionWidgets.waiting(context: context)
               : setMembers.isEmpty
-                  ? StreamExceptionWidgets.noData(title: '멤버가 없습니다')
+                  ? StreamExceptionWidgets.noData(
+                      title: '멤버가 없습니다',
+                      context: context,
+                    )
                   : StreamBuilder<MMember?>(
                       stream: GServiceMember.stream,
                       builder: (context, snapshot) {

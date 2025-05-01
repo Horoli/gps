@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'gps_test.dart';
 
 Future<void> main() async {
@@ -14,7 +13,6 @@ Future<void> main() async {
 
 Future<void> init() async {
   WidgetsFlutterBinding.ensureInitialized();
-  packageInfo = await PackageInfo.fromPlatform();
   // TODO : sharedPreferences 추가
 }
 

@@ -37,6 +37,7 @@ class ViewChecklistState extends State<ViewChecklist> {
                   }
                   if (!snapshot.hasData || snapshot.data!.isEmpty) {
                     return StreamExceptionWidgets.noData(
+                      context: context,
                       title: '체크리스트가 없습니다',
                     );
                   }
