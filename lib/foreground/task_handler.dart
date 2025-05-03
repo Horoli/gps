@@ -6,7 +6,7 @@ void startCallback() {
 }
 
 class ForegroundTaskHandler extends TaskHandler {
-  static int interval = 1000;
+  static int interval = 1000 * 60 * 5;
 
   static Future<void> requestPermissions() async {
     final NotificationPermission notificationPermission =
@@ -97,7 +97,7 @@ class ForegroundTaskHandler extends TaskHandler {
   // Called every [interval] milliseconds in [ForegroundTaskOptions].
   @override
   void onRepeatEvent(DateTime timestamp) async {
-    print('$timestamp');
+    print('repeat $timestamp');
     FlutterForegroundTask.sendDataToMain('check');
     Position position = await Geolocator.getCurrentPosition();
     final List<String> cookies = await CookieManager.loadCookies();
@@ -138,6 +138,7 @@ class ForegroundTaskHandler extends TaskHandler {
   @override
   Future<void> onDestroy(DateTime timestamp, bool isTimeout) async {
     FlutterForegroundTask.stopService();
+    print('on destory : $timestamp');
   }
 
   @override
@@ -150,6 +151,7 @@ class ForegroundTaskHandler extends TaskHandler {
     if (id == 'btn_hello' && await FlutterForegroundTask.isRunningService) {
       FlutterForegroundTask.sendDataToMain('stop');
       FlutterForegroundTask.stopService();
+      print('stopService : $id');
     }
   }
 }

@@ -171,24 +171,16 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
               textAlign: TextAlign.center,
             ),
 
-            ElevatedButton(
-                onPressed: () async {
-                  await GServiceSSE.innerTest();
-                },
-                child: Text('sse connect')),
-            ElevatedButton(
-                onPressed: () async {
-                  await GServiceSSE.disconnect();
-                },
-                child: Text('sse disconnect')),
-
-            // StreamBuilder(
-            //   stream: GServiceWork.event(),
-            //   builder: (context, snapshot) {
-            //     print('snapshot $snapshot');
-            //     return Container(child: Text('$snapshot'));
-            //   },
-            // ),
+            // ElevatedButton(
+            //     onPressed: () async {
+            //       await GServiceSSE.innerTest();
+            //     },
+            //     child: Text('sse connect')),
+            // ElevatedButton(
+            //     onPressed: () async {
+            //       await GServiceSSE.disconnect();
+            //     },
+            //     child: Text('sse disconnect')),
 
             const Spacer(),
             // 현재 작업 완료 버튼

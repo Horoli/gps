@@ -18,10 +18,12 @@ class ServiceUser extends CommonService {
   }) async {
     Completer<MUser> completer = Completer<MUser>();
 
+    print('login step 1');
     dio.options.extra['withCredentials'] = true;
+    print('login step 2');
 
-    final Response response =
-        await dio.post('${URL.BASE_URL}/${URL.USER_LOGIN}',
+    final Response response = await dio
+        .post('${URL.BASE_URL}/${URL.USER_LOGIN}',
             data: {
               'phoneNumber': phoneNumber,
               'employeeId': id,
@@ -31,8 +33,12 @@ class ServiceUser extends CommonService {
               headers: {
                 'Content-Type': 'application/json',
               },
-            ));
+            ))
+        .catchError((e) {
+      print('login error : $e');
+    });
 
+    print('login step 3');
     if (!completer.isCompleted) {
       // TODO : ForegroundTask에서 사용하기 위해 쿠키를 저장
       await CookieManager.saveCookies(response);

@@ -329,19 +329,7 @@ class ServiceSSE extends CommonService {
     });
   }
 
-  // // 연결 정리 및 리소스 해제
-  // Future<void> _cleanupConnection() async {
-  //   try {
-  //     await _eventSub?.cancel();
-
-  //     _eventSub = null;
-  //     _isConnected = false;
-  //   } catch (e) {
-  //     print('Error during connection cleanup: $e');
-  //   }
-  // }
-
-  Future<void> disconnect() async {
+  Future<void> disconnect({bool ignoreErrors = false}) async {
     print('Performing full reset of SSE service...');
 
     try {
@@ -358,6 +346,14 @@ class ServiceSSE extends CommonService {
       _lastEventTime = null;
       _reconnectAttempts = 0;
 
+      if (_dio != null) {
+        try {
+          _dio!.close(force: true); // 강제로 모든 연결 종료
+        } catch (e) {
+          print('Error closing Dio instance: $e');
+        }
+        _dio = null;
+      }
       // 4. Dio 인스턴스 교체
       _dio = _getNewDioInstance();
 
@@ -367,6 +363,7 @@ class ServiceSSE extends CommonService {
       print('Full reset completed');
     } catch (e) {
       print('Error during full reset: $e');
+      if (!ignoreErrors) throw e;
     }
   }
 }

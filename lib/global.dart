@@ -8,7 +8,7 @@ late ServiceMember GServiceMember;
 late ServiceSSE GServiceSSE;
 late RouterManager GServiceRouterManager;
 
-bool useForeground = false;
+bool useForeground = true;
 
 const String tmpNumber = "01041850688";
 const String tmpID = 'devel';

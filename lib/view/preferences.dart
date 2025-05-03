@@ -138,7 +138,32 @@ class ViewPreferencesState extends State<ViewPreferences> {
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () async {
+                      // 로그아웃 확인
+                      final bool confirm = await buildConfirmDialog();
+                      // if (!confirm) return;
+
+                      if (!confirm) return;
+
+                      // 로그아웃 수행
+                      final bool success = await _performLogout(context);
+
+                      // 성공 시 화면 전환
+                      if (success && context.mounted) {
+                        await Navigator.of(context)
+                            .pushReplacementNamed(PATH.ROUTE_LOGIN);
+                      }
+                    },
+                    // onPressed: () async {
+                    // // foreground service 종료
+                    // await FlutterForegroundTask.stopService();
+                    // // SSE event 제거
+                    // await GServiceSSE.disconnect();
+                    // // localstorage cookie 제거
+                    // await CookieManager.clearCookies();
+                    // await Navigator.of(context)
+                    //     .pushReplacementNamed(PATH.ROUTE_LOGIN);
+                    // },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF4B5EFC),
                       shape: RoundedRectangleBorder(
@@ -161,5 +186,72 @@ class ViewPreferencesState extends State<ViewPreferences> {
         ),
       ),
     );
+  }
+
+  Future<bool> buildConfirmDialog() async {
+    return await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('로그아웃'),
+            content: const Text('정말 로그아웃 하시겠습니까?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('취소'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('로그아웃', style: TextStyle(color: Colors.red)),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+  }
+
+  Future<bool> _performLogout(BuildContext context) async {
+    // 로딩 표시
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      // 1. Foreground Service 종료
+      if (await FlutterForegroundTask.isRunningService) {
+        await FlutterForegroundTask.stopService();
+      }
+
+      // 2. SSE 연결 종료
+      await GServiceSSE.disconnect(ignoreErrors: true);
+
+      // 3. 쿠키 삭제
+      await CookieManager.clearCookies();
+
+      // 4. 사용자 상태 초기화 (필요한 경우)
+      // await GServiceUser.clearUserData();
+
+      // 로딩 닫기
+      if (context.mounted) {
+        Navigator.of(context).pop();
+      }
+
+      return true;
+    } catch (e) {
+      // 로딩 닫기
+      if (context.mounted) {
+        Navigator.of(context).pop();
+      }
+
+      // 에러 메시지 표시
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('로그아웃 중 오류가 발생했습니다: $e')),
+        );
+      }
+
+      return false;
+    }
   }
 }

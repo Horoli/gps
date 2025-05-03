@@ -196,12 +196,7 @@ class ViewChecklistState extends State<ViewChecklist> {
     checkAndRequestLocationPermission();
 
     if (useForeground) {
-      FlutterForegroundTask.addTaskDataCallback(
-          ForegroundTaskHandler.onReceiveTaskData);
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ForegroundTaskHandler.requestPermissions();
-        ForegroundTaskHandler.initTask();
-      });
+      print('foreground step 5');
       ForegroundTaskHandler.startService();
     }
   }

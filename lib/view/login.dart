@@ -145,6 +145,15 @@ class ViewLoginState extends State<ViewLogin> {
     );
   }
 
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  Future<void> checkCookie() async {
+    await CookieManager.loadCookies();
+  }
+
   Future<void> _handleLogin() async {
     // 로그인 로직 구현
     String phone = _phoneController.text;
@@ -155,8 +164,10 @@ class ViewLoginState extends State<ViewLogin> {
 
     await GServiceUser.login(phoneNumber: phone, id: employeeId).then((user) {
       // TODO : 로그인 성공 시점에 성공한 데이터를 localStorage에 저장
+      print('login step 1');
       GServiceSSE.connect();
 
+      print('login step 2');
       Navigator.pushReplacementNamed(context, PATH.ROUTE_CHECKLIST);
 
       // TODO : ViewChecklist로 navigation.replace
@@ -165,12 +176,6 @@ class ViewLoginState extends State<ViewLogin> {
       ShowInfomationWidgets.snackbar(context, MSG.LOGIN_FAILED);
     });
   }
-
-  // Future<void> showSnackbar(String text) async {
-  //   ScaffoldMessenger.of(context).showSnackBar(
-  //     SnackBar(content: Text(text)),
-  //   );
-  // }
 
   @override
   void dispose() {

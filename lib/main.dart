@@ -4,16 +4,25 @@ import 'gps_test.dart';
 
 Future<void> main() async {
   await initService();
-
-  FlutterForegroundTask.initCommunicationPort();
-  await init();
-
+  WidgetsFlutterBinding.ensureInitialized();
+  await foregroundInit();
   runApp(const AppRoot());
 }
 
-Future<void> init() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  // TODO : sharedPreferences 추가
+Future<void> foregroundInit() async {
+  if (useForeground) {
+    FlutterForegroundTask.initCommunicationPort();
+    print('foreground step 1');
+    FlutterForegroundTask.addTaskDataCallback(
+        ForegroundTaskHandler.onReceiveTaskData);
+    print('foreground step 2');
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      print('foreground step 3');
+      ForegroundTaskHandler.requestPermissions();
+      print('foreground step 4');
+      ForegroundTaskHandler.initTask();
+    });
+  }
 }
 
 Future<void> initService() async {
