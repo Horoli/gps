@@ -18,15 +18,11 @@ class ServiceMember extends CommonService {
     Completer<List<MMember>> completer = Completer<List<MMember>>();
     final List<String> cookies = await CookieManager.loadCookies();
 
-    dio.options.extra['withCredentials'] = true;
-    final Map<String, dynamic> headers = DioConnector.headersByCookie(cookies);
-
-    final Response response =
-        await dio.get('${URL.BASE_URL}/${URL.MEMBER_LIST}',
-            options: Options(
-              extra: {'withCredentials': true},
-              headers: headers,
-            ));
+    final Response response = await DioConnector.get(
+      dio: dio,
+      url: '${URL.BASE_URL}/${URL.MEMBER_LIST}',
+      cookies: cookies,
+    );
 
     if (!completer.isCompleted) {
       List<MMember> result = List.from(response.data).map((e) {

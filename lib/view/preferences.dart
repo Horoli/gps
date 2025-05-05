@@ -139,31 +139,8 @@ class ViewPreferencesState extends State<ViewPreferences> {
                   height: 50,
                   child: ElevatedButton(
                     onPressed: () async {
-                      // 로그아웃 확인
-                      final bool confirm = await buildConfirmDialog();
-                      // if (!confirm) return;
-
-                      if (!confirm) return;
-
-                      // 로그아웃 수행
-                      final bool success = await _performLogout(context);
-
-                      // 성공 시 화면 전환
-                      if (success && context.mounted) {
-                        await Navigator.of(context)
-                            .pushReplacementNamed(PATH.ROUTE_LOGIN);
-                      }
+                      logoutPressed(context);
                     },
-                    // onPressed: () async {
-                    // // foreground service 종료
-                    // await FlutterForegroundTask.stopService();
-                    // // SSE event 제거
-                    // await GServiceSSE.disconnect();
-                    // // localstorage cookie 제거
-                    // await CookieManager.clearCookies();
-                    // await Navigator.of(context)
-                    //     .pushReplacementNamed(PATH.ROUTE_LOGIN);
-                    // },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF4B5EFC),
                       shape: RoundedRectangleBorder(
@@ -186,6 +163,25 @@ class ViewPreferencesState extends State<ViewPreferences> {
         ),
       ),
     );
+  }
+
+  Future<void> logoutPressed(BuildContext context) async {
+    // 로그아웃 확인
+    final bool confirm = await buildConfirmDialog();
+    // if (!confirm) return;
+
+    if (!confirm) return;
+
+    // 로그아웃 수행
+    final bool success = await _performLogout(context);
+
+    // 성공 시 화면 전환
+    if (success && context.mounted) {
+      await Navigator.of(context).pushNamedAndRemoveUntil(
+        PATH.ROUTE_LOGIN,
+        (route) => false,
+      );
+    }
   }
 
   Future<bool> buildConfirmDialog() async {
@@ -214,7 +210,14 @@ class ViewPreferencesState extends State<ViewPreferences> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => const Center(child: CircularProgressIndicator()),
+      builder: (context) => const Center(
+          child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(),
+          Text('로그아웃 중입니다...'),
+        ],
+      )),
     );
 
     try {
@@ -229,8 +232,8 @@ class ViewPreferencesState extends State<ViewPreferences> {
       // 3. 쿠키 삭제
       await CookieManager.clearCookies();
 
-      // 4. 사용자 상태 초기화 (필요한 경우)
-      // await GServiceUser.clearUserData();
+      // 4. interval 삭제
+      // await IntervalManager.clear();
 
       // 로딩 닫기
       if (context.mounted) {

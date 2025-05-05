@@ -79,8 +79,12 @@ class ViewCreateGroupState extends State<ViewCreateGroup> {
 
               // useReplacement
               // ?
-              await Navigator.pushReplacementNamed(
-                  context, PATH.ROUTE_WORK_DETAIL);
+
+              await Navigator.of(GNavigationKey.currentContext!)
+                  .pushNamedAndRemoveUntil(
+                PATH.ROUTE_WORK_DETAIL,
+                (route) => false,
+              );
               // : await Navigator.pushNamed(context, PATH.ROUTE_WORK_DETAIL);
             },
           )
@@ -100,6 +104,10 @@ class ViewCreateGroupState extends State<ViewCreateGroup> {
     setState(() {
       isLoading = true;
     });
+    // currentWork가 있으면 자동으로 WORK_VIEW로 이동
+    if (GServiceWorklist.lastValue?.currentWork != null) {
+      await Navigator.pushReplacementNamed(context, PATH.ROUTE_WORK_DETAIL);
+    }
 
     try {
       final List<MMember> members = await GServiceMember.get();

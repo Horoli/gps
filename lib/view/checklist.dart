@@ -194,50 +194,15 @@ class ViewChecklistState extends State<ViewChecklist> {
   void initState() {
     super.initState();
     checkAndRequestLocationPermission();
-
-    if (useForeground) {
-      print('foreground step 5');
-      ForegroundTaskHandler.startService();
-    }
+    initForegroundTask();
   }
 
-  // Future<ServiceRequestResult> startService() async {
-  //   if (await FlutterForegroundTask.isRunningService) {
-  //     return FlutterForegroundTask.restartService();
-  //   } else {
-  //     return FlutterForegroundTask.startService(
-  //       serviceId: 256,
-  //       notificationTitle: 'Foreground Service is running',
-  //       notificationText: 'Tap to return to the app',
-  //       notificationIcon: null,
-  //       notificationButtons: [
-  //         const NotificationButton(id: 'btn_hello', text: 'end location share'),
-  //       ],
-  //       notificationInitialRoute: '/',
-  //       callback: startCallback,
-  //     );
-  //   }
-  // }
-
-  // Future endService() async {
-  //   if (await FlutterForegroundTask.isRunningService) {
-  //     print('stop service');
-  //     FlutterForegroundTask.stopService();
-  //   } else {
-  //     return;
-  //   }
-  // }
-
-  // void onReceiveTaskData(Object data) {
-  //   if (data is Map<String, dynamic>) {
-  //     final dynamic timestampMillis = data["timestampMillis"];
-  //     if (timestampMillis != null) {
-  //       final DateTime timestamp =
-  //           DateTime.fromMillisecondsSinceEpoch(timestampMillis, isUtc: true);
-  //       print('timestamp: ${timestamp.toString()}');
-  //     }
-  //   }
-  // }
+  Future<void> initForegroundTask() async {
+    print('foreground step 4');
+    await ForegroundTaskHandler.initTask();
+    print('foreground step 5');
+    await ForegroundTaskHandler.startService();
+  }
 
   @override
   void dispose() {

@@ -36,24 +36,18 @@ class ServiceWork extends CommonService {
         return;
       }
 
-      Map<String, dynamic> data = {
-        "members": members,
-        "lng": position.longitude,
-        "lat": position.latitude,
-        "aircraftName": selectedWork!.name,
-        "aircraftDepartureTime": selectedWork!.departureTime,
-        "timestamp": DateTime.now().toIso8601String(),
-      };
-
-      print('create $data');
-
-      final Response response = await dio.post(
-        '${URL.BASE_URL}/${URL.GET_WORK_LIST}',
-        data: data,
-        options: Options(
-          extra: {'withCredentials': true},
-          headers: headers,
-        ),
+      final Response response = await DioConnector.post(
+        dio: dio,
+        url: '${URL.BASE_URL}/${URL.GET_WORK_LIST}',
+        data: {
+          "members": members,
+          "lng": position.longitude,
+          "lat": position.latitude,
+          "aircraftName": selectedWork!.name,
+          "aircraftDepartureTime": selectedWork!.departureTime,
+          "timestamp": DateTime.now().toIso8601String(),
+        },
+        cookies: cookies,
       );
     } catch (e) {
       if (e is DioException) {

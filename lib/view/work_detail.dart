@@ -32,6 +32,7 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
           }
 
           if (!snapshot.hasData || snapshot.data?.currentWork == null) {
+            // GServiceWorklist.navigatorWithHasCurrentWork();
             return StreamExceptionWidgets.noData(
                 context: context, title: '작업 정보가 없습니다');
           }
@@ -170,17 +171,38 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
               ),
               textAlign: TextAlign.center,
             ),
+            ElevatedButton(
+              onPressed: () async {
+                await Navigator.of(GNavigationKey.currentState!.context)
+                    .pushReplacementNamed(PATH.ROUTE_WORKLIST);
+              },
+              child: Text('a'),
+            ),
 
-            // ElevatedButton(
-            //     onPressed: () async {
-            //       await GServiceSSE.innerTest();
-            //     },
-            //     child: Text('sse connect')),
-            // ElevatedButton(
-            //     onPressed: () async {
-            //       await GServiceSSE.disconnect();
-            //     },
-            //     child: Text('sse disconnect')),
+            ElevatedButton(
+                onPressed: () async {
+                  // await GServiceSSE.innerTest();
+                  await GServiceSSE.connect();
+                },
+                child: Text('sse connect')),
+            ElevatedButton(
+                onPressed: () async {
+                  await GServiceSSE.disconnect();
+                },
+                child: Text('sse disconnect')),
+            ElevatedButton(
+              onPressed: () async {
+                await GServiceSSE.testHealth();
+              },
+              child: Text('sse healthCheck'),
+            ),
+
+            ElevatedButton(
+              onPressed: () async {
+                await GServiceSSE.healthCheckWithTimer();
+              },
+              child: Text('processing healthChecker'),
+            ),
 
             const Spacer(),
             // 현재 작업 완료 버튼
@@ -188,9 +210,11 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                onPressed: () {
-                  showConfirmationDialog(
-                      context, procedures[_currentProcedureIndex].name);
+                onPressed: () async {
+                  await showConfirmationDialog(
+                    context,
+                    procedures[_currentProcedureIndex].name,
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF4B5EFC),
@@ -224,8 +248,9 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
     await GServiceWorklist.get();
   }
 
-  void showConfirmationDialog(BuildContext context, String procedureName) {
-    showDialog(
+  Future<void> showConfirmationDialog(
+      BuildContext context, String procedureName) async {
+    await showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
@@ -259,9 +284,9 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
                   color: Colors.grey.shade300,
                 ),
                 TextButton(
-                  onPressed: () {
+                  onPressed: () async {
                     Navigator.of(context).pop(); // 다이얼로그 닫기
-                    completeProcedure(); // 작업 완료 처리
+                    await completeProcedure(); // 작업 완료 처리
                   },
                   child: const Text(
                     '네',
@@ -279,7 +304,7 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
   }
 
   // 작업 완료 처리
-  void completeProcedure() async {
+  Future<void> completeProcedure() async {
     // 여기에 작업 완료 API 호출 로직 구현
     try {
       // 현재 위치 가져오기
@@ -287,8 +312,10 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
 
       // 작업 완료 API 호출
       await GServiceWorklist.completeProcedure();
+      print(
+          'GServiceWorklist.lastValue?.currentWork == null ${GServiceWorklist.lastValue?.currentWork == null}');
       if (GServiceWorklist.lastValue?.currentWork == null) {
-        await Navigator.pushReplacementNamed(context, PATH.ROUTE_WORKLIST);
+        await Navigator.of(context).pushReplacementNamed(PATH.ROUTE_WORKLIST);
       }
 
       // 성공 메시지

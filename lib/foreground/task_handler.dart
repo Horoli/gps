@@ -6,8 +6,6 @@ void startCallback() {
 }
 
 class ForegroundTaskHandler extends TaskHandler {
-  static int interval = 1000 * 60 * 5;
-
   static Future<void> requestPermissions() async {
     final NotificationPermission notificationPermission =
         await FlutterForegroundTask.checkNotificationPermission();
@@ -67,7 +65,29 @@ class ForegroundTaskHandler extends TaskHandler {
     }
   }
 
-  static void initTask() {
+  static final Dio _dio = Dio();
+
+  static Future<void> initTask() async {
+    // int interval = await IntervalManager.load();
+    // int intervalToMiliseconds = interval * 1000;
+    // print('initTask $interval : ${intervalToMiliseconds}');
+
+    final Response response = await DioConnector.get(
+      dio: _dio,
+      url: '${URL.BASE_URL}/${URL.GPS_INTERVAL}',
+    );
+
+    List<MConfig> result = List.from(response.data ?? [])
+        .map((item) => MConfig.fromMap(item))
+        .toList();
+
+    MConfig intervalResult = result[0];
+    int intervalValue = int.parse(intervalResult.value.toString());
+
+    int intervalToMiliseconds = intervalValue * 1000;
+
+    print('initTask interval $intervalValue : ${intervalToMiliseconds}');
+
     FlutterForegroundTask.init(
       androidNotificationOptions: AndroidNotificationOptions(
         showWhen: false, // timeStamp
@@ -85,7 +105,7 @@ class ForegroundTaskHandler extends TaskHandler {
       ),
       foregroundTaskOptions: ForegroundTaskOptions(
         eventAction: ForegroundTaskEventAction.repeat(
-          interval,
+          intervalToMiliseconds,
         ),
       ),
     );
@@ -97,35 +117,21 @@ class ForegroundTaskHandler extends TaskHandler {
   // Called every [interval] milliseconds in [ForegroundTaskOptions].
   @override
   void onRepeatEvent(DateTime timestamp) async {
-    print('repeat $timestamp');
     FlutterForegroundTask.sendDataToMain('check');
     Position position = await Geolocator.getCurrentPosition();
     final List<String> cookies = await CookieManager.loadCookies();
+    print('repeat $timestamp : $cookies');
 
-    final Dio dio = Dio();
-    dio.options.extra['withCredentials'] = true;
-
-    Map<String, dynamic> headers = DioConnector.headersByCookie(cookies);
-
-    final Response response = await dio
-        .post('${URL.BASE_URL}/${URL.USER_LOCATION}',
-            data: {
-              "lng": position.longitude,
-              "lat": position.latitude,
-              "timestamp": timestamp.toIso8601String()
-            },
-            options: Options(
-              extra: {'withCredentials': true},
-              headers: headers,
-            ))
-        .catchError((e) {
-      return Response(
-        requestOptions:
-            RequestOptions(path: '${URL.BASE_URL}/${URL.USER_LOCATION}'),
-        statusCode: 500,
-        data: {'error': e.toString()},
-      );
-    });
+    final Response response = await DioConnector.post(
+      dio: _dio,
+      url: '${URL.BASE_URL}/${URL.USER_LOCATION}',
+      cookies: cookies,
+      data: {
+        "lng": position.longitude,
+        "lat": position.latitude,
+        "timestamp": timestamp.toIso8601String()
+      },
+    );
 
     // 응답 확인
     if (response.statusCode == 200) {
@@ -133,6 +139,31 @@ class ForegroundTaskHandler extends TaskHandler {
     } else {
       print('위치 전송 실패: ${response}');
     }
+
+    // final Dio dio = Dio();
+    // dio.options.extra['withCredentials'] = true;
+
+    // Map<String, dynamic> headers = DioConnector.headersByCookie(cookies);
+
+    // final Response response = await dio
+    //     .post('${URL.BASE_URL}/${URL.USER_LOCATION}',
+    //         data: {
+    //           "lng": position.longitude,
+    //           "lat": position.latitude,
+    //           "timestamp": timestamp.toIso8601String()
+    //         },
+    //         options: Options(
+    //           extra: {'withCredentials': true},
+    //           headers: headers,
+    //         ))
+    //     .catchError((e) {
+    //   return Response(
+    //     requestOptions:
+    //         RequestOptions(path: '${URL.BASE_URL}/${URL.USER_LOCATION}'),
+    //     statusCode: 500,
+    //     data: {'error': e.toString()},
+    //   );
+    // });
   }
 
   @override

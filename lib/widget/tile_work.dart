@@ -51,7 +51,7 @@ class TileWork extends StatelessWidget {
               const SizedBox(height: 12),
 
               // 상태 버튼
-              buildAasd(context),
+              buildStartButton(context),
             ],
           ),
         ),
@@ -61,7 +61,7 @@ class TileWork extends StatelessWidget {
     );
   }
 
-  Widget buildAasd(BuildContext context) {
+  Widget buildStartButton(BuildContext context) {
     if (workItem.state == STATE.WORKSTATE_NORMAL) {
       return buildNavigationButton(
           context: context,

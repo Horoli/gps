@@ -20,15 +20,10 @@ class ServiceWorklist extends CommonService {
 
     print('cookies $cookies');
 
-    final Map<String, dynamic> headers = DioConnector.headersByCookie(cookies);
-    dio.options.extra['withCredentials'] = true;
-
-    final Response response = await dio.get(
-      '${URL.BASE_URL}/${URL.GET_WORK_LIST}',
-      options: Options(
-        extra: {'withCredentials': true},
-        headers: headers,
-      ),
+    final Response response = await DioConnector.get(
+      dio: dio,
+      url: '${URL.BASE_URL}/${URL.GET_WORK_LIST}',
+      cookies: cookies,
     );
 
     if (!completer.isCompleted) {
@@ -81,7 +76,6 @@ class ServiceWorklist extends CommonService {
   }
 
   // 현재 작업 완료 함수
-  // 현재 작업 완료 처리 후 화면을 갱신해야 하기 때문에 get()을 실행
   Future<void> completeProcedure() async {
     try {
       final List<String> cookies = await CookieManager.loadCookies();
@@ -95,19 +89,16 @@ class ServiceWorklist extends CommonService {
       Position position = await Geolocator.getCurrentPosition();
       final String timestamp = DateTime.now().toIso8601String();
 
-      final Response response = await dio.post(
-        '${URL.BASE_URL}/api/user/work/$uuid/procedure/complete',
-        data: {
-          "lng": position.longitude,
-          "lat": position.latitude,
-          "description": '',
-          "timestamp": timestamp
-        },
-        options: Options(
-          extra: {'withCredentials': true},
-          headers: headers,
-        ),
-      );
+      final Response response = await DioConnector.post(
+          dio: dio,
+          url: '${URL.BASE_URL}/api/user/work/$uuid/procedure/complete',
+          cookies: cookies,
+          data: {
+            "lng": position.longitude,
+            "lat": position.latitude,
+            "description": '',
+            "timestamp": timestamp
+          });
     } on DioException catch (e) {
       if (e.response != null) {
         ResponseBody errorBody = e.response?.data as ResponseBody;

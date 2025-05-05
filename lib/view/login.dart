@@ -165,6 +165,7 @@ class ViewLoginState extends State<ViewLogin> {
     await GServiceUser.login(phoneNumber: phone, id: employeeId).then((user) {
       // TODO : 로그인 성공 시점에 성공한 데이터를 localStorage에 저장
       print('login step 1');
+      // GServiceGPSInterval.gpsInterval();
       GServiceSSE.connect();
 
       print('login step 2');

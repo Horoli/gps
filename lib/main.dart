@@ -19,8 +19,6 @@ Future<void> foregroundInit() async {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       print('foreground step 3');
       ForegroundTaskHandler.requestPermissions();
-      print('foreground step 4');
-      ForegroundTaskHandler.initTask();
     });
   }
 }
@@ -32,6 +30,7 @@ Future<void> initService() async {
   GServiceWork = ServiceWork.getInstance();
   GServiceMember = ServiceMember.getInstance();
   GServiceSSE = ServiceSSE.getInstance();
+  GServiceGPSInterval = ServiceGPSInterval.getInstance();
 }
 
 // TODO : 플랫폼 추가(device info plus)

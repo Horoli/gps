@@ -20,9 +20,24 @@ class ServiceSSE extends CommonService {
   Dio _getNewDioInstance() {
     final Dio newDio = Dio(BaseOptions(
       baseUrl: URL.BASE_URL,
-      // connectTimeout: const Duration(seconds: 30),
-      // receiveTimeout: const Duration(seconds: 30),
+      connectTimeout: const Duration(seconds: 10),
+      receiveTimeout: Duration.zero,
       // sendTimeout: const Duration(seconds: 30),
+    ));
+
+    newDio.interceptors.add(InterceptorsWrapper(
+      onRequest: (options, handler) {
+        print('Starting request to ${options.path}');
+        return handler.next(options);
+      },
+      onResponse: (response, handler) {
+        print('Received response from ${response.requestOptions.path}');
+        return handler.next(response);
+      },
+      onError: (DioException e, handler) {
+        print('Error in request to ${e.requestOptions.path}: ${e.message}');
+        return handler.next(e);
+      },
     ));
 
     return newDio;
@@ -34,13 +49,16 @@ class ServiceSSE extends CommonService {
   Timer? _healthCheckTimer;
   int _reconnectAttempts = 0;
   final int _maxReconnectAttempts = 5;
-  final Duration _reconnectDelay = Duration(seconds: 2);
-  final Duration _healthCheckInterval = Duration(seconds: 30);
+  final Duration _reconnectDelay = const Duration(seconds: 2);
+  final Duration _healthCheckInterval = const Duration(seconds: 30);
 
   ServiceSSE._internal();
 
   late Stream eventStream;
   StreamSubscription? _eventSub;
+  StreamSubscription? _connectivitySubscription;
+  bool _hasNetworkConnection = true;
+
   final StreamTransformer _transformer =
       StreamTransformer<Uint8List, Map<String, dynamic>>.fromHandlers(
     handleData: (data, sink) {
@@ -85,32 +103,45 @@ class ServiceSSE extends CommonService {
     },
   );
 
-  // 테스트용으로 로그인 후 재연결 시도를 해 봄
-  // 계정별로 1세션 / 1커넥션만 승인되는것 같음
-  Future<void> innerTest({bool reconnect = true}) async {
-    await GServiceUser.login(id: tmpID, phoneNumber: tmpNumber).then((user) {
-      GServiceSSE.connect(reconnect: reconnect);
+  void _setupNetworkListener() {
+    _connectivitySubscription = Connectivity()
+        .onConnectivityChanged
+        .listen((List<ConnectivityResult> result) async {
+      print('network listener $result');
+      if (!result.contains(ConnectivityResult.none)) {
+        await connect();
+      }
     });
   }
 
+  // TODO : 테스트용으로 로그인 후 재연결 시도를 해 봄
+  // 계정별로 1세션 / 1커넥션만 승인되는것 같음
+  // Future<void> innerTest({bool reconnect = true}) async {
+  //   await GServiceUser.login(id: tmpID, phoneNumber: tmpNumber).then((user) {
+  //     connect(reconnect: reconnect);
+  //   });
+  // }
+
   Future<void> connect({bool reconnect = true}) async {
     try {
+      if (_connectivitySubscription == null) {
+        _setupNetworkListener();
+      }
+      await disconnect();
+
       _dio = _getNewDioInstance();
       final List<String> cookies = await CookieManager.loadCookies();
-      print('cookies $cookies');
-      final Map<String, dynamic> headers =
-          DioConnector.streamHeadersByCookie(cookies);
-      dio.options.extra['withCredentials'] = true;
-      print('stream step 1');
-      print('headers $headers');
-      final Response response = await _dio!.get(
-        '${URL.BASE_URL}/${URL.STREAM}',
-        options: Options(
-          responseType: ResponseType.stream,
-          extra: {'withCredentials': true},
-          headers: headers,
-        ),
+
+      final Response response = await DioConnector.stream(
+        dio: _dio!,
+        url: '${URL.BASE_URL}/${URL.STREAM}',
+        cookies: cookies,
       );
+
+      // if (response.statusCode == 503) {
+      //   await innerTest();
+      //   return;
+      // }
 
       print('stream step 2');
 
@@ -120,7 +151,7 @@ class ServiceSSE extends CommonService {
 
       _isConnected = true;
       _lastEventTime = DateTime.now();
-      _eventSub?.cancel();
+      await _eventSub?.cancel();
       _eventSub = eventStream.listen((dynamic data) async {
         print('event received : $data');
         _lastEventTime = DateTime.now();
@@ -234,23 +265,26 @@ class ServiceSSE extends CommonService {
       }, onError: (error) {
         print('SSE stream error : $error');
         _isConnected = false;
-        if (reconnect) {
-          healthCheck();
-        }
+        // if (reconnect) {
+        //   print('processing healthChecker');
+        // healthCheckWithTimer();
+        // }
       }, onDone: () {
         print('SSE stream closed');
         _isConnected = false;
         if (reconnect) {
-          healthCheck();
+          print('processing healthChecker');
+          healthCheckWithTimer();
         }
       });
 
       if (reconnect) {
-        healthCheck();
+        healthCheckWithTimer();
       }
     } on DioException catch (e) {
       _isConnected = false;
       // rethrow;
+      print('errrrrrrrrrrrrrror $e');
 
       if (e.response != null) {
         ResponseBody errorBody = e.response?.data as ResponseBody;
@@ -260,12 +294,29 @@ class ServiceSSE extends CommonService {
         // throw errorBody;
         rethrow;
       }
-      rethrow;
+      // rethrow;
     }
   }
 
+  Future<void> testHealth() async {
+    final now = DateTime.now();
+    final timeSinceLastEvent = _lastEventTime != null
+        ? now.difference(_lastEventTime!)
+        : Duration(hours: 1); // 초기값으로 큰 값 설정
+
+    // 연결 상태 확인 조건:
+    // 1. _isConnected가 false이거나
+    // 2. 마지막 이벤트 수신 후 일정 시간(1분) 이상 지났거나
+    // 3. _eventSub이 null이거나 closed 상태인 경우
+    bool needsReconnect = !_isConnected ||
+        timeSinceLastEvent > Duration(minutes: 1) ||
+        _eventSub == null;
+    print('_eventSub $_eventSub');
+    print('needsReconnect $needsReconnect');
+  }
+
   // TODO : 재연결 관련 연결상태 체크
-  Future<void> healthCheck() async {
+  Future<void> healthCheckWithTimer() async {
     // 이미 타이머가 실행 중이면 중지
     _healthCheckTimer?.cancel();
 
@@ -309,8 +360,10 @@ class ServiceSSE extends CommonService {
           await Future.delayed(delay);
           try {
             await disconnect();
-            await innerTest();
-            // await connect(reconnect: true);
+            // print('is innerTest');
+            // await innerTest();
+            print('is Connect');
+            await connect();
             _reconnectAttempts = 0; // 성공 시 재시도 횟수 초기화
             print('SSE reconnection successful');
           } catch (e) {
@@ -334,36 +387,46 @@ class ServiceSSE extends CommonService {
 
     try {
       // 1. 타이머 취소
-      _healthCheckTimer?.cancel();
-      _healthCheckTimer = null;
+      if (_healthCheckTimer != null) {
+        _healthCheckTimer!.cancel();
+        _healthCheckTimer = null;
+        print('Health check timer canceled');
+      }
 
-      // 2. 이벤트 구독 취소
-      await _eventSub?.cancel();
-      _eventSub = null;
+      // 2. 이벤트 구독 강제 취소
+      if (_eventSub != null) {
+        try {
+          await _eventSub!.cancel();
+          print('Event subscription canceled');
+        } catch (e) {
+          print('Error canceling event subscription: $e');
+        }
+        _eventSub = null;
+      }
 
-      // 3. 상태 초기화
-      _isConnected = false;
-      _lastEventTime = null;
-      _reconnectAttempts = 0;
-
+      // 3. Dio 인스턴스 강제 종료
       if (_dio != null) {
         try {
-          _dio!.close(force: true); // 강제로 모든 연결 종료
+          _dio!.close(force: true);
+          print('Dio instance closed (force: true)');
+          _dio = null;
+          // 5. 잠시 대기
+          await Future.delayed(const Duration(milliseconds: 300));
         } catch (e) {
           print('Error closing Dio instance: $e');
         }
-        _dio = null;
       }
-      // 4. Dio 인스턴스 교체
-      _dio = _getNewDioInstance();
 
-      // 5. 잠시 대기
-      await Future.delayed(Duration(seconds: 2));
-
+      // 4. 상태 초기화
+      _isConnected = false;
+      _lastEventTime = null;
+      _reconnectAttempts = 0;
+      // 추가 대기 시간
+      await Future.delayed(const Duration(seconds: 2));
       print('Full reset completed');
     } catch (e) {
       print('Error during full reset: $e');
-      if (!ignoreErrors) throw e;
+      if (!ignoreErrors) rethrow;
     }
   }
 }

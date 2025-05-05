@@ -1,11 +1,17 @@
 part of gps_test;
 
 class CookieManager {
+  // static final BehaviorSubject<List<String>?> subject =
+  //     BehaviorSubject<List<String>?>.seeded(null);
+
+  // static Stream<List<String>?> get stream => subject.stream;
+
   static Future<void> saveCookies(Response response) async {
     final prefs = await SharedPreferences.getInstance();
 
     if (response.headers.map.containsKey('set-cookie')) {
-      final cookies = response.headers.map['set-cookie'];
+      final List<String>? cookies = response.headers.map['set-cookie'];
+      // subject.add(cookies);
       await prefs.setStringList('auth_cookies', cookies ?? []);
       print('쿠키 저장됨: $cookies');
     }
@@ -13,6 +19,7 @@ class CookieManager {
 
   static Future<List<String>> loadCookies() async {
     final prefs = await SharedPreferences.getInstance();
+
     return prefs.getStringList('auth_cookies') ?? [];
   }
 
@@ -21,6 +28,7 @@ class CookieManager {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('auth_cookies');
+      // subject.add([]);
 
       print('쿠키 삭제 완료');
     } catch (e) {

@@ -74,8 +74,10 @@ Widget buildNavigationButton({
           //     : await Navigator.pushNamed(context, routerName);
 
           useReplacement
-              ? await Navigator.pushReplacementNamed(
-                  GNavigationKey.currentContext!, routerName)
+              ? await Navigator.pushNamedAndRemoveUntil(
+                  GNavigationKey.currentContext!,
+                  routerName,
+                  ModalRoute.withName(('/')))
               : await Navigator.pushNamed(
                   GNavigationKey.currentContext!, routerName);
         },
