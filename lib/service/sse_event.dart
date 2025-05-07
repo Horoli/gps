@@ -21,7 +21,7 @@ class ServiceSSE extends CommonService {
     Dio newDio = Dio(BaseOptions(
       // baseUrl: URL.BASE_URL,
       connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: Duration.zero,
+      // receiveTimeout: null,
       // sendTimeout: const Duration(seconds: 30),
     ));
 
@@ -37,6 +37,16 @@ class ServiceSSE extends CommonService {
       onError: (DioException e, handler) {
         print('Error in request to ${e.requestOptions.path}: ${e.message}');
         return handler.next(e);
+      },
+    ));
+
+    newDio.interceptors.add(LogInterceptor(
+      request: true,
+      responseBody: true,
+      requestBody: true,
+      error: true,
+      logPrint: (message) {
+        print('Dio Log: $message');
       },
     ));
 
@@ -134,178 +144,182 @@ class ServiceSSE extends CommonService {
   }
 
   Future<void> connect({bool reconnect = true}) async {
-    try {
-      _dio = _getNewDioInstance();
-      print('stream step 0');
-      print('dio ${_dio}');
-      final List<String> cookies = await CookieManager.loadCookies();
+    if (_dio != null) {
+      throw Exception('Dio is not null');
+    }
+    _dio ??= _getNewDioInstance();
+    print('stream step 0');
 
-      print('stream step 1');
-      final Response response = await HttpConnector.stream(
-        dio: _dio!,
-        url: '${URL.BASE_URL}/${URL.STREAM}',
-        cookies: cookies,
-      );
+    print('dio ${_dio}');
+    final List<String> cookies = await CookieManager.loadCookies();
 
-      print('stream step 2');
+    print('stream step 1');
+    final Response response = await HttpConnector.stream(
+      dio: _dio!,
+      url: '${URL.BASE_URL}/${URL.STREAM}',
+      cookies: cookies,
+    );
 
-      Stream tmpStream = response.data.stream as Stream;
-      eventStream = tmpStream.transform(_transformer);
-      print('stream step 3');
+    print('stream step 2');
 
-      _isConnected = true;
+    Stream tmpStream = response.data.stream as Stream;
+    eventStream = tmpStream.transform(_transformer);
+    print('stream step 3');
+
+    _isConnected = true;
+    _lastEventTime = DateTime.now();
+    print('stream step 4');
+
+    // await _eventSub?.cancel();
+    // _eventSub
+    // eventSubManager[eventCount]?.cancel();
+    // eventSubManager[eventCount] =
+
+    _eventSub = eventStream.listen((dynamic data) async {
+      print('event received : $data');
       _lastEventTime = DateTime.now();
-      print('stream step 4');
+      await GServiceWorklist.get();
+      CurrentWork? getCurrentWork = GServiceWorklist.lastValue!.currentWork;
 
-      // await _eventSub?.cancel();
-      // _eventSub
-      // eventSubManager[eventCount]?.cancel();
-      // eventSubManager[eventCount] =
+      print('in stream currentWork : $getCurrentWork');
 
-      _eventSub = eventStream.listen((dynamic data) async {
-        print('event received : $data');
-        _lastEventTime = DateTime.now();
-        await GServiceWorklist.get();
-        CurrentWork? getCurrentWork = GServiceWorklist.lastValue!.currentWork;
+      // stream을 구독하고 있으면서
+      // currentWork를 갖고 있지만 WORK_DETAIL 화면이 아닌 user는
+      // WORK_DETAIL 화면으로 이동
+      if (getCurrentWork != null && !RouterManager().isWorkDetail()) {
+        Navigator.of(GNavigationKey.currentState!.context)
+            .pushReplacementNamed(PATH.ROUTE_WORK_DETAIL);
+      }
 
-        print('in stream currentWork : $getCurrentWork');
+      String uuid = data['uuid'];
+      print('check uuid... ${getCurrentWork?.uuid == uuid}');
+      if (getCurrentWork != null && getCurrentWork.uuid == uuid) {
+        print('valid uuid');
+        Map<String, dynamic> unflattenedData = unflatten(data['update']);
 
-        // stream을 구독하고 있으면서
-        // currentWork를 갖고 있지만 WORK_DETAIL 화면이 아닌 user는
-        // WORK_DETAIL 화면으로 이동
-        if (getCurrentWork != null && !RouterManager().isWorkDetail()) {
-          Navigator.of(GNavigationKey.currentState!.context)
-              .pushReplacementNamed(PATH.ROUTE_WORK_DETAIL);
-        }
+        print('unflattenedData $unflattenedData');
+        if (unflattenedData.containsKey('procedures') &&
+            unflattenedData['procedures'] is List) {
+          List updatedProcedures = List.from(unflattenedData['procedures']);
 
-        String uuid = data['uuid'];
-        print('check uuid... ${getCurrentWork?.uuid == uuid}');
-        if (getCurrentWork != null && getCurrentWork.uuid == uuid) {
-          print('valid uuid');
-          Map<String, dynamic> unflattenedData = unflatten(data['update']);
+          int getIndex = List.from(updatedProcedures).indexWhere((e) {
+            return e != null;
+          });
+          print('getIndex $getIndex');
+          print('work ${GServiceWorklist.lastValue!.currentWork}');
+          if (getIndex < 4) {
+            // 현재 작업 가져오기
+            CurrentWork currentWork = getCurrentWork;
 
-          print('unflattenedData $unflattenedData');
-          if (unflattenedData.containsKey('procedures') &&
-              unflattenedData['procedures'] is List) {
-            List updatedProcedures = List.from(unflattenedData['procedures']);
+            // 현재 작업의 procedures 가져오기
+            List<MProcedureInCurrentWork> currentProcedures =
+                currentWork.procedures;
 
-            int getIndex = List.from(updatedProcedures).indexWhere((e) {
-              return e != null;
-            });
-            print('getIndex $getIndex');
-            print('work ${GServiceWorklist.lastValue!.currentWork}');
-            if (getIndex < 4) {
-              // 현재 작업 가져오기
-              CurrentWork currentWork = getCurrentWork;
-
-              // 현재 작업의 procedures 가져오기
-              List<MProcedureInCurrentWork> currentProcedures =
-                  currentWork.procedures;
-
-              // 업데이트할 procedures 가져오기
-              // 가져온 updatedProcedures[getIndex]를 포메팅해줘야함
-              Map<String, dynamic> updatedProcedureData = {};
-              if (updatedProcedures[getIndex] != null) {
-                Map originalMap = updatedProcedures[getIndex] as Map;
-                originalMap.forEach((key, value) {
-                  updatedProcedureData[key.toString()] = value;
-                });
-              }
-
-              print('updatedProcedureData $updatedProcedureData');
-
-              // 기존 procedure가져오기
-              MProcedureInCurrentWork existingProcedure =
-                  currentProcedures[getIndex];
-
-              DateTime? updatedDate = updatedProcedureData.containsKey('date')
-                  ? updatedProcedureData['date'] == null
-                      ? null // work가 최초 생성됐을 경우엔 null임
-                      : DateTime.parse(updatedProcedureData['date'] as String)
-                  : existingProcedure.date;
-
-              List<double>? updatedLocation;
-              if (updatedProcedureData.containsKey('location') &&
-                  updatedProcedureData['location'] is List) {
-                List locationList = updatedProcedureData['location'];
-                if (locationList.length >= 2) {
-                  updatedLocation = [
-                    locationList[0] is double
-                        ? locationList[0]
-                        : (locationList[0] as num).toDouble(),
-                    locationList[1] is double
-                        ? locationList[1]
-                        : (locationList[1] as num).toDouble()
-                  ];
-                }
-              } else {
-                updatedLocation = existingProcedure.location;
-              }
-
-              // 업데이트된 procedure를 저장
-              MProcedureInCurrentWork updatedProcedure =
-                  existingProcedure.copyWith(
-                date: updatedDate,
-                location: updatedLocation,
-              );
-
-              // 현재 작업의 procedure에 업데이트된 procedure를 할당
-              currentProcedures[getIndex] = updatedProcedure;
-
-              // 현재 작업을 업데이트
-              CurrentWork updatedCurrentWork =
-                  currentWork.copyWith(procedures: currentProcedures);
-
-              // 작업리스트를 업데이트
-              MWorkList updatedWorkList = GServiceWorklist.lastValue!
-                  .copyWith(currentWork: updatedCurrentWork);
-
-              GServiceWorklist.subject.add(updatedWorkList);
-              print('stream complete');
+            // 업데이트할 procedures 가져오기
+            // 가져온 updatedProcedures[getIndex]를 포메팅해줘야함
+            Map<String, dynamic> updatedProcedureData = {};
+            if (updatedProcedures[getIndex] != null) {
+              Map originalMap = updatedProcedures[getIndex] as Map;
+              originalMap.forEach((key, value) {
+                updatedProcedureData[key.toString()] = value;
+              });
             }
 
-            // 마지막 작업이 완료되면 getCurrentWork가 null이 되기 때문에
-            // 마지막 작업이 완료되면 ViewWorklist로 이동
-            if (getIndex == 4) {
-              Navigator.of(GNavigationKey.currentState!.context)
-                  .pushReplacementNamed(PATH.ROUTE_WORKLIST);
+            print('updatedProcedureData $updatedProcedureData');
+
+            // 기존 procedure가져오기
+            MProcedureInCurrentWork existingProcedure =
+                currentProcedures[getIndex];
+
+            DateTime? updatedDate = updatedProcedureData.containsKey('date')
+                ? updatedProcedureData['date'] == null
+                    ? null // work가 최초 생성됐을 경우엔 null임
+                    : DateTime.parse(updatedProcedureData['date'] as String)
+                : existingProcedure.date;
+
+            List<double>? updatedLocation;
+            if (updatedProcedureData.containsKey('location') &&
+                updatedProcedureData['location'] is List) {
+              List locationList = updatedProcedureData['location'];
+              if (locationList.length >= 2) {
+                updatedLocation = [
+                  locationList[0] is double
+                      ? locationList[0]
+                      : (locationList[0] as num).toDouble(),
+                  locationList[1] is double
+                      ? locationList[1]
+                      : (locationList[1] as num).toDouble()
+                ];
+              }
+            } else {
+              updatedLocation = existingProcedure.location;
             }
+
+            // 업데이트된 procedure를 저장
+            MProcedureInCurrentWork updatedProcedure =
+                existingProcedure.copyWith(
+              date: updatedDate,
+              location: updatedLocation,
+            );
+
+            // 현재 작업의 procedure에 업데이트된 procedure를 할당
+            currentProcedures[getIndex] = updatedProcedure;
+
+            // 현재 작업을 업데이트
+            CurrentWork updatedCurrentWork =
+                currentWork.copyWith(procedures: currentProcedures);
+
+            // 작업리스트를 업데이트
+            MWorkList updatedWorkList = GServiceWorklist.lastValue!
+                .copyWith(currentWork: updatedCurrentWork);
+
+            GServiceWorklist.subject.add(updatedWorkList);
+            print('stream complete');
+          }
+
+          // 마지막 작업이 완료되면 getCurrentWork가 null이 되기 때문에
+          // 마지막 작업이 완료되면 ViewWorklist로 이동
+          if (getIndex == 4) {
+            Navigator.of(GNavigationKey.currentState!.context)
+                .pushReplacementNamed(PATH.ROUTE_WORKLIST);
           }
         }
-      }, onError: (error) {
-        print('SSE stream error : $error');
-        _isConnected = false;
-        if (reconnect) {
-          print('processing healthChecker');
-          healthCheckWithTimer();
-        }
-      }, onDone: () {
-        print('SSE stream closed');
-        _isConnected = false;
-        if (reconnect) {
-          print('processing healthChecker');
-          healthCheckWithTimer();
-        }
-      });
-
+      }
+    }, onError: (error) {
+      print('SSE stream error : $error');
+      _isConnected = false;
       if (reconnect) {
+        print('processing healthChecker');
         healthCheckWithTimer();
       }
-    } on DioException catch (e) {
+    }, onDone: () {
+      print('SSE stream closed');
       _isConnected = false;
-      // rethrow;
-      print('errrrrrrrrrrrrrror $e');
-
-      if (e.response != null) {
-        ResponseBody errorBody = e.response?.data as ResponseBody;
-
-        print('error statusCode : ${e.response?.statusCode}');
-        print('error message : ${errorBody.statusMessage}');
-        // throw errorBody;
-        rethrow;
+      if (reconnect) {
+        print('processing healthChecker');
+        healthCheckWithTimer();
       }
-      // rethrow;
+    });
+
+    if (reconnect) {
+      healthCheckWithTimer();
     }
+    //   try{
+    // } on DioException catch (e) {
+    //   _isConnected = false;
+    //   // rethrow;
+    //   print('errrrrrrrrrrrrrror $e');
+
+    //   if (e.response != null) {
+    //     ResponseBody errorBody = e.response?.data as ResponseBody;
+
+    //     print('error statusCode : ${e.response?.statusCode}');
+    //     print('error message : ${errorBody.statusMessage}');
+    //     // throw errorBody;
+    //     rethrow;
+    //   }
+    //   // rethrow;
+    // }
   }
 
   // TODO : 재연결 관련 연결상태 체크
