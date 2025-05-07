@@ -20,7 +20,7 @@ class ServiceWorklist extends CommonService {
 
     print('cookies $cookies');
 
-    final Response response = await DioConnector.get(
+    final Response response = await HttpConnector.get(
       dio: dio,
       url: '${URL.BASE_URL}/${URL.GET_WORK_LIST}',
       cookies: cookies,
@@ -80,7 +80,7 @@ class ServiceWorklist extends CommonService {
     try {
       final List<String> cookies = await CookieManager.loadCookies();
       final Map<String, dynamic> headers =
-          DioConnector.headersByCookie(cookies);
+          HttpConnector.headersByCookie(cookies);
       dio.options.extra['withCredentials'] = true;
       print('cookies $cookies');
 
@@ -89,7 +89,7 @@ class ServiceWorklist extends CommonService {
       Position position = await Geolocator.getCurrentPosition();
       final String timestamp = DateTime.now().toIso8601String();
 
-      final Response response = await DioConnector.post(
+      final Response response = await HttpConnector.post(
           dio: dio,
           url: '${URL.BASE_URL}/api/user/work/$uuid/procedure/complete',
           cookies: cookies,

@@ -27,7 +27,7 @@ class ServiceWork extends CommonService {
       final List<String> cookies = await CookieManager.loadCookies();
       print('cookies $cookies');
       final Map<String, dynamic> headers =
-          DioConnector.headersByCookie(cookies);
+          HttpConnector.headersByCookie(cookies);
       dio.options.extra['withCredentials'] = true;
 
       Position position = await Geolocator.getCurrentPosition();
@@ -36,7 +36,7 @@ class ServiceWork extends CommonService {
         return;
       }
 
-      final Response response = await DioConnector.post(
+      final Response response = await HttpConnector.post(
         dio: dio,
         url: '${URL.BASE_URL}/${URL.GET_WORK_LIST}',
         data: {

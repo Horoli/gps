@@ -72,7 +72,7 @@ class ForegroundTaskHandler extends TaskHandler {
     // int intervalToMiliseconds = interval * 1000;
     // print('initTask $interval : ${intervalToMiliseconds}');
 
-    final Response response = await DioConnector.get(
+    final Response response = await HttpConnector.get(
       dio: _dio,
       url: '${URL.BASE_URL}/${URL.GPS_INTERVAL}',
     );
@@ -122,7 +122,7 @@ class ForegroundTaskHandler extends TaskHandler {
     final List<String> cookies = await CookieManager.loadCookies();
     print('repeat $timestamp : $cookies');
 
-    final Response response = await DioConnector.post(
+    final Response response = await HttpConnector.post(
       dio: _dio,
       url: '${URL.BASE_URL}/${URL.USER_LOCATION}',
       cookies: cookies,

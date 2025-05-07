@@ -18,8 +18,8 @@ class ServiceSSE extends CommonService {
   Dio? _dio;
 
   Dio _getNewDioInstance() {
-    final Dio newDio = Dio(BaseOptions(
-      baseUrl: URL.BASE_URL,
+    Dio newDio = Dio(BaseOptions(
+      // baseUrl: URL.BASE_URL,
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: Duration.zero,
       // sendTimeout: const Duration(seconds: 30),
@@ -56,7 +56,9 @@ class ServiceSSE extends CommonService {
 
   late Stream eventStream;
   StreamSubscription? _eventSub;
-  StreamSubscription? _connectivitySubscription;
+  // Map<int, StreamSubscription> eventSubManager = {};
+  // int eventCount = 0;
+  StreamSubscription? connectivitySubscription;
   bool _hasNetworkConnection = true;
 
   final StreamTransformer _transformer =
@@ -103,45 +105,47 @@ class ServiceSSE extends CommonService {
     },
   );
 
-  void _setupNetworkListener() {
-    _connectivitySubscription = Connectivity()
+  void setNetworkListener() {
+    connectivitySubscription = Connectivity()
         .onConnectivityChanged
         .listen((List<ConnectivityResult> result) async {
+      print('a');
+      print('b');
+      print('c');
+      print('d');
+      print('e');
       print('network listener $result');
-      if (!result.contains(ConnectivityResult.none)) {
-        await connect();
-      }
+      // if (!result.contains(ConnectivityResult.none)) {
+      //   if (_dio == null) {
+      //     print('dio is null');
+      //     await connect();
+      //   } else {
+      //     print('dio is not null');
+      //     await disconnect();
+      //     await connect();
+      //   }
+      // }
+      print('a');
+      print('b');
+      print('c');
+      print('d');
+      print('e');
     });
   }
 
-  // TODO : 테스트용으로 로그인 후 재연결 시도를 해 봄
-  // 계정별로 1세션 / 1커넥션만 승인되는것 같음
-  // Future<void> innerTest({bool reconnect = true}) async {
-  //   await GServiceUser.login(id: tmpID, phoneNumber: tmpNumber).then((user) {
-  //     connect(reconnect: reconnect);
-  //   });
-  // }
-
   Future<void> connect({bool reconnect = true}) async {
     try {
-      if (_connectivitySubscription == null) {
-        _setupNetworkListener();
-      }
-      await disconnect();
-
       _dio = _getNewDioInstance();
+      print('stream step 0');
+      print('dio ${_dio}');
       final List<String> cookies = await CookieManager.loadCookies();
 
-      final Response response = await DioConnector.stream(
+      print('stream step 1');
+      final Response response = await HttpConnector.stream(
         dio: _dio!,
         url: '${URL.BASE_URL}/${URL.STREAM}',
         cookies: cookies,
       );
-
-      // if (response.statusCode == 503) {
-      //   await innerTest();
-      //   return;
-      // }
 
       print('stream step 2');
 
@@ -151,7 +155,13 @@ class ServiceSSE extends CommonService {
 
       _isConnected = true;
       _lastEventTime = DateTime.now();
-      await _eventSub?.cancel();
+      print('stream step 4');
+
+      // await _eventSub?.cancel();
+      // _eventSub
+      // eventSubManager[eventCount]?.cancel();
+      // eventSubManager[eventCount] =
+
       _eventSub = eventStream.listen((dynamic data) async {
         print('event received : $data');
         _lastEventTime = DateTime.now();
@@ -265,10 +275,10 @@ class ServiceSSE extends CommonService {
       }, onError: (error) {
         print('SSE stream error : $error');
         _isConnected = false;
-        // if (reconnect) {
-        //   print('processing healthChecker');
-        // healthCheckWithTimer();
-        // }
+        if (reconnect) {
+          print('processing healthChecker');
+          healthCheckWithTimer();
+        }
       }, onDone: () {
         print('SSE stream closed');
         _isConnected = false;
@@ -296,23 +306,6 @@ class ServiceSSE extends CommonService {
       }
       // rethrow;
     }
-  }
-
-  Future<void> testHealth() async {
-    final now = DateTime.now();
-    final timeSinceLastEvent = _lastEventTime != null
-        ? now.difference(_lastEventTime!)
-        : Duration(hours: 1); // 초기값으로 큰 값 설정
-
-    // 연결 상태 확인 조건:
-    // 1. _isConnected가 false이거나
-    // 2. 마지막 이벤트 수신 후 일정 시간(1분) 이상 지났거나
-    // 3. _eventSub이 null이거나 closed 상태인 경우
-    bool needsReconnect = !_isConnected ||
-        timeSinceLastEvent > Duration(minutes: 1) ||
-        _eventSub == null;
-    print('_eventSub $_eventSub');
-    print('needsReconnect $needsReconnect');
   }
 
   // TODO : 재연결 관련 연결상태 체크
@@ -360,8 +353,6 @@ class ServiceSSE extends CommonService {
           await Future.delayed(delay);
           try {
             await disconnect();
-            // print('is innerTest');
-            // await innerTest();
             print('is Connect');
             await connect();
             _reconnectAttempts = 0; // 성공 시 재시도 횟수 초기화
@@ -393,11 +384,24 @@ class ServiceSSE extends CommonService {
         print('Health check timer canceled');
       }
 
+      // print('_eventSub $_eventSub');
+      // if (eventSubManager.isNotEmpty) {
+      //   for (var entry in eventSubManager.entries) {
+      //     print('entry ${entry.key}');
+      //     entry.value.cancel();
+      //     print('Event subscription ${entry.key} canceled');
+      //   }
+      //   eventSubManager.clear();
+      //   eventCount = 0;
+      // }
+
       // 2. 이벤트 구독 강제 취소
       if (_eventSub != null) {
         try {
+          _eventSub!.pause();
           await _eventSub!.cancel();
           print('Event subscription canceled');
+          await Future.delayed(const Duration(milliseconds: 300));
         } catch (e) {
           print('Error canceling event subscription: $e');
         }

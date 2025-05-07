@@ -18,7 +18,7 @@ class ServiceMember extends CommonService {
     Completer<List<MMember>> completer = Completer<List<MMember>>();
     final List<String> cookies = await CookieManager.loadCookies();
 
-    final Response response = await DioConnector.get(
+    final Response response = await HttpConnector.get(
       dio: dio,
       url: '${URL.BASE_URL}/${URL.MEMBER_LIST}',
       cookies: cookies,

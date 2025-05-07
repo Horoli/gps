@@ -17,7 +17,7 @@ class ServiceGPSInterval extends CommonService {
   Future<MConfig> gpsInterval() async {
     Completer<MConfig> completer = Completer<MConfig>();
 
-    final Response response = await DioConnector.get(
+    final Response response = await HttpConnector.get(
       dio: dio,
       url: '${URL.BASE_URL}/${URL.GPS_INTERVAL}',
     );

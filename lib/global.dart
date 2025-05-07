@@ -19,7 +19,10 @@ final GlobalKey<NavigatorState> GNavigationKey = GlobalKey();
 /**
  * 임시로 global에다 생성
  */
-class DioConnector {
+class HttpConnector {
+  static Map<String, dynamic> _defaultHeaders = {
+    'Content-Type': 'application/json',
+  };
   static Map<String, dynamic> headersByCookie(List<String> cookies) {
     final Map<String, dynamic> headers = {
       'Content-Type': 'application/json',
@@ -50,11 +53,9 @@ class DioConnector {
     required String url,
     List<String>? cookies,
   }) async {
-    Map<String, dynamic> headers = {
-      'Content-Type': 'application/json',
-    };
+    Map<String, dynamic> headers = _defaultHeaders;
     if (cookies != null) {
-      headers = DioConnector.headersByCookie(cookies);
+      headers = headersByCookie(cookies);
     }
 
     dio.options.extra['withCredentials'] = true;
@@ -80,12 +81,10 @@ class DioConnector {
     List<String>? cookies,
     Map<String, dynamic>? data,
   }) async {
-    Map<String, dynamic> headers = {
-      'Content-Type': 'application/json',
-    };
+    Map<String, dynamic> headers = _defaultHeaders;
 
     if (cookies != null) {
-      headers = DioConnector.headersByCookie(cookies);
+      headers = headersByCookie(cookies);
     }
 
     dio.options.extra['withCredentials'] = true;
@@ -106,22 +105,43 @@ class DioConnector {
     return response;
   }
 
+  // static Future<EventSource> eventStream({
+  //   required EventSource eventSource,
+  //   required String url,
+  //   List<String>? cookies,
+  // }) async {
+  //   Map<String, dynamic> headers = _defaultHeaders;
+
+  //   if (cookies != null) {
+  //     headers = HttpConnector.streamHeadersByCookie(cookies);
+  //   }
+
+  //   Map<String, String> convertHeaders = headers.map((k, v) {
+  //     return MapEntry(k, v.toString());
+  //   });
+
+  //   return await eventSource.connect(
+  //     url,
+  //     headers: convertHeaders,
+  //   );
+  // }
+
   static Future<Response> stream({
     required Dio dio,
     required String url,
     List<String>? cookies,
   }) async {
-    Map<String, dynamic> headers = {
-      'Content-Type': 'application/json',
-    };
+    Map<String, dynamic> headers = _defaultHeaders;
 
     if (cookies != null) {
-      headers = DioConnector.streamHeadersByCookie(cookies);
+      headers = HttpConnector.streamHeadersByCookie(cookies);
     }
 
     dio.options.extra['withCredentials'] = true;
 
     print('$url stream headers : $headers');
+
+    print('dio.options ${dio.options.baseUrl}');
 
     final Response response = await dio
         .get(url,
@@ -134,10 +154,16 @@ class DioConnector {
       print('$url stream result : $result');
       return result;
     }).catchError((e) {
+      print('sse connect error');
       print('$url stream error : $e');
 
       throw e;
     });
+    // .onError((e, stackTrace) {
+    //   print('connect error');
+    //   print('$url stream error : $e');
+    //   throw Error();
+    // });
     // .timeout(const Duration(seconds: 10), onTimeout: () {
     //   print('sse timeout');
     //   return Response(

@@ -166,7 +166,12 @@ class ViewLoginState extends State<ViewLogin> {
       // TODO : 로그인 성공 시점에 성공한 데이터를 localStorage에 저장
       print('login step 1');
       // GServiceGPSInterval.gpsInterval();
+
+      if (GServiceSSE.connectivitySubscription == null) {
+        GServiceSSE.setNetworkListener();
+      }
       GServiceSSE.connect();
+      // GServiceSSE.eventConnect();
 
       print('login step 2');
       Navigator.pushReplacementNamed(context, PATH.ROUTE_CHECKLIST);

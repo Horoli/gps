@@ -19,6 +19,7 @@ import 'package:gps_test/preset/state.dart' as STATE;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:eventsource/eventsource.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 part 'model/common.dart';

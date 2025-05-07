@@ -190,12 +190,6 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
                   await GServiceSSE.disconnect();
                 },
                 child: Text('sse disconnect')),
-            ElevatedButton(
-              onPressed: () async {
-                await GServiceSSE.testHealth();
-              },
-              child: Text('sse healthCheck'),
-            ),
 
             ElevatedButton(
               onPressed: () async {

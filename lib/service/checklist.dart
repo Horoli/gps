@@ -20,7 +20,7 @@ class ServiceChecklist extends CommonService {
 
     final List<String> cookies = await CookieManager.loadCookies();
 
-    final Response response = await DioConnector.get(
+    final Response response = await HttpConnector.get(
       dio: dio,
       url: '${URL.BASE_URL}/${URL.CHECK_LIST}',
       cookies: cookies,

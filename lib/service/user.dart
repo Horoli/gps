@@ -20,7 +20,7 @@ class ServiceUser extends CommonService {
 
     dio.options.extra['withCredentials'] = true;
 
-    final Response response = await DioConnector.post(
+    final Response response = await HttpConnector.post(
       dio: dio,
       url: '${URL.BASE_URL}/${URL.USER_LOGIN}',
       data: {
@@ -53,7 +53,7 @@ class ServiceUser extends CommonService {
   }) async {
     Completer completer = Completer();
 
-    final Response response = await DioConnector.post(
+    final Response response = await HttpConnector.post(
       dio: dio,
       url: '${URL.BASE_URL}/${URL.USER_LOCATION}',
       data: {
