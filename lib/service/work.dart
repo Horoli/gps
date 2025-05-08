@@ -24,7 +24,7 @@ class ServiceWork extends CommonService {
     required List<String> members,
   }) async {
     try {
-      final List<String> cookies = await CookieManager.loadCookies();
+      final List<String> cookies = await CookieManager.load();
       print('cookies $cookies');
       final Map<String, dynamic> headers =
           HttpConnector.headersByCookie(cookies);

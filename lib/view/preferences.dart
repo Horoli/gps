@@ -230,7 +230,7 @@ class ViewPreferencesState extends State<ViewPreferences> {
       await GServiceSSE.disconnect(ignoreErrors: true);
 
       // 3. 쿠키 삭제
-      await CookieManager.clearCookies();
+      await CookieManager.clear();
 
       // 4. interval 삭제
       // await IntervalManager.clear();

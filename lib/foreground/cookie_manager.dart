@@ -6,7 +6,7 @@ class CookieManager {
 
   // static Stream<List<String>?> get stream => subject.stream;
 
-  static Future<void> saveCookies(Response response) async {
+  static Future<void> save(Response response) async {
     final prefs = await SharedPreferences.getInstance();
 
     if (response.headers.map.containsKey('set-cookie')) {
@@ -17,14 +17,14 @@ class CookieManager {
     }
   }
 
-  static Future<List<String>> loadCookies() async {
+  static Future<List<String>> load() async {
     final prefs = await SharedPreferences.getInstance();
 
     return prefs.getStringList('auth_cookies') ?? [];
   }
 
   // SharedPreferences에서 쿠키 삭제
-  static Future<void> clearCookies() async {
+  static Future<void> clear() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('auth_cookies');

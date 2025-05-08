@@ -152,7 +152,7 @@ class ViewLoginState extends State<ViewLogin> {
   }
 
   Future<void> checkCookie() async {
-    await CookieManager.loadCookies();
+    await CookieManager.load();
   }
 
   Future<void> _handleLogin() async {

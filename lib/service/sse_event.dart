@@ -145,7 +145,7 @@ class ServiceSSE extends CommonService {
 
     _dio = _getNewDioInstance();
 
-    final List<String> cookies = await CookieManager.loadCookies();
+    final List<String> cookies = await CookieManager.load();
 
     print('stream step 1');
     final Response response = await HttpConnector.stream(

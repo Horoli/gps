@@ -16,7 +16,7 @@ class ServiceWorklist extends CommonService {
 
   Future<MWorkList> get() async {
     Completer<MWorkList> completer = Completer<MWorkList>();
-    final List<String> cookies = await CookieManager.loadCookies();
+    final List<String> cookies = await CookieManager.load();
 
     print('cookies $cookies');
 
@@ -78,7 +78,7 @@ class ServiceWorklist extends CommonService {
   // 현재 작업 완료 함수
   Future<void> completeProcedure() async {
     try {
-      final List<String> cookies = await CookieManager.loadCookies();
+      final List<String> cookies = await CookieManager.load();
       final Map<String, dynamic> headers =
           HttpConnector.headersByCookie(cookies);
       dio.options.extra['withCredentials'] = true;

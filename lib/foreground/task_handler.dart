@@ -119,7 +119,7 @@ class ForegroundTaskHandler extends TaskHandler {
   void onRepeatEvent(DateTime timestamp) async {
     FlutterForegroundTask.sendDataToMain('check');
     Position position = await Geolocator.getCurrentPosition();
-    final List<String> cookies = await CookieManager.loadCookies();
+    final List<String> cookies = await CookieManager.load();
     print('repeat $timestamp : $cookies');
 
     Map<String, dynamic> data = {

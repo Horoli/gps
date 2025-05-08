@@ -18,7 +18,7 @@ class ServiceChecklist extends CommonService {
     Completer<List<MChecklistData>> completer =
         Completer<List<MChecklistData>>();
 
-    final List<String> cookies = await CookieManager.loadCookies();
+    final List<String> cookies = await CookieManager.load();
 
     final Response response = await HttpConnector.get(
       dio: dio,

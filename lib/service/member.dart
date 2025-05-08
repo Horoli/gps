@@ -16,7 +16,7 @@ class ServiceMember extends CommonService {
 
   Future<List<MMember>> get() async {
     Completer<List<MMember>> completer = Completer<List<MMember>>();
-    final List<String> cookies = await CookieManager.loadCookies();
+    final List<String> cookies = await CookieManager.load();
 
     final Response response = await HttpConnector.get(
       dio: dio,
