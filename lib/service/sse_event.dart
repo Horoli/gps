@@ -66,8 +66,6 @@ class ServiceSSE extends CommonService {
 
   late Stream eventStream;
   StreamSubscription? _eventSub;
-  // Map<int, StreamSubscription> eventSubManager = {};
-  // int eventCount = 0;
   StreamSubscription? connectivitySubscription;
   bool _hasNetworkConnection = true;
 
@@ -95,10 +93,15 @@ class ServiceSSE extends CommonService {
         if (dataStr.isNotEmpty) {
           Map<String, dynamic> parsedData = {};
           try {
+            print('dataStr $dataStr');
             parsedData = json.decode(dataStr);
           } catch (e) {
             print('JSON parsing error: $e');
-            parsedData = {'raw': dataStr};
+            parsedData = {
+              'id': id,
+              'event': event,
+              'raw': dataStr,
+            };
           }
 
           sink.add(parsedData);
@@ -119,38 +122,28 @@ class ServiceSSE extends CommonService {
     connectivitySubscription = Connectivity()
         .onConnectivityChanged
         .listen((List<ConnectivityResult> result) async {
-      print('a');
-      print('b');
-      print('c');
-      print('d');
-      print('e');
       print('network listener $result');
-      // if (!result.contains(ConnectivityResult.none)) {
-      //   if (_dio == null) {
-      //     print('dio is null');
-      //     await connect();
-      //   } else {
-      //     print('dio is not null');
-      //     await disconnect();
-      //     await connect();
-      //   }
-      // }
-      print('a');
-      print('b');
-      print('c');
-      print('d');
-      print('e');
+
+      if (result.contains(ConnectivityResult.none)) {
+        print('network is not connected');
+        _hasNetworkConnection = false;
+        await disconnect(ignoreErrors: true);
+      } else {
+        print('network is connected');
+        _hasNetworkConnection = true;
+        await Future.delayed(const Duration(seconds: 1));
+        await connect();
+      }
     });
   }
 
   Future<void> connect({bool reconnect = true}) async {
-    if (_dio != null) {
-      throw Exception('Dio is not null');
+    if (_isConnected) {
+      await disconnect(ignoreErrors: true);
     }
-    _dio ??= _getNewDioInstance();
-    print('stream step 0');
 
-    print('dio ${_dio}');
+    _dio = _getNewDioInstance();
+
     final List<String> cookies = await CookieManager.loadCookies();
 
     print('stream step 1');
@@ -170,13 +163,14 @@ class ServiceSSE extends CommonService {
     _lastEventTime = DateTime.now();
     print('stream step 4');
 
-    // await _eventSub?.cancel();
-    // _eventSub
-    // eventSubManager[eventCount]?.cancel();
-    // eventSubManager[eventCount] =
+    await _eventSub?.cancel();
+    _eventSub = eventStream.listen((data) async {
+      print('event received : ${data}');
+      if (data['event'] == 'sid') {
+        print('first connection event received : ${data}');
+        return;
+      }
 
-    _eventSub = eventStream.listen((dynamic data) async {
-      print('event received : $data');
       _lastEventTime = DateTime.now();
       await GServiceWorklist.get();
       CurrentWork? getCurrentWork = GServiceWorklist.lastValue!.currentWork;
@@ -285,41 +279,24 @@ class ServiceSSE extends CommonService {
           }
         }
       }
-    }, onError: (error) {
+    }, onError: (error) async {
       print('SSE stream error : $error');
       _isConnected = false;
       if (reconnect) {
-        print('processing healthChecker');
-        healthCheckWithTimer();
+        await disconnect(ignoreErrors: true);
       }
-    }, onDone: () {
+    }, onDone: () async {
       print('SSE stream closed');
       _isConnected = false;
       if (reconnect) {
-        print('processing healthChecker');
-        healthCheckWithTimer();
+        await disconnect(ignoreErrors: true);
       }
     });
 
     if (reconnect) {
+      print('processing healthChecker');
       healthCheckWithTimer();
     }
-    //   try{
-    // } on DioException catch (e) {
-    //   _isConnected = false;
-    //   // rethrow;
-    //   print('errrrrrrrrrrrrrror $e');
-
-    //   if (e.response != null) {
-    //     ResponseBody errorBody = e.response?.data as ResponseBody;
-
-    //     print('error statusCode : ${e.response?.statusCode}');
-    //     print('error message : ${errorBody.statusMessage}');
-    //     // throw errorBody;
-    //     rethrow;
-    //   }
-    //   // rethrow;
-    // }
   }
 
   // TODO : 재연결 관련 연결상태 체크
@@ -335,22 +312,21 @@ class ServiceSSE extends CommonService {
       final now = DateTime.now();
       final timeSinceLastEvent = _lastEventTime != null
           ? now.difference(_lastEventTime!)
-          : Duration(hours: 1); // 초기값으로 큰 값 설정
+          : const Duration(hours: 1); // 초기값으로 큰 값 설정
 
       // 연결 상태 확인 조건:
       // 1. _isConnected가 false이거나
-      // 2. 마지막 이벤트 수신 후 일정 시간(1분) 이상 지났거나
+      // 2. 마지막 이벤트 수신 후 일정 시간(2분) 이상 지났거나
       // 3. _eventSub이 null이거나 closed 상태인 경우
+      // 4. _hasNetworkConnection이 false인 경우
       bool needsReconnect = !_isConnected ||
-          timeSinceLastEvent > Duration(minutes: 1) ||
-          _eventSub == null;
+          timeSinceLastEvent > const Duration(seconds: 120) ||
+          _eventSub == null ||
+          _hasNetworkConnection == false;
 
       // 재연결이 필요한 경우
       if (needsReconnect) {
         print('SSE connection needs reconnection. Attempting to reconnect...');
-
-        // 기존 연결 해제
-        // await _cleanupConnection();
 
         // 재연결 시도 횟수 제한 확인
         if (_reconnectAttempts < _maxReconnectAttempts) {
@@ -366,8 +342,6 @@ class ServiceSSE extends CommonService {
           // 지연 후 재연결 시도
           await Future.delayed(delay);
           try {
-            await disconnect();
-            print('is Connect');
             await connect();
             _reconnectAttempts = 0; // 성공 시 재시도 횟수 초기화
             print('SSE reconnection successful');
@@ -398,17 +372,6 @@ class ServiceSSE extends CommonService {
         print('Health check timer canceled');
       }
 
-      // print('_eventSub $_eventSub');
-      // if (eventSubManager.isNotEmpty) {
-      //   for (var entry in eventSubManager.entries) {
-      //     print('entry ${entry.key}');
-      //     entry.value.cancel();
-      //     print('Event subscription ${entry.key} canceled');
-      //   }
-      //   eventSubManager.clear();
-      //   eventCount = 0;
-      // }
-
       // 2. 이벤트 구독 강제 취소
       if (_eventSub != null) {
         try {
@@ -426,6 +389,7 @@ class ServiceSSE extends CommonService {
       if (_dio != null) {
         try {
           _dio!.close(force: true);
+          _dio!.interceptors.clear();
           print('Dio instance closed (force: true)');
           _dio = null;
           // 5. 잠시 대기

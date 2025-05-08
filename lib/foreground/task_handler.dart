@@ -122,15 +122,31 @@ class ForegroundTaskHandler extends TaskHandler {
     final List<String> cookies = await CookieManager.loadCookies();
     print('repeat $timestamp : $cookies');
 
+    Map<String, dynamic> data = {
+      "lng": position.longitude,
+      "lat": position.latitude,
+      "timestamp": timestamp.toIso8601String()
+    };
+
+    // TODO : network 사용 가능 확인
+
+    // TODO : network 사용 불가능 시, localStorage에 datas를 저장(array로 저장)
+
+    // TODO : network 사용 가능 시, localStorage에 저장된 datas가 있는지 확인
+
+    // TODO : localStorage에 저장된 datas가 있으면, 서버에 모두 post
+
+    // TODO : 서버에 전송 완료 시, localstorage에 저장된 datas 삭제
+
+    // TODO : 서버에 전송 실패 시, localstorage에 저장된 datas는 그대로 유지
+
+    // TODO : network 사용 가능 시, localStorage에 저장된 datas가 없으면 현재 data를 서버에 post
+
     final Response response = await HttpConnector.post(
       dio: _dio,
       url: '${URL.BASE_URL}/${URL.USER_LOCATION}',
       cookies: cookies,
-      data: {
-        "lng": position.longitude,
-        "lat": position.latitude,
-        "timestamp": timestamp.toIso8601String()
-      },
+      data: data,
     );
 
     // 응답 확인
@@ -139,31 +155,6 @@ class ForegroundTaskHandler extends TaskHandler {
     } else {
       print('위치 전송 실패: ${response}');
     }
-
-    // final Dio dio = Dio();
-    // dio.options.extra['withCredentials'] = true;
-
-    // Map<String, dynamic> headers = DioConnector.headersByCookie(cookies);
-
-    // final Response response = await dio
-    //     .post('${URL.BASE_URL}/${URL.USER_LOCATION}',
-    //         data: {
-    //           "lng": position.longitude,
-    //           "lat": position.latitude,
-    //           "timestamp": timestamp.toIso8601String()
-    //         },
-    //         options: Options(
-    //           extra: {'withCredentials': true},
-    //           headers: headers,
-    //         ))
-    //     .catchError((e) {
-    //   return Response(
-    //     requestOptions:
-    //         RequestOptions(path: '${URL.BASE_URL}/${URL.USER_LOCATION}'),
-    //     statusCode: 500,
-    //     data: {'error': e.toString()},
-    //   );
-    // });
   }
 
   @override
