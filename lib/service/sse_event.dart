@@ -60,7 +60,8 @@ class ServiceSSE extends CommonService {
   int _reconnectAttempts = 0;
   final int _maxReconnectAttempts = 5;
   final Duration _reconnectDelay = const Duration(seconds: 2);
-  final Duration _healthCheckInterval = const Duration(seconds: 30);
+
+  final Duration _healthCheckInterval = const Duration(seconds: 120);
 
   ServiceSSE._internal();
 
@@ -320,7 +321,7 @@ class ServiceSSE extends CommonService {
       // 3. _eventSub이 null이거나 closed 상태인 경우
       // 4. _hasNetworkConnection이 false인 경우
       bool needsReconnect = !_isConnected ||
-          timeSinceLastEvent > const Duration(seconds: 120) ||
+          timeSinceLastEvent > _healthCheckInterval ||
           _eventSub == null ||
           _hasNetworkConnection == false;
 
