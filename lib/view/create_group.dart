@@ -60,7 +60,7 @@ class ViewCreateGroupState extends State<ViewCreateGroup> {
             onPressed: () async {
               // bool useReplacement = true;
               if (GServiceMember.selectedMember == null) {
-                await ShowInfomationWidgets.errorDialog(
+                await ShowInformationWidgets.errorDialog(
                   context,
                   '멤버를 선택하세요',
                 );

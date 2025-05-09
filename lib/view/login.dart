@@ -175,9 +175,9 @@ class ViewLoginState extends State<ViewLogin> {
       Navigator.pushReplacementNamed(context, PATH.ROUTE_CHECKLIST);
 
       // TODO : ViewChecklist로 navigation.replace
-      ShowInfomationWidgets.snackbar(context, MSG.LOGIN_SUCCESS);
+      ShowInformationWidgets.snackbar(context, MSG.LOGIN_SUCCESS);
     }).catchError((e) {
-      ShowInfomationWidgets.snackbar(context, MSG.LOGIN_FAILED);
+      ShowInformationWidgets.snackbar(context, MSG.LOGIN_FAILED);
     });
   }
 

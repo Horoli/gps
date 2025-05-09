@@ -314,13 +314,13 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
 
       // 성공 메시지
       if (mounted) {
-        ShowInfomationWidgets.snackbar(context, '작업이 완료되었습니다');
+        ShowInformationWidgets.snackbar(context, '작업이 완료되었습니다');
       }
 
       // 작업 목록 새로고침
     } catch (e) {
       if (mounted) {
-        ShowInfomationWidgets.snackbar(context, '작업 완료 처리 중 오류가 발생했습니다: $e');
+        ShowInformationWidgets.snackbar(context, '작업 완료 처리 중 오류가 발생했습니다: $e');
       }
     }
   }

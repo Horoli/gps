@@ -1,6 +1,6 @@
 part of gps_test;
 
-class ShowInfomationWidgets {
+class ShowInformationWidgets {
   static Future<void> errorDialog(BuildContext context, String message) async {
     showDialog(
       context: context,

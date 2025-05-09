@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
+import 'package:geolocator/geolocator.dart';
 import 'gps_test.dart';
 
 Future<void> main() async {
   await initService();
   WidgetsFlutterBinding.ensureInitialized();
+  await Geolocator.checkPermission();
   await foregroundInit();
   runApp(const AppRoot());
 }
