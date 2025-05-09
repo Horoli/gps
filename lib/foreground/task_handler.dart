@@ -106,6 +106,7 @@ class ForegroundTaskHandler extends TaskHandler {
       foregroundTaskOptions: ForegroundTaskOptions(
         eventAction: ForegroundTaskEventAction.repeat(
           intervalToMiliseconds,
+          // 10000,
         ),
       ),
     );
@@ -117,6 +118,11 @@ class ForegroundTaskHandler extends TaskHandler {
   // Called every [interval] milliseconds in [ForegroundTaskOptions].
   @override
   void onRepeatEvent(DateTime timestamp) async {
+    //  network 사용 가능 확인
+    bool internetAvailable = await isInternetAvailable();
+
+    print('internetAvailable $internetAvailable');
+
     FlutterForegroundTask.sendDataToMain('check');
     Position position = await Geolocator.getCurrentPosition();
     final List<String> cookies = await CookieManager.load();
@@ -128,20 +134,42 @@ class ForegroundTaskHandler extends TaskHandler {
       "timestamp": timestamp.toIso8601String()
     };
 
-    // TODO : network 사용 가능 확인
+    // network 사용 불가능 시, localStorage에 datas를 저장(array로 저장)
+    if (internetAvailable == false) {
+      print('network unavailable, save to localStorage $data');
+      await LocationManager.save(data);
+      return;
+    }
 
-    // TODO : network 사용 불가능 시, localStorage에 datas를 저장(array로 저장)
+    // network 사용 가능 시, localStorage에 저장된 datas가 있는지 확인
+    await LocationManager.hasData().then((hasData) async {
+      if (hasData) {
+        // localStorage에 저장된 datas가 있으면, 서버에 모두 post
+        List<Map<String, dynamic>> locationData = await LocationManager.load();
 
-    // TODO : network 사용 가능 시, localStorage에 저장된 datas가 있는지 확인
+        print('locationData $locationData');
+        for (Map<String, dynamic> item in locationData) {
+          final Response response = await HttpConnector.post(
+            dio: _dio,
+            url: '${URL.BASE_URL}/${URL.USER_LOCATION}',
+            cookies: cookies,
+            data: item,
+          );
+          // 응답 확인
+          if (response.statusCode == 200) {
+            print('위치 전송 성공 : $response');
+          } else {
+            // TODO : 서버에 전송 실패 시, localstorage에 저장된 datas는 그대로 유지
+            print('위치 전송 실패: ${response}');
+            return;
+          }
+        }
+        // 서버에 전송 완료 시, localstorage에 저장된 datas 삭제
+        await LocationManager.clear();
+      }
+    });
 
-    // TODO : localStorage에 저장된 datas가 있으면, 서버에 모두 post
-
-    // TODO : 서버에 전송 완료 시, localstorage에 저장된 datas 삭제
-
-    // TODO : 서버에 전송 실패 시, localstorage에 저장된 datas는 그대로 유지
-
-    // TODO : network 사용 가능 시, localStorage에 저장된 datas가 없으면 현재 data를 서버에 post
-
+    // network 사용 가능 시, localStorage에 저장된 datas가 없으면 현재 data를 서버에 post
     final Response response = await HttpConnector.post(
       dio: _dio,
       url: '${URL.BASE_URL}/${URL.USER_LOCATION}',
@@ -174,6 +202,20 @@ class ForegroundTaskHandler extends TaskHandler {
       FlutterForegroundTask.sendDataToMain('stop');
       FlutterForegroundTask.stopService();
       print('stopService : $id');
+    }
+  }
+
+  Future<bool> isInternetAvailable() async {
+    final List<ConnectivityResult> connectivityResult =
+        await Connectivity().checkConnectivity();
+    if (connectivityResult.contains(ConnectivityResult.none)) {
+      return false;
+    }
+    try {
+      final result = await InternetAddress.lookup('google.com');
+      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+    } on SocketException catch (_) {
+      return false;
     }
   }
 }
