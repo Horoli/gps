@@ -56,14 +56,12 @@ class ViewWorklistState extends State<ViewWorklist> {
             );
           }
           return RefreshIndicator(
+            backgroundColor: COLOR.BASE,
             onRefresh: getData,
             child: ListView.builder(
               itemCount: works.length,
               itemBuilder: (BuildContext context, int index) {
-                return TileWork(
-                  workItem: works[index],
-                  isFirst: index == 0,
-                );
+                return TileWork(workItem: works[index]);
               },
             ),
           );
@@ -75,6 +73,7 @@ class ViewWorklistState extends State<ViewWorklist> {
   @override
   void initState() {
     super.initState();
+    GServiceLocation.checkAndRequestLocationPermission();
     getData();
   }
 

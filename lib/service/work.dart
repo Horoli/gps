@@ -25,7 +25,7 @@ class ServiceWork extends CommonService {
   }) async {
     try {
       final List<String> cookies = await CookieManager.load();
-      print('cookies $cookies');
+      debugPrint('cookies $cookies');
       final Map<String, dynamic> headers =
           HttpConnector.headersByCookie(cookies);
       dio.options.extra['withCredentials'] = true;
@@ -52,8 +52,8 @@ class ServiceWork extends CommonService {
     } catch (e) {
       if (e is DioException) {
         if (e.response != null) {
-          print('error statusCode : ${e.response?.statusCode}');
-          print('error data : ${e.response?.data}');
+          debugPrint('error statusCode : ${e.response?.statusCode}');
+          debugPrint('error data : ${e.response?.data}');
         }
       }
     }

@@ -188,7 +188,7 @@ class MProcedureInCurrentWork extends CommonModel<MProcedureInCurrentWork> {
           }).toList();
         }
       } catch (e) {
-        print('Location 파싱 오류: $e');
+        debugPrint('Location 파싱 오류: $e');
         locationList = null;
       }
     }

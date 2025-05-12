@@ -30,7 +30,7 @@ class UserLoginManager {
           jsonDecode(user) as Map<String, dynamic>;
       return parsedData;
     }
-    print('UserManager: No user found');
+    debugPrint('UserManager: No user found');
     return {
       'employeeId': '',
       'phoneNumber': '',
@@ -42,9 +42,9 @@ class UserLoginManager {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(title);
 
-      print('로그인 정보 삭제 완료');
+      debugPrint('로그인 정보 삭제 완료');
     } catch (e) {
-      print('로그인 정보 삭제 오류: $e');
+      debugPrint('로그인 정보 삭제 오류: $e');
     }
   }
 }

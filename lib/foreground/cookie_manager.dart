@@ -11,7 +11,7 @@ class CookieManager {
       final List<String>? cookies = response.headers.map[headers];
       // subject.add(cookies);
       await prefs.setStringList(title, cookies ?? []);
-      print('쿠키 저장됨: $cookies');
+      debugPrint('쿠키 저장됨: $cookies');
     }
   }
 
@@ -28,9 +28,9 @@ class CookieManager {
       await prefs.remove(title);
       // subject.add([]);
 
-      print('쿠키 삭제 완료');
+      debugPrint('쿠키 삭제 완료');
     } catch (e) {
-      print('쿠키 삭제 오류: $e');
+      debugPrint('쿠키 삭제 오류: $e');
     }
   }
 }

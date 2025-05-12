@@ -134,26 +134,17 @@ class ViewPreferencesState extends State<ViewPreferences> {
                 const Spacer(),
 
                 // 로그아웃 버튼
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      logoutPressed(context);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF4B5EFC),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                    child: const Text(
-                      '로그아웃',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
+                buildElevatedButton(
+                  usePadding: false,
+                  onPressed: () async {
+                    logoutPressed(context);
+                  },
+                  child: const Text(
+                    '로그아웃',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
                   ),
                 ),

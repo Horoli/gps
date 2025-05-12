@@ -16,9 +16,33 @@ PreferredSizeWidget CommonAppBar({
         ]
       : [];
   return AppBar(
+    backgroundColor: COLOR.BASE,
     title: Text(title),
     centerTitle: true,
     actions: actions,
+  );
+}
+
+BoxDecoration get commonDecoration => BoxDecoration(
+      border: Border.all(color: Colors.grey[300]!),
+      borderRadius: BorderRadius.circular(8.0),
+    );
+
+Widget buildElevatedButton({
+  VoidCallback? onPressed,
+  bool usePadding = true,
+  required Widget child,
+}) {
+  return Padding(
+    padding: EdgeInsets.all(usePadding ? 16 : 0),
+    child: SizedBox(
+      width: double.infinity,
+      height: 50,
+      child: ElevatedButton(
+        onPressed: onPressed,
+        child: child,
+      ),
+    ),
   );
 }
 
@@ -57,10 +81,11 @@ Widget buildNavigationButton({
   required String title,
   required String routerName,
   bool useReplacement = false,
+  bool usePadding = true,
   VoidCallback? onPressed,
 }) {
   return Padding(
-    padding: const EdgeInsets.all(16.0),
+    padding: EdgeInsets.all(usePadding ? 16 : 0),
     child: SizedBox(
       width: double.infinity,
       height: 50,

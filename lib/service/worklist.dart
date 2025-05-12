@@ -18,7 +18,7 @@ class ServiceWorklist extends CommonService {
     Completer<MWorkList> completer = Completer<MWorkList>();
     final List<String> cookies = await CookieManager.load();
 
-    print('cookies $cookies');
+    debugPrint('cookies $cookies');
 
     final Response response = await HttpConnector.get(
       dio: dio,
@@ -36,21 +36,21 @@ class ServiceWorklist extends CommonService {
           final Map<String, dynamic> currentWorkData =
               data['currentWork'] as Map<String, dynamic>;
           currentWork = CurrentWork.fromMap(currentWorkData);
-          print('현재 작업 파싱 성공: ${currentWork.uuid}');
+          debugPrint('현재 작업 파싱 성공: ${currentWork.uuid}');
         } catch (e) {
-          print('현재 작업 파싱 오류: $e');
+          debugPrint('현재 작업 파싱 오류: $e');
           // 파싱 오류가 있어도 전체 결과에는 영향을 주지 않도록 함
           currentWork = null;
         }
       }
-      print('currentWork $currentWork');
+      debugPrint('currentWork $currentWork');
 
       // workList 파싱
       final List<MWorkData> works = (data['workList'] as List<dynamic>)
           .map(
               (workItem) => MWorkData.fromMap(workItem as Map<String, dynamic>))
           .toList();
-      print('works $works');
+      debugPrint('works $works');
 
       // step 파싱
       final List<String> steps = (data['step'] as List<dynamic>)
@@ -79,15 +79,22 @@ class ServiceWorklist extends CommonService {
   Future<void> completeProcedure() async {
     try {
       final List<String> cookies = await CookieManager.load();
-      final Map<String, dynamic> headers =
-          HttpConnector.headersByCookie(cookies);
+      // final Map<String, dynamic> headers =
+      //     HttpConnector.headersByCookie(cookies);
       dio.options.extra['withCredentials'] = true;
-      print('cookies $cookies');
+      debugPrint('cookies $cookies');
 
       // 현재 시간을 ISO 8601 형식의 문자열로 변환
       String uuid = lastValue!.currentWork!.uuid;
-      Position position = await Geolocator.getCurrentPosition();
+      // Position? position = await Geolocator.getLastKnownPosition();
+      Position? position = GServiceLocation._subject.valueOrNull;
+      if (position == null) {
+        return ShowInformationWidgets.errorDialog(
+            GNavigationKey.currentState!.context, 'GPS 값을 찾을 수 없습니다');
+      }
       final String timestamp = DateTime.now().toIso8601String();
+      debugPrint(
+          '중간 : gps값 갱신 lat ${position.latitude} / lng ${position.longitude} ${DateTime.now().millisecondsSinceEpoch}');
 
       final Response response = await HttpConnector.post(
           dio: dio,
@@ -103,8 +110,8 @@ class ServiceWorklist extends CommonService {
       if (e.response != null) {
         ResponseBody errorBody = e.response?.data as ResponseBody;
 
-        print('error statusCode : ${e.response?.statusCode}');
-        print('error message : ${errorBody.statusMessage}');
+        debugPrint('error statusCode : ${e.response?.statusCode}');
+        debugPrint('error message : ${errorBody.statusMessage}');
         throw errorBody;
       }
     }

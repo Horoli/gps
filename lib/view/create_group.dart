@@ -33,15 +33,19 @@ class ViewCreateGroupState extends State<ViewCreateGroup> {
                       stream: GServiceMember.stream,
                       builder: (context, snapshot) {
                         final selectedMember = snapshot.data;
-                        return ListView.builder(
+                        return ListView.separated(
+                          separatorBuilder: (context, index) => const Divider(
+                            indent: 15,
+                            endIndent: 15,
+                          ),
                           itemCount: setFilteredMembers.length,
                           itemBuilder: (context, index) {
                             final MMember member = setFilteredMembers[index];
                             final bool isSelected =
                                 selectedMember?.uuid == member.uuid;
 
-                            print(member);
-                            print(isSelected);
+                            debugPrint('$member');
+                            debugPrint('$isSelected');
 
                             return MemberListTile(
                               member: member,
@@ -69,9 +73,9 @@ class ViewCreateGroupState extends State<ViewCreateGroup> {
 
               // TODO : geolocation
               // Position position = await Geolocator.getCurrentPosition();
-              // print(position.longitude);
+              // debugPrint(position.longitude);
 
-              print(GServiceMember.selectedMember!.uuid);
+              debugPrint(GServiceMember.selectedMember!.uuid);
               await GServiceWork.create(
                   members: [GServiceMember.selectedMember!.uuid]);
 

@@ -7,6 +7,7 @@ late ServiceWork GServiceWork;
 late ServiceMember GServiceMember;
 late ServiceSSE GServiceSSE;
 late ServiceGPSInterval GServiceGPSInterval;
+late ServiceLocation GServiceLocation;
 late RouterManager GServiceRouterManager;
 
 bool useForeground = true;
@@ -67,10 +68,10 @@ class HttpConnector {
               headers: headers,
             ))
         .then((result) {
-      print('$url get result : ${result.data}');
+      debugPrint('$url get result : ${result.data}');
       return result;
     }).catchError((e) {
-      print('$url get error : ${e}');
+      debugPrint('$url get error : ${e}');
     });
     return response;
   }
@@ -97,10 +98,10 @@ class HttpConnector {
               headers: headers,
             ))
         .then((result) {
-      print('$url post result : ${result.data}');
+      debugPrint('$url post result : ${result.data}');
       return result;
     }).catchError((e) {
-      print('$url post error : ${e}');
+      debugPrint('$url post error : ${e}');
     });
     return response;
   }
@@ -139,9 +140,9 @@ class HttpConnector {
 
     dio.options.extra['withCredentials'] = true;
 
-    print('$url stream headers : $headers');
+    debugPrint('$url stream headers : $headers');
 
-    print('dio.options ${dio.options.baseUrl}');
+    debugPrint('dio.options ${dio.options.baseUrl}');
 
     final Response response = await dio
         .get(url,
@@ -151,21 +152,21 @@ class HttpConnector {
               headers: headers,
             ))
         .then((result) {
-      print('$url stream result : $result');
+      debugPrint('$url stream result : $result');
       return result;
     }).catchError((e) {
-      print('sse connect error');
-      print('$url stream error : $e');
+      debugPrint('sse connect error');
+      debugPrint('$url stream error : $e');
 
       throw e;
     });
     // .onError((e, stackTrace) {
-    //   print('connect error');
-    //   print('$url stream error : $e');
+    //   debugPrint('connect error');
+    //   debugPrint('$url stream error : $e');
     //   throw Error();
     // });
     // .timeout(const Duration(seconds: 10), onTimeout: () {
-    //   print('sse timeout');
+    //   debugPrint('sse timeout');
     //   return Response(
     //     requestOptions: RequestOptions(),
     //     statusCode: 503,

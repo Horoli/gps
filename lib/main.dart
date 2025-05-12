@@ -4,22 +4,22 @@ import 'package:geolocator/geolocator.dart';
 import 'gps_test.dart';
 
 Future<void> main() async {
-  await initService();
   WidgetsFlutterBinding.ensureInitialized();
-  await Geolocator.checkPermission();
+  await initService();
   await foregroundInit();
+  await checkAndRequestLocationPermission();
   runApp(const AppRoot());
 }
 
 Future<void> foregroundInit() async {
   if (useForeground) {
     FlutterForegroundTask.initCommunicationPort();
-    print('foreground step 1');
+    debugPrint('foreground step 1');
     FlutterForegroundTask.addTaskDataCallback(
         ForegroundTaskHandler.onReceiveTaskData);
-    print('foreground step 2');
+    debugPrint('foreground step 2');
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      print('foreground step 3');
+      debugPrint('foreground step 3');
       ForegroundTaskHandler.requestPermissions();
     });
   }
@@ -33,7 +33,18 @@ Future<void> initService() async {
   GServiceMember = ServiceMember.getInstance();
   GServiceSSE = ServiceSSE.getInstance();
   GServiceGPSInterval = ServiceGPSInterval.getInstance();
+  GServiceLocation = ServiceLocation.getInstance();
 }
 
-// TODO : 플랫폼 추가(device info plus)
-Future<void> deviceCheck() async {}
+Future<LocationPermission> checkAndRequestLocationPermission() async {
+  // 현재 권한 상태 확인
+  LocationPermission permission = await Geolocator.checkPermission();
+
+  if (permission != LocationPermission.always) {
+    permission = await Geolocator.requestPermission();
+  } else {
+    permission = await Geolocator.requestPermission();
+  }
+
+  return permission;
+}

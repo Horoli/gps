@@ -14,6 +14,18 @@ class MemberListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return ListTile(
+      title: Text(member.username),
+      subtitle: Text(member.phoneNumber),
+      trailing: Checkbox(
+        activeColor: COLOR.BASE,
+        checkColor: COLOR.WHITE,
+        value: isSelected,
+        onChanged: (value) {
+          onPressed();
+        },
+      ),
+    );
     return Column(
       children: [
         Padding(

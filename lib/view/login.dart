@@ -8,11 +8,6 @@ class ViewLogin extends StatefulWidget {
 }
 
 class ViewLoginState extends State<ViewLogin> {
-  // final TextEditingController _phoneController =
-  //     TextEditingController(text: tmpNumber);
-  // final TextEditingController _employeeIdController =
-  //     TextEditingController(text: tmpID);
-
   late final TextEditingController _phoneController = TextEditingController();
   late final TextEditingController _employeeIdController =
       TextEditingController();
@@ -58,8 +53,6 @@ class ViewLoginState extends State<ViewLogin> {
                     _handleLogin();
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF4B5EFC),
-                    foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(4),
                     ),
@@ -74,18 +67,27 @@ class ViewLoginState extends State<ViewLogin> {
                   ),
                 ),
               ),
-              // ElevatedButton(
-              //     onPressed: () {
-              //       _phoneController.text = '01041850688';
-              //       _employeeIdController.text = 'devel';
-              //     },
-              //     child: Text('박선하')),
-              // ElevatedButton(
-              //     onPressed: () {
-              //       _phoneController.text = '01011112222';
-              //       _employeeIdController.text = '100';
-              //     },
-              //     child: Text('홍길동')),
+              ElevatedButton(
+                  onPressed: () {
+                    _phoneController.text = '01041850688';
+                    _employeeIdController.text = 'devel';
+                  },
+                  child: Text('박선하')),
+              ElevatedButton(
+                  onPressed: () {
+                    _phoneController.text = '01011112222';
+                    _employeeIdController.text = '100';
+                  },
+                  child: Text('홍길동')),
+              ElevatedButton(
+                  onPressed: () async {
+                    debugPrint(
+                        'subscription ${GServiceLocation.subscription == null}');
+                    debugPrint('hasValue ${GServiceLocation._subject.value}');
+                    debugPrint(
+                        'location stream last : ${GServiceLocation._subject.valueOrNull}');
+                  },
+                  child: Text('location')),
             ],
           ),
         ),
@@ -147,13 +149,9 @@ class ViewLoginState extends State<ViewLogin> {
   @override
   void initState() {
     super.initState();
-    checkAndRequestLocationPermission();
+    GServiceLocation.checkAndRequestLocationPermission();
     checkLocalStorage();
   }
-
-  // Future<void> checkCookie() async {
-  //   await CookieManager.load();
-  // }
 
   Future<void> checkLocalStorage() async {
     await UserLoginManager.load().then((Map<String, dynamic> loginData) {
@@ -164,34 +162,40 @@ class ViewLoginState extends State<ViewLogin> {
         _employeeIdController.text = employeeId;
       }
     }).catchError((e) {
-      print('error: $e');
+      debugPrint('error: $e');
     });
   }
 
+  // 로그인 로직 구현
   Future<void> _handleLogin() async {
-    // 로그인 로직 구현
     String employeeId = _employeeIdController.text;
     String phoneNumber = _phoneController.text;
 
-    print('Phone: $phoneNumber, Employee ID: $employeeId');
-    // TODO: 실제 로그인 처리 로직 추가
+    debugPrint('Phone: $phoneNumber, Employee ID: $employeeId');
 
     await GServiceUser.login(
       phoneNumber: phoneNumber,
       id: employeeId,
     ).then((user) {
-      // TODO : 로그인 성공 시점에 성공한 데이터를 localStorage에 저장
-      print('login step 1');
+      debugPrint('login step 1');
 
       if (GServiceSSE.connectivitySubscription == null) {
         GServiceSSE.setNetworkListener();
       }
+      if (GServiceLocation.subscription == null) {
+        debugPrint('checkPermission');
+        Geolocator.checkPermission();
+        debugPrint('setLocationListener');
+        GServiceLocation.setLocationListener();
+      }
+
+      // 로그인 성공 시점에 성공한 데이터를 localStorage에 저장
       UserLoginManager.save({
         'employeeId': employeeId,
         'phoneNumber': phoneNumber,
       });
 
-      print('login step 2');
+      debugPrint('login step 2');
       Navigator.pushReplacementNamed(context, PATH.ROUTE_CHECKLIST);
 
       // TODO : ViewChecklist로 navigation.replace
@@ -199,77 +203,6 @@ class ViewLoginState extends State<ViewLogin> {
     }).catchError((e) {
       ShowInformationWidgets.snackbar(context, MSG.LOGIN_FAILED);
     });
-  }
-
-  Future<LocationPermission> checkAndRequestLocationPermission() async {
-    // 현재 권한 상태 확인
-    LocationPermission permission = await Geolocator.checkPermission();
-
-    // 권한이 영구적으로 거부된 경우
-    if (permission == LocationPermission.deniedForever) {
-      // 사용자에게 설정 화면으로 이동하도록 안내하는 다이얼로그 표시
-      bool goToSettings = await showDialog(
-            context: context,
-            builder: (BuildContext context) => AlertDialog(
-              title: Text('위치 권한 필요'),
-              content: Text('이 앱은 위치 정보가 필요합니다. 설정에서 위치 권한을 허용해주세요.'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(false),
-                  child: Text('취소'),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(true),
-                  child: Text('설정으로 이동'),
-                ),
-              ],
-            ),
-          ) ??
-          false;
-
-      // 사용자가 설정으로 이동하기로 선택한 경우
-      if (goToSettings) {
-        await Geolocator.openAppSettings(); // 앱 설정 페이지 열기
-        // 또는 Geolocator.openLocationSettings(); // 위치 설정 페이지 열기
-      }
-    }
-    // 권한이 거부되었지만 영구적으로 거부되지 않은 경우
-    else if (permission == LocationPermission.denied) {
-      // 권한 요청
-      permission = await Geolocator.requestPermission();
-    }
-
-    // 권한이 항상 허용되지 않은 경우 (whileInUse 상태인 경우)
-    if (permission == LocationPermission.whileInUse) {
-      // 항상 허용 권한을 요청하는 다이얼로그 표시
-      bool requestAlways = await showDialog(
-            context: context,
-            builder: (BuildContext context) => AlertDialog(
-              title: Text('백그라운드 위치 권한'),
-              content: Text('앱이 백그라운드에서도 위치 정보를 사용할 수 있도록 허용하시겠습니까?'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(false),
-                  child: Text('아니오'),
-                ),
-                TextButton(
-                  onPressed: () async {
-                    Navigator.of(context).pop();
-                    await Geolocator.openAppSettings(); // 앱 설정 페이지 열기
-                  },
-                  child: Text('예'),
-                ),
-              ],
-            ),
-          ) ??
-          false;
-
-      // 사용자가 항상 허용을 선택한 경우
-      if (requestAlways) {
-        permission = await Geolocator.requestPermission();
-      }
-    }
-    return permission;
   }
 
   @override

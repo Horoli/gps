@@ -20,7 +20,7 @@ class LocationManager {
       // location이 null이 아닌 경우, 기존 리스트에 추가
 
       location.add(jsonEncode(data));
-      print('LocationManager save: $location');
+      debugPrint('LocationManager save: $location');
       await prefs.setStringList(title, location);
       return;
     }
@@ -37,7 +37,7 @@ class LocationManager {
           .toList();
       return parsedData;
     }
-    print('LocationManager: No location found');
+    debugPrint('LocationManager: No location found');
 
     return [];
   }
@@ -46,9 +46,9 @@ class LocationManager {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.remove(title);
-      print('LocationManager: location 삭제 완료');
+      debugPrint('LocationManager: location 삭제 완료');
     } catch (e) {
-      print('LocationManager: location 삭제 오류: $e');
+      debugPrint('LocationManager: location 삭제 오류: $e');
     }
   }
 }

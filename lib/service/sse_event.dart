@@ -27,15 +27,27 @@ class ServiceSSE extends CommonService {
 
     newDio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) {
-        print('Starting request to ${options.path}');
+        options.extra['startTime'] = DateTime.now().microsecondsSinceEpoch;
+        debugPrint('Starting request to ${options.path}');
         return handler.next(options);
       },
       onResponse: (response, handler) {
-        print('Received response from ${response.requestOptions.path}');
+        final int startTime = response.requestOptions.extra['startTime'] as int;
+        final int endTime = DateTime.now().millisecondsSinceEpoch;
+        final int duration = endTime - startTime;
+        debugPrint(
+            'Request to ${response.requestOptions.path} took ${duration}ms');
+        debugPrint('Received response from ${response.requestOptions.path}');
         return handler.next(response);
       },
       onError: (DioException e, handler) {
-        print('Error in request to ${e.requestOptions.path}: ${e.message}');
+        final int startTime = e.requestOptions.extra['startTime'] as int;
+        final int endTime = DateTime.now().millisecondsSinceEpoch;
+        final int duration = endTime - startTime;
+        debugPrint(
+            'Failed request to ${e.requestOptions.path} took ${duration}ms');
+        debugPrint(
+            'Error in request to ${e.requestOptions.path}: ${e.message}');
         return handler.next(e);
       },
     ));
@@ -46,7 +58,7 @@ class ServiceSSE extends CommonService {
       requestBody: true,
       error: true,
       logPrint: (message) {
-        print('Dio Log: $message');
+        debugPrint('Dio Log: $message');
       },
     ));
 
@@ -75,7 +87,7 @@ class ServiceSSE extends CommonService {
     handleData: (data, sink) {
       try {
         final String rawData = utf8.decode(data);
-        print('rawData $rawData');
+        debugPrint('rawData $rawData');
         final List<String> splitData = rawData.split('\n');
         String id = '';
         String event = '';
@@ -94,10 +106,10 @@ class ServiceSSE extends CommonService {
         if (dataStr.isNotEmpty) {
           Map<String, dynamic> parsedData = {};
           try {
-            print('dataStr $dataStr');
+            debugPrint('dataStr $dataStr');
             parsedData = json.decode(dataStr);
           } catch (e) {
-            print('JSON parsing error: $e');
+            debugPrint('JSON parsing error: $e');
             parsedData = {
               'id': id,
               'event': event,
@@ -108,13 +120,13 @@ class ServiceSSE extends CommonService {
           sink.add(parsedData);
         }
       } catch (e) {
-        print('SSE parsing error :$e');
+        debugPrint('SSE parsing error :$e');
       }
 
       // sink.add(utf8.decode((data)));
     },
     handleError: (error, stackTrace, sink) {
-      print('error $error');
+      debugPrint('error $error');
       sink.addError(error, stackTrace);
     },
   );
@@ -123,14 +135,14 @@ class ServiceSSE extends CommonService {
     connectivitySubscription = Connectivity()
         .onConnectivityChanged
         .listen((List<ConnectivityResult> result) async {
-      print('network listener $result');
+      debugPrint('network listener $result');
 
       if (result.contains(ConnectivityResult.none)) {
-        print('network is not connected');
+        debugPrint('network is not connected');
         _hasNetworkConnection = false;
         await disconnect(ignoreErrors: true);
       } else {
-        print('network is connected');
+        debugPrint('network is connected');
         _hasNetworkConnection = true;
         await Future.delayed(const Duration(seconds: 1));
         await connect();
@@ -147,147 +159,157 @@ class ServiceSSE extends CommonService {
 
     final List<String> cookies = await CookieManager.load();
 
-    print('stream step 1');
+    debugPrint('stream step 1');
     final Response response = await HttpConnector.stream(
       dio: _dio!,
       url: '${URL.BASE_URL}/${URL.STREAM}',
       cookies: cookies,
     );
 
-    print('stream step 2');
+    debugPrint('stream step 2');
 
     Stream tmpStream = response.data.stream as Stream;
     eventStream = tmpStream.transform(_transformer);
-    print('stream step 3');
+    debugPrint('stream step 3');
 
     _isConnected = true;
     _lastEventTime = DateTime.now();
-    print('stream step 4');
+    debugPrint('stream step 4');
 
     await _eventSub?.cancel();
     _eventSub = eventStream.listen((data) async {
-      print('event received : ${data}');
-      if (data['event'] == 'sid') {
-        print('first connection event received : ${data}');
-        return;
-      }
+      final Stopwatch stopwatch = Stopwatch()..start();
 
-      _lastEventTime = DateTime.now();
-      await GServiceWorklist.get();
-      CurrentWork? getCurrentWork = GServiceWorklist.lastValue!.currentWork;
+      debugPrint('stopwatch start : ${DateTime.now().millisecondsSinceEpoch}');
+      try {
+        debugPrint('event received : ${data}');
+        if (data['event'] == 'sid') {
+          debugPrint('first connection event received : ${data}');
+          return;
+        }
 
-      print('in stream currentWork : $getCurrentWork');
+        _lastEventTime = DateTime.now();
+        // await GServiceWorklist.get();
+        CurrentWork? getCurrentWork = GServiceWorklist.lastValue?.currentWork;
 
-      // stream을 구독하고 있으면서
-      // currentWork를 갖고 있지만 WORK_DETAIL 화면이 아닌 user는
-      // WORK_DETAIL 화면으로 이동
-      if (getCurrentWork != null && !RouterManager().isWorkDetail()) {
-        Navigator.of(GNavigationKey.currentState!.context)
-            .pushReplacementNamed(PATH.ROUTE_WORK_DETAIL);
-      }
-
-      String uuid = data['uuid'];
-      print('check uuid... ${getCurrentWork?.uuid == uuid}');
-      if (getCurrentWork != null && getCurrentWork.uuid == uuid) {
-        print('valid uuid');
-        Map<String, dynamic> unflattenedData = unflatten(data['update']);
-
-        print('unflattenedData $unflattenedData');
-        if (unflattenedData.containsKey('procedures') &&
-            unflattenedData['procedures'] is List) {
-          List updatedProcedures = List.from(unflattenedData['procedures']);
-
-          int getIndex = List.from(updatedProcedures).indexWhere((e) {
-            return e != null;
-          });
-          print('getIndex $getIndex');
-          print('work ${GServiceWorklist.lastValue!.currentWork}');
-          if (getIndex < 4) {
-            // 현재 작업 가져오기
-            CurrentWork currentWork = getCurrentWork;
-
-            // 현재 작업의 procedures 가져오기
-            List<MProcedureInCurrentWork> currentProcedures =
-                currentWork.procedures;
-
-            // 업데이트할 procedures 가져오기
-            // 가져온 updatedProcedures[getIndex]를 포메팅해줘야함
-            Map<String, dynamic> updatedProcedureData = {};
-            if (updatedProcedures[getIndex] != null) {
-              Map originalMap = updatedProcedures[getIndex] as Map;
-              originalMap.forEach((key, value) {
-                updatedProcedureData[key.toString()] = value;
-              });
-            }
-
-            print('updatedProcedureData $updatedProcedureData');
-
-            // 기존 procedure가져오기
-            MProcedureInCurrentWork existingProcedure =
-                currentProcedures[getIndex];
-
-            DateTime? updatedDate = updatedProcedureData.containsKey('date')
-                ? updatedProcedureData['date'] == null
-                    ? null // work가 최초 생성됐을 경우엔 null임
-                    : DateTime.parse(updatedProcedureData['date'] as String)
-                : existingProcedure.date;
-
-            List<double>? updatedLocation;
-            if (updatedProcedureData.containsKey('location') &&
-                updatedProcedureData['location'] is List) {
-              List locationList = updatedProcedureData['location'];
-              if (locationList.length >= 2) {
-                updatedLocation = [
-                  locationList[0] is double
-                      ? locationList[0]
-                      : (locationList[0] as num).toDouble(),
-                  locationList[1] is double
-                      ? locationList[1]
-                      : (locationList[1] as num).toDouble()
-                ];
-              }
-            } else {
-              updatedLocation = existingProcedure.location;
-            }
-
-            // 업데이트된 procedure를 저장
-            MProcedureInCurrentWork updatedProcedure =
-                existingProcedure.copyWith(
-              date: updatedDate,
-              location: updatedLocation,
-            );
-
-            // 현재 작업의 procedure에 업데이트된 procedure를 할당
-            currentProcedures[getIndex] = updatedProcedure;
-
-            // 현재 작업을 업데이트
-            CurrentWork updatedCurrentWork =
-                currentWork.copyWith(procedures: currentProcedures);
-
-            // 작업리스트를 업데이트
-            MWorkList updatedWorkList = GServiceWorklist.lastValue!
-                .copyWith(currentWork: updatedCurrentWork);
-
-            GServiceWorklist.subject.add(updatedWorkList);
-            print('stream complete');
-          }
-
-          // 마지막 작업이 완료되면 getCurrentWork가 null이 되기 때문에
-          // 마지막 작업이 완료되면 ViewWorklist로 이동
-          if (getIndex == 4) {
+        // stream을 구독하고 있으면서
+        // currentWork를 갖고 있지만 WORK_DETAIL 화면이 아닌 user는
+        // WORK_DETAIL 화면으로 이동
+        if (getCurrentWork != null && getCurrentWork.uuid == data['uuid']) {
+          if (!RouterManager().isWorkDetail()) {
             Navigator.of(GNavigationKey.currentState!.context)
-                .pushReplacementNamed(PATH.ROUTE_WORKLIST);
+                .pushReplacementNamed(PATH.ROUTE_WORK_DETAIL);
           }
         }
+
+        // String uuid = data['uuid'];
+        // debugPrint('check uuid... ${getCurrentWork?.uuid == uuid}');
+        // if (getCurrentWork != null && getCurrentWork.uuid == uuid) {
+        //   debugPrint('valid uuid');
+        //   Map<String, dynamic> unflattenedData = unflatten(data['update']);
+
+        //   debugPrint('unflattenedData $unflattenedData');
+        //   if (unflattenedData.containsKey('procedures') &&
+        //       unflattenedData['procedures'] is List) {
+        //     List updatedProcedures = List.from(unflattenedData['procedures']);
+
+        //     int getIndex = List.from(updatedProcedures).indexWhere((e) {
+        //       return e != null;
+        //     });
+        //     debugPrint('getIndex $getIndex');
+        //     debugPrint('work ${GServiceWorklist.lastValue!.currentWork}');
+        //     if (getIndex < 4) {
+        //       // 현재 작업 가져오기
+        //       CurrentWork currentWork = getCurrentWork;
+
+        //       // 현재 작업의 procedures 가져오기
+        //       List<MProcedureInCurrentWork> currentProcedures =
+        //           currentWork.procedures;
+
+        //       // 업데이트할 procedures 가져오기
+        //       // 가져온 updatedProcedures[getIndex]를 포메팅해줘야함
+        //       Map<String, dynamic> updatedProcedureData = {};
+        //       if (updatedProcedures[getIndex] != null) {
+        //         Map originalMap = updatedProcedures[getIndex] as Map;
+        //         originalMap.forEach((key, value) {
+        //           updatedProcedureData[key.toString()] = value;
+        //         });
+        //       }
+
+        //       debugPrint('updatedProcedureData $updatedProcedureData');
+
+        //       // 기존 procedure가져오기
+        //       MProcedureInCurrentWork existingProcedure =
+        //           currentProcedures[getIndex];
+
+        //       DateTime? updatedDate = updatedProcedureData.containsKey('date')
+        //           ? updatedProcedureData['date'] == null
+        //               ? null // work가 최초 생성됐을 경우엔 null임
+        //               : DateTime.parse(updatedProcedureData['date'] as String)
+        //           : existingProcedure.date;
+
+        //       List<double>? updatedLocation;
+        //       if (updatedProcedureData.containsKey('location') &&
+        //           updatedProcedureData['location'] is List) {
+        //         List locationList = updatedProcedureData['location'];
+        //         if (locationList.length >= 2) {
+        //           updatedLocation = [
+        //             locationList[0] is double
+        //                 ? locationList[0]
+        //                 : (locationList[0] as num).toDouble(),
+        //             locationList[1] is double
+        //                 ? locationList[1]
+        //                 : (locationList[1] as num).toDouble()
+        //           ];
+        //         }
+        //       } else {
+        //         updatedLocation = existingProcedure.location;
+        //       }
+
+        //       // 업데이트된 procedure를 저장
+        //       MProcedureInCurrentWork updatedProcedure =
+        //           existingProcedure.copyWith(
+        //         date: updatedDate,
+        //         location: updatedLocation,
+        //       );
+
+        //       // 현재 작업의 procedure에 업데이트된 procedure를 할당
+        //       currentProcedures[getIndex] = updatedProcedure;
+
+        //       // 현재 작업을 업데이트
+        //       CurrentWork updatedCurrentWork =
+        //           currentWork.copyWith(procedures: currentProcedures);
+
+        //       // 작업리스트를 업데이트
+        //       MWorkList updatedWorkList = GServiceWorklist.lastValue!
+        //           .copyWith(currentWork: updatedCurrentWork);
+
+        //       GServiceWorklist.subject.add(updatedWorkList);
+        //       debugPrint('stream complete');
+        //     }
+
+        //     // 마지막 작업이 완료되면 getCurrentWork가 null이 되기 때문에
+        //     // 마지막 작업이 완료되면 ViewWorklist로 이동
+        //     if (getIndex == 4) {
+        //       Navigator.of(GNavigationKey.currentState!.context)
+        //           .pushReplacementNamed(PATH.ROUTE_WORKLIST);
+        //     }
+        //   }
+        // }
+        _processWorkUpdate(data, getCurrentWork!);
+      } finally {
+        stopwatch.stop();
+        debugPrint('stopwatch end : ${DateTime.now().millisecondsSinceEpoch}');
+        debugPrint('stopwatch : ${stopwatch.elapsedMilliseconds}');
       }
     }, onError: (error) async {
-      print('SSE stream error : $error');
+      debugPrint('SSE stream error : $error');
       _isConnected = false;
       if (reconnect) {
         await disconnect(ignoreErrors: true);
       }
     }, onDone: () async {
-      print('SSE stream closed');
+      debugPrint('SSE stream closed');
       _isConnected = false;
       if (reconnect) {
         await disconnect(ignoreErrors: true);
@@ -295,9 +317,144 @@ class ServiceSSE extends CommonService {
     });
 
     if (reconnect) {
-      print('processing healthChecker');
+      debugPrint('processing healthChecker');
       healthCheckWithTimer();
     }
+  }
+
+  Future<int> now() async {
+    return DateTime.now().millisecondsSinceEpoch;
+  }
+
+  // 이벤트 데이터 처리 로직을 별도 메서드로 분리
+  void _processWorkUpdate(Map<String, dynamic> data, CurrentWork currentWork) {
+    // unflatten 작업은 비용이 큰 작업이므로 필요한 경우에만 수행
+    // if (!data.containsKey('update')) return;
+
+    Map<String, dynamic> unflattenedData = unflatten(data['update']);
+    debugPrint('unflattenedData $unflattenedData');
+
+    // procedures 데이터가 없으면 처리 중단
+    if (!unflattenedData.containsKey('procedures') ||
+        !(unflattenedData['procedures'] is List)) {
+      return;
+    }
+
+    List updatedProcedures = List.from(unflattenedData['procedures']);
+
+    // 빠른 인덱스 찾기
+    int getIndex = -1;
+    for (int i = 0; i < updatedProcedures.length; i++) {
+      if (updatedProcedures[i] != null) {
+        getIndex = i;
+        break;
+      }
+    }
+
+    if (getIndex < 0) return; // 유효한 인덱스가 없으면 중단
+
+    // 마지막 작업 완료 처리 (이동 로직)
+    if (getIndex == 4) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.of(GNavigationKey.currentState!.context)
+            .pushReplacementNamed(PATH.ROUTE_WORKLIST);
+      });
+      return;
+    }
+
+    // 작업 업데이트 처리 (getIndex < 4)
+    if (getIndex < 4) {
+      _updateProcedureData(currentWork, updatedProcedures, getIndex);
+    }
+  }
+
+// 프로시저 데이터 업데이트 로직 분리
+  void _updateProcedureData(
+      CurrentWork currentWork, List updatedProcedures, int index) {
+    // 현재 작업의 procedures 가져오기
+    List<MProcedureInCurrentWork> currentProcedures = currentWork.procedures;
+
+    // 인덱스 유효성 검사
+    if (index >= currentProcedures.length) return;
+
+    // 업데이트할 데이터 변환 - 캐싱 최적화
+    Map<String, dynamic> updatedProcedureData = {};
+    if (updatedProcedures[index] != null) {
+      Map originalMap = updatedProcedures[index] as Map;
+      originalMap.forEach((key, value) {
+        updatedProcedureData[key.toString()] = value;
+      });
+    } else {
+      return; // 업데이트할 데이터가 없으면 중단
+    }
+
+    // 기존 procedure 가져오기
+    MProcedureInCurrentWork existingProcedure = currentProcedures[index];
+
+    // 날짜 처리 최적화
+    DateTime? updatedDate = existingProcedure.date;
+    if (updatedProcedureData.containsKey('date')) {
+      final dateValue = updatedProcedureData['date'];
+      updatedDate =
+          dateValue == null ? null : DateTime.parse(dateValue as String);
+    }
+
+    // 위치 처리 최적화
+    List<double>? updatedLocation = existingProcedure.location;
+    if (updatedProcedureData.containsKey('location') &&
+        updatedProcedureData['location'] is List) {
+      List locationList = updatedProcedureData['location'];
+      if (locationList.length >= 2) {
+        updatedLocation = [
+          locationList[0] is double
+              ? locationList[0]
+              : (locationList[0] as num).toDouble(),
+          locationList[1] is double
+              ? locationList[1]
+              : (locationList[1] as num).toDouble()
+        ];
+      }
+    }
+
+    // 변경사항이 없으면 업데이트 스킵
+    if (updatedDate == existingProcedure.date &&
+        _areLocationsEqual(updatedLocation, existingProcedure.location)) {
+      return;
+    }
+
+    // 업데이트된 procedure 생성
+    MProcedureInCurrentWork updatedProcedure = existingProcedure.copyWith(
+      date: updatedDate,
+      location: updatedLocation,
+    );
+
+    // 현재 작업의 procedure에 업데이트된 procedure를 할당
+    currentProcedures[index] = updatedProcedure;
+
+    // 현재 작업을 업데이트
+    CurrentWork updatedCurrentWork =
+        currentWork.copyWith(procedures: currentProcedures);
+
+    // 작업리스트를 업데이트
+    MWorkList updatedWorkList =
+        GServiceWorklist.lastValue!.copyWith(currentWork: updatedCurrentWork);
+
+    // 상태 업데이트
+    GServiceWorklist.subject.add(updatedWorkList);
+    debugPrint('SSE stream completed');
+  }
+
+// 위치 비교 헬퍼 함수
+  bool _areLocationsEqual(List<double>? loc1, List<double>? loc2) {
+    if (loc1 == null && loc2 == null) return true;
+    if (loc1 == null || loc2 == null) return false;
+    if (loc1.length != loc2.length) return false;
+
+    for (int i = 0; i < loc1.length; i++) {
+      if (loc1[i] != loc2[i]) return false;
+    }
+
+    return true;
   }
 
   // TODO : 재연결 관련 연결상태 체크
@@ -307,7 +464,7 @@ class ServiceSSE extends CommonService {
 
     // 주기적으로 연결 상태 확인
     _healthCheckTimer = Timer.periodic(_healthCheckInterval, (timer) async {
-      print('Performing SSE health check...');
+      debugPrint('Performing SSE health check...');
 
       // 마지막 이벤트 수신 시간 확인
       final now = DateTime.now();
@@ -327,7 +484,8 @@ class ServiceSSE extends CommonService {
 
       // 재연결이 필요한 경우
       if (needsReconnect) {
-        print('SSE connection needs reconnection. Attempting to reconnect...');
+        debugPrint(
+            'SSE connection needs reconnection. Attempting to reconnect...');
 
         // 재연결 시도 횟수 제한 확인
         if (_reconnectAttempts < _maxReconnectAttempts) {
@@ -337,7 +495,7 @@ class ServiceSSE extends CommonService {
           final delay = Duration(
               milliseconds: _reconnectDelay.inMilliseconds *
                   (1 << (_reconnectAttempts - 1)));
-          print(
+          debugPrint(
               'Reconnect attempt $_reconnectAttempts of $_maxReconnectAttempts after ${delay.inSeconds}s');
 
           // 지연 후 재연결 시도
@@ -345,32 +503,32 @@ class ServiceSSE extends CommonService {
           try {
             await connect();
             _reconnectAttempts = 0; // 성공 시 재시도 횟수 초기화
-            print('SSE reconnection successful');
+            debugPrint('SSE reconnection successful');
           } catch (e) {
-            print('SSE reconnection failed: $e');
+            debugPrint('SSE reconnection failed: $e');
             // 다음 healthCheck에서 다시 시도
           }
         } else {
-          print(
+          debugPrint(
               'Max reconnection attempts reached. Stopping reconnection attempts.');
           timer.cancel(); // 최대 시도 횟수 초과 시 타이머 중지
         }
       } else {
-        print('SSE connection is healthy');
+        debugPrint('SSE connection is healthy');
         _reconnectAttempts = 0; // 정상 상태면 재시도 횟수 초기화
       }
     });
   }
 
   Future<void> disconnect({bool ignoreErrors = false}) async {
-    print('Performing full reset of SSE service...');
+    debugPrint('Performing full reset of SSE service...');
 
     try {
       // 1. 타이머 취소
       if (_healthCheckTimer != null) {
         _healthCheckTimer!.cancel();
         _healthCheckTimer = null;
-        print('Health check timer canceled');
+        debugPrint('Health check timer canceled');
       }
 
       // 2. 이벤트 구독 강제 취소
@@ -378,10 +536,10 @@ class ServiceSSE extends CommonService {
         try {
           _eventSub!.pause();
           await _eventSub!.cancel();
-          print('Event subscription canceled');
+          debugPrint('Event subscription canceled');
           await Future.delayed(const Duration(milliseconds: 300));
         } catch (e) {
-          print('Error canceling event subscription: $e');
+          debugPrint('Error canceling event subscription: $e');
         }
         _eventSub = null;
       }
@@ -391,12 +549,12 @@ class ServiceSSE extends CommonService {
         try {
           _dio!.close(force: true);
           _dio!.interceptors.clear();
-          print('Dio instance closed (force: true)');
+          debugPrint('Dio instance closed (force: true)');
           _dio = null;
           // 5. 잠시 대기
           await Future.delayed(const Duration(milliseconds: 300));
         } catch (e) {
-          print('Error closing Dio instance: $e');
+          debugPrint('Error closing Dio instance: $e');
         }
       }
 
@@ -406,9 +564,9 @@ class ServiceSSE extends CommonService {
       _reconnectAttempts = 0;
       // 추가 대기 시간
       await Future.delayed(const Duration(seconds: 2));
-      print('Full reset completed');
+      debugPrint('Full reset completed');
     } catch (e) {
-      print('Error during full reset: $e');
+      debugPrint('Error during full reset: $e');
       if (!ignoreErrors) rethrow;
     }
   }

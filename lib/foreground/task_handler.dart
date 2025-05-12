@@ -62,7 +62,7 @@ class ForegroundTaskHandler extends TaskHandler {
       if (timestampMillis != null) {
         final DateTime timestamp =
             DateTime.fromMillisecondsSinceEpoch(timestampMillis, isUtc: true);
-        print('timestamp: ${timestamp.toString()}');
+        debugPrint('timestamp: ${timestamp.toString()}');
       }
     }
   }
@@ -72,7 +72,7 @@ class ForegroundTaskHandler extends TaskHandler {
   static Future<void> initTask() async {
     // int interval = await IntervalManager.load();
     // int intervalToMiliseconds = interval * 1000;
-    // print('initTask $interval : ${intervalToMiliseconds}');
+    // debugPrint('initTask $interval : ${intervalToMiliseconds}');
 
     final Response response = await HttpConnector.get(
       dio: _dio,
@@ -88,7 +88,7 @@ class ForegroundTaskHandler extends TaskHandler {
 
     int intervalToMiliseconds = intervalValue * 1000;
 
-    print('initTask interval $intervalValue : ${intervalToMiliseconds}');
+    debugPrint('initTask interval $intervalValue : ${intervalToMiliseconds}');
 
     FlutterForegroundTask.init(
       androidNotificationOptions: AndroidNotificationOptions(
@@ -123,12 +123,12 @@ class ForegroundTaskHandler extends TaskHandler {
     //  network 사용 가능 확인
     bool internetAvailable = await isInternetAvailable();
 
-    print('internetAvailable $internetAvailable');
+    debugPrint('internetAvailable $internetAvailable');
 
     FlutterForegroundTask.sendDataToMain('check');
     Position position = await Geolocator.getCurrentPosition();
     final List<String> cookies = await CookieManager.load();
-    print('repeat $timestamp : $cookies');
+    debugPrint('repeat $timestamp : $cookies');
 
     Map<String, dynamic> data = {
       "lng": position.longitude,
@@ -138,7 +138,7 @@ class ForegroundTaskHandler extends TaskHandler {
 
     // network 사용 불가능 시, localStorage에 datas를 저장(array로 저장)
     if (internetAvailable == false) {
-      print('network unavailable, save to localStorage $data');
+      debugPrint('network unavailable, save to localStorage $data');
       await LocationManager.save(data);
       return;
     }
@@ -149,7 +149,7 @@ class ForegroundTaskHandler extends TaskHandler {
         // localStorage에 저장된 datas가 있으면, 서버에 모두 post
         List<Map<String, dynamic>> locationData = await LocationManager.load();
 
-        print('locationData $locationData');
+        debugPrint('locationData $locationData');
         for (Map<String, dynamic> item in locationData) {
           final Response response = await HttpConnector.post(
             dio: _dio,
@@ -159,10 +159,10 @@ class ForegroundTaskHandler extends TaskHandler {
           );
           // 응답 확인
           if (response.statusCode == 200) {
-            print('위치 전송 성공 : $response');
+            debugPrint('위치 전송 성공 : $response');
           } else {
             // TODO : 서버에 전송 실패 시, localstorage에 저장된 datas는 그대로 유지
-            print('위치 전송 실패: ${response}');
+            debugPrint('위치 전송 실패: ${response}');
             return;
           }
         }
@@ -181,16 +181,16 @@ class ForegroundTaskHandler extends TaskHandler {
 
     // 응답 확인
     if (response.statusCode == 200) {
-      print('위치 전송 성공 : $response');
+      debugPrint('위치 전송 성공 : $response');
     } else {
-      print('위치 전송 실패: ${response}');
+      debugPrint('위치 전송 실패: ${response}');
     }
   }
 
   @override
   Future<void> onDestroy(DateTime timestamp, bool isTimeout) async {
     FlutterForegroundTask.stopService();
-    print('on destory : $timestamp');
+    debugPrint('on destory : $timestamp');
   }
 
   @override
@@ -204,7 +204,7 @@ class ForegroundTaskHandler extends TaskHandler {
         await FlutterForegroundTask.isRunningService) {
       FlutterForegroundTask.sendDataToMain('stop');
       FlutterForegroundTask.stopService();
-      print('stopService : $id');
+      debugPrint('stopService : $id');
     }
   }
 

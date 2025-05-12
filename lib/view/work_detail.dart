@@ -51,36 +51,9 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
             }
           }
           return Column(children: [
-// 항공기 정보
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '편명: ${currentWork.aircraft.name}',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                // Text(
-                //   '기종: ${currentWork.aircraft.departureTime}',
-                //   style: const TextStyle(
-                //     fontSize: 14,
-                //     fontWeight: FontWeight.w500,
-                //   ),
-                // ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            // 출발 시간
-            Text(
-              '출발시간: ${currentWork.aircraft.departureTime}',
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 16),
+            buildWorkInfo(currentWork).expand(),
+            buildCurrentWork(procedures[_currentProcedureIndex]).expand(),
+            buildWorkHistory(procedures, _currentProcedureIndex).expand(),
             // 작업자 정보
             const Text(
               '작업자',
@@ -100,11 +73,143 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
             ),
             const SizedBox(height: 16),
             // 작업 기록
+
+            // 현재 작업 완료 버튼
+            buildElevatedButton(
+              onPressed: () async {
+                await showConfirmationDialog(
+                  context,
+                  procedures[_currentProcedureIndex].name,
+                );
+              },
+              child: const Text(
+                '현재 작업 완료',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ]);
+        },
+      ),
+    );
+  }
+
+  Widget buildWorkInfo(CurrentWork currentWork) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Container(
+        decoration: commonDecoration,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              '작업 정보',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: SIZE.WORK_DETAIL_HEADER,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  children: [
+                    const Text(
+                      '편명',
+                      style: TextStyle(
+                        fontSize: SIZE.WORK_DETAIL_CHILD,
+                        color: COLOR.GREY,
+                      ),
+                    ),
+                    Text(
+                      currentWork.aircraft.name,
+                      style: const TextStyle(
+                        fontSize: SIZE.WORK_DETAIL_CHILD,
+                        color: COLOR.GREY,
+                      ),
+                    ).expand(),
+                  ],
+                ).expand(),
+                Column(
+                  children: [
+                    const Text(
+                      '출발시간',
+                      style: TextStyle(
+                        fontSize: SIZE.WORK_DETAIL_CHILD,
+                        color: COLOR.GREY,
+                      ),
+                    ),
+                    Text(
+                      currentWork.aircraft.departureTime,
+                      style: const TextStyle(
+                        fontSize: SIZE.WORK_DETAIL_CHILD,
+                        color: COLOR.GREY,
+                      ),
+                    ).expand(),
+                  ],
+                ).expand(),
+              ],
+            ).expand(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildCurrentWork(MProcedureInCurrentWork currentProcedure) {
+    // 현재 작업명
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Container(
+        width: double.infinity,
+        decoration: commonDecoration,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              '현재 작업',
+              style: TextStyle(
+                fontSize: SIZE.WORK_DETAIL_HEADER,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            Text(
+              currentProcedure.name,
+              style: const TextStyle(
+                fontSize: SIZE.WORK_DETAIL_CHILD,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildWorkHistory(
+    List<MProcedureInCurrentWork> procedures,
+    int currentProcedureIndex,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Container(
+        decoration: commonDecoration,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
             const Text(
               '작업 기록',
               style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+                fontSize: SIZE.WORK_DETAIL_HEADER,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
               ),
               textAlign: TextAlign.center,
             ),
@@ -113,8 +218,8 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: List.generate(procedures.length, (index) {
-                final isCompleted = index < _currentProcedureIndex;
-                final isCurrent = index == _currentProcedureIndex;
+                final bool isCompleted = index < currentProcedureIndex;
+                final bool isCurrent = index == currentProcedureIndex;
 
                 return Column(
                   children: [
@@ -124,10 +229,8 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: isCompleted
-                            ? Colors.green
-                            : (isCurrent
-                                ? const Color(0xFF4B5EFC)
-                                : Colors.grey.shade300),
+                            ? COLOR.SELECTED
+                            : (isCurrent ? COLOR.BASE : Colors.grey.shade300),
                       ),
                       child: Icon(
                         isCompleted ? Icons.check : null,
@@ -149,87 +252,14 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
                 );
               }),
             ),
-            const SizedBox(height: 24),
-            // 현재 작업
-            const Text(
-              '현재 작업',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-
-            // 현재 작업명
-            Text(
-              procedures[_currentProcedureIndex].name,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF4B5EFC),
-              ),
-              textAlign: TextAlign.center,
-            ),
-            // ElevatedButton(
-            //   onPressed: () async {
-            //     await Navigator.of(GNavigationKey.currentState!.context)
-            //         .pushReplacementNamed(PATH.ROUTE_WORKLIST);
-            //   },
-            //   child: Text('a'),
-            // ),
-
-            // ElevatedButton(
-            //     onPressed: () async {
-            //       // await GServiceSSE.innerTest();
-            //       await GServiceSSE.connect();
-            //     },
-            //     child: Text('sse connect')),
-            // ElevatedButton(
-            //     onPressed: () async {
-            //       await GServiceSSE.disconnect();
-            //     },
-            //     child: Text('sse disconnect')),
-
-            // ElevatedButton(
-            //   onPressed: () async {
-            //     await GServiceSSE.healthCheckWithTimer();
-            //   },
-            //   child: Text('processing healthChecker'),
-            // ),
-
-            const Spacer(),
-            // 현재 작업 완료 버튼
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: () async {
-                  await showConfirmationDialog(
-                    context,
-                    procedures[_currentProcedureIndex].name,
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF4B5EFC),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-                child: const Text(
-                  '현재 작업 완료',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-          ]);
-        },
+          ],
+        ),
       ),
     );
+  }
+
+  Widget buildWorkers() {
+    return Container();
   }
 
   @override
@@ -305,8 +335,10 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
       // Position position = await Geolocator.getCurrentPosition();
 
       // 작업 완료 API 호출
+
+      debugPrint('완료 처리 ${DateTime.now().millisecondsSinceEpoch}');
       await GServiceWorklist.completeProcedure();
-      print(
+      debugPrint(
           'GServiceWorklist.lastValue?.currentWork == null ${GServiceWorklist.lastValue?.currentWork == null}');
       if (GServiceWorklist.lastValue?.currentWork == null) {
         await Navigator.of(context).pushReplacementNamed(PATH.ROUTE_WORKLIST);

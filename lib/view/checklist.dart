@@ -123,12 +123,13 @@ class ViewChecklistState extends State<ViewChecklist> {
   void initState() {
     super.initState();
     initForegroundTask();
+    GServiceLocation.checkAndRequestLocationPermission();
   }
 
   Future<void> initForegroundTask() async {
-    print('foreground step 4');
+    debugPrint('foreground step 4');
     await ForegroundTaskHandler.initTask();
-    print('foreground step 5');
+    debugPrint('foreground step 5');
     await ForegroundTaskHandler.startService();
   }
 

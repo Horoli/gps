@@ -26,7 +26,23 @@ class AppRootState extends State<AppRoot> {
       navigatorObservers: [AppRouteObserver()],
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.deepPurple,
+          seedColor: COLOR.BASE,
+          primary: Colors.white,
+          // onPrimary: COLOR.ON_PRIMARY,
+        ),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: COLOR.BASE,
+          foregroundColor: Colors.white,
+          elevation: 0,
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: COLOR.BASE,
+            foregroundColor: COLOR.WHITE,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
         ),
         useMaterial3: true,
       ),

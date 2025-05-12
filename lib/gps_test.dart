@@ -17,6 +17,8 @@ import 'package:gps_test/preset/title.dart' as TITLE;
 import 'package:gps_test/preset/path.dart' as PATH;
 import 'package:gps_test/preset/state.dart' as STATE;
 import 'package:gps_test/preset/id.dart' as ID;
+import 'package:gps_test/preset/color.dart' as COLOR;
+import 'package:gps_test/preset/size.dart' as SIZE;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -40,6 +42,7 @@ part 'service/member.dart';
 part 'service/sse_event.dart';
 part 'service/route_manager.dart';
 part 'service/gps_interval.dart';
+part 'service/location.dart';
 
 part 'extensions.dart';
 part 'app_root.dart';

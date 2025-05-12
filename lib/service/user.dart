@@ -64,7 +64,7 @@ class ServiceUser extends CommonService {
     );
 
     if (!completer.isCompleted) {
-      print('gps complete $response');
+      debugPrint('gps complete $response');
       completer.complete(response);
     }
 
