@@ -171,32 +171,32 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
               ),
               textAlign: TextAlign.center,
             ),
-            ElevatedButton(
-              onPressed: () async {
-                await Navigator.of(GNavigationKey.currentState!.context)
-                    .pushReplacementNamed(PATH.ROUTE_WORKLIST);
-              },
-              child: Text('a'),
-            ),
+            // ElevatedButton(
+            //   onPressed: () async {
+            //     await Navigator.of(GNavigationKey.currentState!.context)
+            //         .pushReplacementNamed(PATH.ROUTE_WORKLIST);
+            //   },
+            //   child: Text('a'),
+            // ),
 
-            ElevatedButton(
-                onPressed: () async {
-                  // await GServiceSSE.innerTest();
-                  await GServiceSSE.connect();
-                },
-                child: Text('sse connect')),
-            ElevatedButton(
-                onPressed: () async {
-                  await GServiceSSE.disconnect();
-                },
-                child: Text('sse disconnect')),
+            // ElevatedButton(
+            //     onPressed: () async {
+            //       // await GServiceSSE.innerTest();
+            //       await GServiceSSE.connect();
+            //     },
+            //     child: Text('sse connect')),
+            // ElevatedButton(
+            //     onPressed: () async {
+            //       await GServiceSSE.disconnect();
+            //     },
+            //     child: Text('sse disconnect')),
 
-            ElevatedButton(
-              onPressed: () async {
-                await GServiceSSE.healthCheckWithTimer();
-              },
-              child: Text('processing healthChecker'),
-            ),
+            // ElevatedButton(
+            //   onPressed: () async {
+            //     await GServiceSSE.healthCheckWithTimer();
+            //   },
+            //   child: Text('processing healthChecker'),
+            // ),
 
             const Spacer(),
             // 현재 작업 완료 버튼
