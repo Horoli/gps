@@ -42,11 +42,13 @@ class ForegroundTaskHandler extends TaskHandler {
     } else {
       return FlutterForegroundTask.startService(
         serviceId: 256,
-        notificationTitle: 'Foreground Service is running',
-        notificationText: 'Tap to return to the app',
+        notificationTitle: TITLE.APP_TITLE,
+        notificationText: MSG.FOREGROUND_NOTIFICATION_TEXT,
         notificationIcon: null,
         notificationButtons: [
-          const NotificationButton(id: 'btn_hello', text: 'end location share'),
+          const NotificationButton(
+              id: ID.NOTIFICATION_ID_FIRST,
+              text: MSG.FOREGROUND_NOTIFICATION_TEXT_STOP),
         ],
         notificationInitialRoute: '/',
         callback: startCallback,
@@ -198,7 +200,8 @@ class ForegroundTaskHandler extends TaskHandler {
 
   @override
   Future<void> onNotificationButtonPressed(String id) async {
-    if (id == 'btn_hello' && await FlutterForegroundTask.isRunningService) {
+    if (id == ID.NOTIFICATION_ID_FIRST &&
+        await FlutterForegroundTask.isRunningService) {
       FlutterForegroundTask.sendDataToMain('stop');
       FlutterForegroundTask.stopService();
       print('stopService : $id');
