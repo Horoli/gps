@@ -47,6 +47,7 @@ part 'app_root.dart';
 part 'foreground/task_handler.dart';
 part 'foreground/cookie_manager.dart';
 part 'foreground/location_manager.dart';
+part 'foreground/user_manager.dart';
 
 part 'view/login.dart';
 part 'view/preferences.dart';

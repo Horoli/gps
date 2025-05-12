@@ -8,15 +8,14 @@ class ViewLogin extends StatefulWidget {
 }
 
 class ViewLoginState extends State<ViewLogin> {
-  final TextEditingController _phoneController =
-      TextEditingController(text: tmpNumber);
-  final TextEditingController _employeeIdController =
-      TextEditingController(text: tmpID);
-
   // final TextEditingController _phoneController =
-  //     TextEditingController(text: '01041850688');
+  //     TextEditingController(text: tmpNumber);
   // final TextEditingController _employeeIdController =
-  //     TextEditingController(text: 'devel');
+  //     TextEditingController(text: tmpID);
+
+  late final TextEditingController _phoneController = TextEditingController();
+  late final TextEditingController _employeeIdController =
+      TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -149,27 +148,48 @@ class ViewLoginState extends State<ViewLogin> {
   void initState() {
     super.initState();
     checkAndRequestLocationPermission();
+    checkLocalStorage();
   }
 
-  Future<void> checkCookie() async {
-    await CookieManager.load();
+  // Future<void> checkCookie() async {
+  //   await CookieManager.load();
+  // }
+
+  Future<void> checkLocalStorage() async {
+    await UserLoginManager.load().then((Map<String, dynamic> loginData) {
+      if (loginData.isNotEmpty) {
+        String employeeId = loginData['employeeId'];
+        String phoneNumber = loginData['phoneNumber'];
+        _phoneController.text = phoneNumber;
+        _employeeIdController.text = employeeId;
+      }
+    }).catchError((e) {
+      print('error: $e');
+    });
   }
 
   Future<void> _handleLogin() async {
     // 로그인 로직 구현
-    String phone = _phoneController.text;
     String employeeId = _employeeIdController.text;
+    String phoneNumber = _phoneController.text;
 
-    print('Phone: $phone, Employee ID: $employeeId');
+    print('Phone: $phoneNumber, Employee ID: $employeeId');
     // TODO: 실제 로그인 처리 로직 추가
 
-    await GServiceUser.login(phoneNumber: phone, id: employeeId).then((user) {
+    await GServiceUser.login(
+      phoneNumber: phoneNumber,
+      id: employeeId,
+    ).then((user) {
       // TODO : 로그인 성공 시점에 성공한 데이터를 localStorage에 저장
       print('login step 1');
 
       if (GServiceSSE.connectivitySubscription == null) {
         GServiceSSE.setNetworkListener();
       }
+      UserLoginManager.save({
+        'employeeId': employeeId,
+        'phoneNumber': phoneNumber,
+      });
 
       print('login step 2');
       Navigator.pushReplacementNamed(context, PATH.ROUTE_CHECKLIST);
