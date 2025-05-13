@@ -50,30 +50,32 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
               break;
             }
           }
-          return Column(children: [
-            buildWorkInfo(currentWork).expand(),
-            buildCurrentWork(procedures[_currentProcedureIndex]).expand(),
-            buildWorkHistory(procedures, _currentProcedureIndex).expand(),
-            buildWorkers(currentWork).expand(),
+          return Column(
+            children: [
+              buildWorkInfo(currentWork).expand(),
+              buildCurrentWork(procedures[_currentProcedureIndex]).expand(),
+              buildWorkHistory(procedures, _currentProcedureIndex).expand(),
+              buildWorkers(currentWork).expand(),
 
-            // 현재 작업 완료 버튼
-            buildElevatedButton(
-              onPressed: () async {
-                await showConfirmationDialog(
-                  context,
-                  procedures[_currentProcedureIndex].name,
-                );
-              },
-              child: const Text(
-                '현재 작업 완료',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+              // 현재 작업 완료 버튼
+              buildElevatedButton(
+                onPressed: () async {
+                  await showConfirmationDialog(
+                    context,
+                    procedures[_currentProcedureIndex].name,
+                  );
+                },
+                child: const Text(
+                  '현재 작업 완료',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
               ),
-            ),
-          ]);
+            ],
+          );
         },
       ),
     );
@@ -241,27 +243,42 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
   }
 
   Widget buildWorkers(CurrentWork currentWork) {
-    return Column(children: [
-      // 작업자 정보
-      const Text(
-        '작업자',
-        style: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Container(
+        width: double.infinity,
+        decoration: commonDecoration,
+        child: Column(
+          children: [
+            // 작업자 정보
+            const Text(
+              '작업자',
+              style: TextStyle(
+                fontSize: SIZE.WORK_DETAIL_HEADER,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: currentWork.users.length,
+              itemBuilder: (context, index) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4.0),
+                  child: ListTile(
+                    title: Text(currentWork.users[index].username),
+                    subtitle: Text(currentWork.users[index].phoneNumber),
+                    // style: const TextStyle(fontSize: 14),
+                    // textAlign: TextAlign.center,
+                  ),
+                );
+              },
+            ),
+          ],
         ),
-        textAlign: TextAlign.center,
       ),
-      const SizedBox(height: 8),
-
-      // 작업자 목록
-      Text(
-        currentWork.users.map((u) => u.username).join(', '),
-        style: const TextStyle(fontSize: 14),
-        textAlign: TextAlign.center,
-      ),
-      const SizedBox(height: 16),
-    ]);
-    // 작업 기록
+    );
   }
 
   @override
