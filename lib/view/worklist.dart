@@ -56,6 +56,7 @@ class ViewWorklistState extends State<ViewWorklist> {
             );
           }
           return RefreshIndicator(
+            color: COLOR.WHITE,
             backgroundColor: COLOR.BASE,
             onRefresh: getData,
             child: ListView.builder(

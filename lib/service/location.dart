@@ -16,17 +16,55 @@ class ServiceLocation extends CommonService {
   Stream<Position?> get stream => _subject.stream;
 
   Future<void> setLocationListener() async {
+    final Response response = await HttpConnector.get(
+      dio: dio,
+      url: '${URL.BASE_URL}/${URL.GPS_INTERVAL}',
+    );
+
+    List<MConfig> result = List.from(response.data ?? [])
+        .map((item) => MConfig.fromMap(item))
+        .toList();
+
+    MConfig androidAccuracy =
+        result.firstWhere((item) => item.name == 'accuracy.android');
+
+    MConfig iosAccuracy =
+        result.firstWhere((item) => item.name == 'accuracy.ios');
+
+    MConfig distanceFilter =
+        result.firstWhere((item) => item.name == 'distance');
+    debugPrint('initTask androidAccuracy $androidAccuracy');
+
+    Map<String, dynamic> accuracyMap = {
+      // android
+      'high': LocationAccuracy.high,
+      'medium': LocationAccuracy.medium,
+      'low': LocationAccuracy.low,
+      'lowest': LocationAccuracy.lowest,
+
+      // ios
+      'best': LocationAccuracy.best,
+      'navigation': LocationAccuracy.bestForNavigation,
+      'reduced': LocationAccuracy.reduced,
+    };
+
+    LocationAccuracy accuracy =
+        accuracyMap[androidAccuracy.value] ?? LocationAccuracy.high; // 기본값 설정
+
+    debugPrint('initTask accuracy $accuracy');
+    debugPrint('initTask distanceFilter $distanceFilter');
+
     if (isConnected) {
-      await disconnected();
+      await disconnect();
     }
     if (_subject.value == null) {
       Position currentPosition = await Geolocator.getCurrentPosition();
       _subject.add(currentPosition);
     }
-    subscription = Geolocator.getPositionStream(
-        locationSettings: const LocationSettings(
-      accuracy: LocationAccuracy.high,
-      distanceFilter: 10,
+    subscription ??= Geolocator.getPositionStream(
+        locationSettings: LocationSettings(
+      accuracy: accuracy,
+      distanceFilter: distanceFilter.value,
     )).listen((Position? position) {
       debugPrint('positionStream $position');
       _subject.add(position);
@@ -34,7 +72,54 @@ class ServiceLocation extends CommonService {
     });
   }
 
-  Future<void> disconnected() async {
+  Future<void> foregroundPost(Position position) async {
+    bool internetAvailable = await isInternetAvailable();
+
+    if (!internetAvailable) {
+      debugPrint('인터넷 연결이 없습니다.');
+    }
+
+    print(position);
+
+    final List<String> cookies = await CookieManager.load();
+    debugPrint('cookies $cookies');
+    dio.options.extra['withCredentials'] = true;
+
+    final Response response = await HttpConnector.post(
+      dio: dio,
+      url: '${URL.BASE_URL}/${URL.USER_LOCATION}',
+      data: {
+        "lng": position.longitude,
+        "lat": position.latitude,
+        "timestamp": DateTime.now().toIso8601String(),
+      },
+      cookies: cookies,
+    );
+
+    if (response.statusCode == 200) {
+      debugPrint('위치 전송 성공 : $response');
+    } else {
+      // TODO : 서버에 전송 실패 시, localstorage에 저장된 datas는 그대로 유지
+      debugPrint('위치 전송 실패: ${response}');
+      return;
+    }
+  }
+
+  Future<bool> isInternetAvailable() async {
+    final List<ConnectivityResult> connectivityResult =
+        await Connectivity().checkConnectivity();
+    if (connectivityResult.contains(ConnectivityResult.none)) {
+      return false;
+    }
+    try {
+      final result = await InternetAddress.lookup('google.com');
+      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+    } on SocketException catch (_) {
+      return false;
+    }
+  }
+
+  Future<void> disconnect() async {
     if (subscription != null) {
       try {
         subscription!.pause();

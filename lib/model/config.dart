@@ -4,11 +4,13 @@ class MConfig extends CommonModel<MConfig> {
   final String name;
   final String description;
   final dynamic value;
+  final dynamic? options;
 
   MConfig({
     required this.name,
     required this.description,
     required this.value,
+    this.options,
   });
 
   factory MConfig.fromMap(Map<String, dynamic> item) {
@@ -16,6 +18,7 @@ class MConfig extends CommonModel<MConfig> {
       name: item['name'] as String,
       description: item['description'] as String,
       value: item['value'] as dynamic,
+      options: item['options'] as dynamic,
     );
   }
 
@@ -26,6 +29,7 @@ class MConfig extends CommonModel<MConfig> {
       'name': name,
       'description': description,
       'value': value,
+      'options': options,
     };
   }
 
@@ -35,17 +39,19 @@ class MConfig extends CommonModel<MConfig> {
     String? uuid,
     String? name,
     String? description,
+    String? options,
     bool? value,
   }) {
     return MConfig(
       name: name ?? this.name,
       description: description ?? this.description,
       value: value ?? this.value,
+      options: options ?? this.options,
     );
   }
 
   @override
   String toString() {
-    return 'MChecklistData(name: $name, description: $description, value: $value)';
+    return 'MConfig(name: $name, description: $description, value: $value, options: $options)';
   }
 }

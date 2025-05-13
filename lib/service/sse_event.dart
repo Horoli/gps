@@ -144,7 +144,6 @@ class ServiceSSE extends CommonService {
       } else {
         debugPrint('network is connected');
         _hasNetworkConnection = true;
-        await Future.delayed(const Duration(seconds: 1));
         await connect();
       }
     });
@@ -556,6 +555,17 @@ class ServiceSSE extends CommonService {
         } catch (e) {
           debugPrint('Error closing Dio instance: $e');
         }
+      }
+
+      // 4. 연결 상태 구독 강제 취소
+      if (connectivitySubscription != null) {
+        try {
+          await connectivitySubscription!.cancel();
+          debugPrint('Connectivity subscription canceled');
+        } catch (e) {
+          debugPrint('Error canceling connectivity subscription: $e');
+        }
+        connectivitySubscription = null;
       }
 
       // 4. 상태 초기화

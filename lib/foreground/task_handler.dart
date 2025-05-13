@@ -6,6 +6,8 @@ void startCallback() {
 }
 
 class ForegroundTaskHandler extends TaskHandler {
+  StreamSubscription<Position>? subscription;
+
   static Future<void> requestPermissions() async {
     final NotificationPermission notificationPermission =
         await FlutterForegroundTask.checkNotificationPermission();
@@ -70,126 +72,230 @@ class ForegroundTaskHandler extends TaskHandler {
   static final Dio _dio = Dio();
 
   static Future<void> initTask() async {
-    // int interval = await IntervalManager.load();
-    // int intervalToMiliseconds = interval * 1000;
-    // debugPrint('initTask $interval : ${intervalToMiliseconds}');
+    // MConfig intervalResult = result[0];
+    // int intervalValue = int.parse(intervalResult.value.toString());
 
+    // int intervalToMiliseconds = intervalValue * 1000;
+
+    // debugPrint('initTask interval $intervalValue : ${intervalToMiliseconds}');
+
+    FlutterForegroundTask.init(
+        androidNotificationOptions: AndroidNotificationOptions(
+          showWhen: false, // timeStamp
+          channelId: 'Foreground Notification',
+          channelName: 'Foreground Notification',
+          channelDescription:
+              'This notification appears when the foreground service is running.',
+          // OS의 noti bar에 지워지지 않는 알림이 생기는데 안보이게 하기 위해서 NONE설정
+          channelImportance: NotificationChannelImportance.NONE,
+          priority: NotificationPriority.LOW,
+        ),
+        iosNotificationOptions: const IOSNotificationOptions(
+          showNotification: false,
+          playSound: false,
+        ),
+        foregroundTaskOptions: ForegroundTaskOptions(
+          eventAction: ForegroundTaskEventAction.once(),
+        )
+        // foregroundTaskOptions: ForegroundTaskOptions(
+        //   eventAction: ForegroundTaskEventAction.repeat(
+        //     intervalToMiliseconds,
+        //     // 10000,
+        //   ),
+        // ),
+        );
+  }
+
+  @override
+  Future<void> onStart(DateTime timestamp, TaskStarter starter) async {
+    debugPrint('onStart : $timestamp');
+  }
+
+  // Called every [interval] milliseconds in [ForegroundTaskOptions].
+  @override
+  void onRepeatEvent(DateTime timestamp) async {
     final Response response = await HttpConnector.get(
       dio: _dio,
       url: '${URL.BASE_URL}/${URL.GPS_INTERVAL}',
     );
 
+    debugPrint('initTask response ${response.data}');
+
     List<MConfig> result = List.from(response.data ?? [])
         .map((item) => MConfig.fromMap(item))
         .toList();
 
-    MConfig intervalResult = result[0];
-    int intervalValue = int.parse(intervalResult.value.toString());
+    MConfig androidAccuracy =
+        result.firstWhere((item) => item.name == 'accuracy.android');
 
-    int intervalToMiliseconds = intervalValue * 1000;
+    MConfig iosAccuracy =
+        result.firstWhere((item) => item.name == 'accuracy.ios');
 
-    debugPrint('initTask interval $intervalValue : ${intervalToMiliseconds}');
+    MConfig distanceFilter =
+        result.firstWhere((item) => item.name == 'distance');
+    debugPrint('initTask androidAccuracy $androidAccuracy');
 
-    FlutterForegroundTask.init(
-      androidNotificationOptions: AndroidNotificationOptions(
-        showWhen: false, // timeStamp
-        channelId: 'Foreground Notification',
-        channelName: 'Foreground Notification',
-        channelDescription:
-            'This notification appears when the foreground service is running.',
-        // OS의 noti bar에 지워지지 않는 알림이 생기는데 안보이게 하기 위해서 NONE설정
-        channelImportance: NotificationChannelImportance.NONE,
-        priority: NotificationPriority.LOW,
-      ),
-      iosNotificationOptions: const IOSNotificationOptions(
-        showNotification: false,
-        playSound: false,
-      ),
-      foregroundTaskOptions: ForegroundTaskOptions(
-        eventAction: ForegroundTaskEventAction.repeat(
-          intervalToMiliseconds,
-          // 10000,
-        ),
-      ),
-    );
-  }
+    Map<String, dynamic> accuracyMap = {
+      // android
+      'high': LocationAccuracy.high,
+      'medium': LocationAccuracy.medium,
+      'low': LocationAccuracy.low,
+      'lowest': LocationAccuracy.lowest,
 
-  @override
-  Future<void> onStart(DateTime timestamp, TaskStarter starter) async {}
-
-  // Called every [interval] milliseconds in [ForegroundTaskOptions].
-  @override
-  void onRepeatEvent(DateTime timestamp) async {
-    //  network 사용 가능 확인
-    bool internetAvailable = await isInternetAvailable();
-
-    debugPrint('internetAvailable $internetAvailable');
-
-    FlutterForegroundTask.sendDataToMain('check');
-    Position position = await Geolocator.getCurrentPosition();
-    final List<String> cookies = await CookieManager.load();
-    debugPrint('repeat $timestamp : $cookies');
-
-    Map<String, dynamic> data = {
-      "lng": position.longitude,
-      "lat": position.latitude,
-      "timestamp": timestamp.toIso8601String()
+      // ios
+      'best': LocationAccuracy.best,
+      'navigation': LocationAccuracy.bestForNavigation,
+      'reduced': LocationAccuracy.reduced,
     };
 
-    // network 사용 불가능 시, localStorage에 datas를 저장(array로 저장)
-    if (internetAvailable == false) {
-      debugPrint('network unavailable, save to localStorage $data');
-      await LocationManager.save(data);
-      return;
-    }
+    LocationAccuracy accuracy =
+        accuracyMap[androidAccuracy.value] ?? LocationAccuracy.high; // 기본값 설정
 
-    // network 사용 가능 시, localStorage에 저장된 datas가 있는지 확인
-    await LocationManager.hasData().then((hasData) async {
-      if (hasData) {
-        // localStorage에 저장된 datas가 있으면, 서버에 모두 post
-        List<Map<String, dynamic>> locationData = await LocationManager.load();
+    debugPrint('initTask accuracy $accuracy');
+    debugPrint('initTask distanceFilter $distanceFilter');
 
-        debugPrint('locationData $locationData');
-        for (Map<String, dynamic> item in locationData) {
-          final Response response = await HttpConnector.post(
-            dio: _dio,
-            url: '${URL.BASE_URL}/${URL.USER_LOCATION}',
-            cookies: cookies,
-            data: item,
-          );
-          // 응답 확인
-          if (response.statusCode == 200) {
-            debugPrint('위치 전송 성공 : $response');
-          } else {
-            // TODO : 서버에 전송 실패 시, localstorage에 저장된 datas는 그대로 유지
-            debugPrint('위치 전송 실패: ${response}');
-            return;
-          }
+    subscription ??= Geolocator.getPositionStream(
+      locationSettings: LocationSettings(
+        accuracy: accuracy,
+        distanceFilter: distanceFilter.value,
+      ),
+    ).listen(
+      (Position position) async {
+        debugPrint('foreground position $position');
+        bool internetAvailable = await isInternetAvailable();
+        final List<String> cookies = await CookieManager.load();
+        _dio.options.extra['withCredentials'] = true;
+
+        Map<String, dynamic> data = {
+          "lng": position.longitude,
+          "lat": position.latitude,
+          "timestamp": timestamp.toIso8601String()
+        };
+
+        if (!internetAvailable) {
+          debugPrint('인터넷 연결이 없습니다.');
+          await LocationManager.save(data);
+          return;
         }
-        // 서버에 전송 완료 시, localstorage에 저장된 datas 삭제
-        await LocationManager.clear();
-      }
-    });
+
+        await LocationManager.hasData().then((hasData) async {
+          if (hasData) {
+            // localStorage에 저장된 datas가 있으면, 서버에 모두 post
+            List<Map<String, dynamic>> locationData =
+                await LocationManager.load();
+
+            debugPrint('locationData $locationData');
+            for (Map<String, dynamic> item in locationData) {
+              final Response response = await HttpConnector.post(
+                dio: _dio,
+                url: '${URL.BASE_URL}/${URL.USER_LOCATION}',
+                cookies: cookies,
+                data: item,
+              );
+              // 응답 확인
+              if (response.statusCode == 200) {
+                debugPrint('위치 전송 성공 : $response');
+              } else {
+                // TODO : 서버에 전송 실패 시, localstorage에 저장된 datas는 그대로 유지
+                debugPrint('위치 전송 실패: ${response}');
+                return;
+              }
+            }
+            // 서버에 전송 완료 시, localstorage에 저장된 datas 삭제
+            await LocationManager.clear();
+          }
+        });
+
+        final Response response = await HttpConnector.post(
+          dio: _dio,
+          url: '${URL.BASE_URL}/${URL.USER_LOCATION}',
+          data: data,
+          cookies: cookies,
+        );
+
+        if (response.statusCode == 200) {
+          debugPrint('위치 전송 성공 : $response');
+        } else {
+          debugPrint('위치 전송 실패: ${response}');
+          return;
+        }
+      },
+      onError: (e) {
+        debugPrint('foreground onRepeatEvent error $e');
+      },
+    );
+    return;
+    //  network 사용 가능 확인
+    // bool internetAvailable = await isInternetAvailable();
+
+    // debugPrint('internetAvailable $internetAvailable');
+
+    // FlutterForegroundTask.sendDataToMain('check');
+    // Position position = await Geolocator.getCurrentPosition();
+    // final List<String> cookies = await CookieManager.load();
+    // debugPrint('repeat $timestamp : $cookies');
+
+    // Map<String, dynamic> data = {
+    //   "lng": position.longitude,
+    //   "lat": position.latitude,
+    //   "timestamp": timestamp.toIso8601String()
+    // };
+
+    // // network 사용 불가능 시, localStorage에 datas를 저장(array로 저장)
+    // if (internetAvailable == false) {
+    //   debugPrint('network unavailable, save to localStorage $data');
+    //   await LocationManager.save(data);
+    //   return;
+    // }
+
+    // // network 사용 가능 시, localStorage에 저장된 datas가 있는지 확인
+    // await LocationManager.hasData().then((hasData) async {
+    //   if (hasData) {
+    //     // localStorage에 저장된 datas가 있으면, 서버에 모두 post
+    //     List<Map<String, dynamic>> locationData = await LocationManager.load();
+
+    //     debugPrint('locationData $locationData');
+    //     for (Map<String, dynamic> item in locationData) {
+    //       final Response response = await HttpConnector.post(
+    //         dio: _dio,
+    //         url: '${URL.BASE_URL}/${URL.USER_LOCATION}',
+    //         cookies: cookies,
+    //         data: item,
+    //       );
+    //       // 응답 확인
+    //       if (response.statusCode == 200) {
+    //         debugPrint('위치 전송 성공 : $response');
+    //       } else {
+    //         // TODO : 서버에 전송 실패 시, localstorage에 저장된 datas는 그대로 유지
+    //         debugPrint('위치 전송 실패: ${response}');
+    //         return;
+    //       }
+    //     }
+    //     // 서버에 전송 완료 시, localstorage에 저장된 datas 삭제
+    //     await LocationManager.clear();
+    //   }
+    // });
 
     // network 사용 가능 시, localStorage에 저장된 datas가 없으면 현재 data를 서버에 post
-    final Response response = await HttpConnector.post(
-      dio: _dio,
-      url: '${URL.BASE_URL}/${URL.USER_LOCATION}',
-      cookies: cookies,
-      data: data,
-    );
+    // final Response response = await HttpConnector.post(
+    //   dio: _dio,
+    //   url: '${URL.BASE_URL}/${URL.USER_LOCATION}',
+    //   cookies: cookies,
+    //   data: data,
+    // );
 
-    // 응답 확인
-    if (response.statusCode == 200) {
-      debugPrint('위치 전송 성공 : $response');
-    } else {
-      debugPrint('위치 전송 실패: ${response}');
-    }
+    // // 응답 확인
+    // if (response.statusCode == 200) {
+    //   debugPrint('위치 전송 성공 : $response');
+    // } else {
+    //   debugPrint('위치 전송 실패: ${response}');
+    // }
   }
 
   @override
   Future<void> onDestroy(DateTime timestamp, bool isTimeout) async {
     FlutterForegroundTask.stopService();
+    await unsubscribe();
     debugPrint('on destory : $timestamp');
   }
 
@@ -205,6 +311,19 @@ class ForegroundTaskHandler extends TaskHandler {
       FlutterForegroundTask.sendDataToMain('stop');
       FlutterForegroundTask.stopService();
       debugPrint('stopService : $id');
+    }
+  }
+
+  Future<void> unsubscribe() async {
+    if (subscription != null) {
+      try {
+        subscription!.pause();
+        await subscription!.cancel();
+      } catch (e) {
+        debugPrint('Error canceling location subscription: $e');
+      }
+
+      subscription = null;
     }
   }
 

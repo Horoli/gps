@@ -54,25 +54,7 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
             buildWorkInfo(currentWork).expand(),
             buildCurrentWork(procedures[_currentProcedureIndex]).expand(),
             buildWorkHistory(procedures, _currentProcedureIndex).expand(),
-            // 작업자 정보
-            const Text(
-              '작업자',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-
-            // 작업자 목록
-            Text(
-              currentWork.users.map((u) => u.username).join(', '),
-              style: const TextStyle(fontSize: 14),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            // 작업 기록
+            buildWorkers(currentWork).expand(),
 
             // 현재 작업 완료 버튼
             buildElevatedButton(
@@ -258,8 +240,28 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
     );
   }
 
-  Widget buildWorkers() {
-    return Container();
+  Widget buildWorkers(CurrentWork currentWork) {
+    return Column(children: [
+      // 작업자 정보
+      const Text(
+        '작업자',
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+        ),
+        textAlign: TextAlign.center,
+      ),
+      const SizedBox(height: 8),
+
+      // 작업자 목록
+      Text(
+        currentWork.users.map((u) => u.username).join(', '),
+        style: const TextStyle(fontSize: 14),
+        textAlign: TextAlign.center,
+      ),
+      const SizedBox(height: 16),
+    ]);
+    // 작업 기록
   }
 
   @override

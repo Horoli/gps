@@ -27,8 +27,8 @@ class AppRootState extends State<AppRoot> {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: COLOR.BASE,
-          primary: Colors.white,
-          // onPrimary: COLOR.ON_PRIMARY,
+          // primary: Colors.white,
+          onPrimary: COLOR.WHITE,
         ),
         appBarTheme: const AppBarTheme(
           backgroundColor: COLOR.BASE,
