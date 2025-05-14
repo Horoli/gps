@@ -1,4 +1,4 @@
-part of gps_test;
+part of FlightSteps;
 
 class LocationManager {
   static const String title = 'location';

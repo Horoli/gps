@@ -1,4 +1,4 @@
-part of gps_test;
+part of FlightSteps;
 
 /**
  * selectedWork를 관리하는 service

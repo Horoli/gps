@@ -1,4 +1,4 @@
-part of gps_test;
+part of FlightSteps;
 
 class ServiceChecklist extends CommonService {
   static ServiceChecklist? _instance;

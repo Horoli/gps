@@ -1,4 +1,4 @@
-part of gps_test;
+part of FlightSteps;
 
 class ServiceUser extends CommonService {
   static ServiceUser? _instance;

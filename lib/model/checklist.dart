@@ -1,4 +1,4 @@
-part of gps_test;
+part of FlightSteps;
 
 class MChecklistData extends CommonModel<MChecklistData> {
   final String uuid;

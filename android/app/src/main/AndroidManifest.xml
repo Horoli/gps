@@ -16,7 +16,7 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <!--gps permission settings/-->
     <application
-        android:label="gps_test"
+        android:label="FlightSteps"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="true">
@@ -45,7 +45,7 @@
             android:name="io.flutter.network-policy"
             android:resource="@xml/network_security_config" />
         <!--foregroundService settings-->
-        <service 
+        <service
             android:name="com.pravera.flutter_foreground_task.service.ForegroundService"
             android:foregroundServiceType="dataSync|remoteMessaging"
             android:exported="false" />

@@ -1,4 +1,4 @@
-part of gps_test;
+part of FlightSteps;
 
 class MConfig extends CommonModel<MConfig> {
   final String name;

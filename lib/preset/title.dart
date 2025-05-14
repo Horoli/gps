@@ -1,6 +1,6 @@
 const String APP_TITLE = 'Flight Steps';
-const String PHONE_NUMBER = 'Phone Number';
-const String EMPLOYEE_ID = 'Employee ID';
+const String PHONE_NUMBER = '휴대폰 번호';
+const String EMPLOYEE_ID = '직원 ID';
 const String LOGIN = '로그인';
 const String CHECKLIST = '체크리스트';
 const String CONFIRM = '확인';

@@ -1,4 +1,4 @@
-part of gps_test;
+part of FlightSteps;
 
 class ShowInformationWidgets {
   static Future<void> errorDialog(BuildContext context, String message) async {

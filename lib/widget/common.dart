@@ -1,4 +1,4 @@
-part of gps_test;
+part of FlightSteps;
 
 PreferredSizeWidget CommonAppBar({
   required String title,

@@ -1,4 +1,4 @@
-part of gps_test;
+part of FlightSteps;
 
 abstract class CommonModel<T> {
   T copyWith() => throw UnimplementedError();

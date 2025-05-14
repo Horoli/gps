@@ -1,4 +1,4 @@
-part of gps_test;
+part of FlightSteps;
 
 late ServiceUser GServiceUser;
 late ServiceChecklist GServiceChecklist;

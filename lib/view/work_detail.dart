@@ -1,4 +1,4 @@
-part of gps_test;
+part of FlightSteps;
 
 class ViewWorkDetail extends StatefulWidget {
   const ViewWorkDetail({super.key});
@@ -52,11 +52,12 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
           }
           return Column(
             children: [
-              buildWorkInfo(currentWork).expand(),
-              buildCurrentWork(procedures[_currentProcedureIndex]).expand(),
-              buildWorkHistory(procedures, _currentProcedureIndex).expand(),
-              buildWorkers(currentWork).expand(),
-
+              buildWorkInfo(currentWork).expand(flex: 2),
+              buildCurrentWork(procedures[_currentProcedureIndex])
+                  .expand(flex: 2),
+              buildWorkHistory(procedures, _currentProcedureIndex)
+                  .expand(flex: 2),
+              buildWorkers(currentWork).expand(flex: 3),
               // 현재 작업 완료 버튼
               buildElevatedButton(
                 onPressed: () async {
@@ -83,7 +84,7 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
 
   Widget buildWorkInfo(CurrentWork currentWork) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: SIZE.WORK_DETAIL_PADDING,
       child: Container(
         decoration: commonDecoration,
         child: Column(
@@ -149,7 +150,7 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
   Widget buildCurrentWork(MProcedureInCurrentWork currentProcedure) {
     // 현재 작업명
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: SIZE.WORK_DETAIL_PADDING,
       child: Container(
         width: double.infinity,
         decoration: commonDecoration,
@@ -182,7 +183,7 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
     int currentProcedureIndex,
   ) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: SIZE.WORK_DETAIL_PADDING,
       child: Container(
         decoration: commonDecoration,
         child: Column(
@@ -244,7 +245,7 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
 
   Widget buildWorkers(CurrentWork currentWork) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: SIZE.WORK_DETAIL_PADDING,
       child: Container(
         width: double.infinity,
         decoration: commonDecoration,
@@ -259,22 +260,20 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
               ),
               textAlign: TextAlign.center,
             ),
-            ListView.builder(
+            ListView.separated(
+              separatorBuilder: (context, index) => SIZE.DIVIDER,
               shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
+              // physics: const NeverScrollableScrollPhysics(),
               itemCount: currentWork.users.length,
               itemBuilder: (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4.0),
-                  child: ListTile(
-                    title: Text(currentWork.users[index].username),
-                    subtitle: Text(currentWork.users[index].phoneNumber),
-                    // style: const TextStyle(fontSize: 14),
-                    // textAlign: TextAlign.center,
+                return ListTile(
+                  title: Text(currentWork.users[index].username),
+                  subtitle: Text(
+                    currentWork.users[index].phoneNumber,
                   ),
                 );
               },
-            ),
+            ).expand(),
           ],
         ),
       ),

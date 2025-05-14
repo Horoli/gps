@@ -1,4 +1,4 @@
-part of gps_test;
+part of FlightSteps;
 
 class ViewChecklist extends StatefulWidget {
   const ViewChecklist({super.key});

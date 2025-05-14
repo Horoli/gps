@@ -1,4 +1,4 @@
-part of gps_test;
+part of FlightSteps;
 
 @pragma('vm:entry-point')
 void startCallback() {

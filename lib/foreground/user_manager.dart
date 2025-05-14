@@ -1,4 +1,4 @@
-part of gps_test;
+part of FlightSteps;
 
 class UserLoginManager {
   static const String title = 'user_login_data';

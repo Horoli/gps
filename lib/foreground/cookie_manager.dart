@@ -1,4 +1,4 @@
-part of gps_test;
+part of FlightSteps;
 
 class CookieManager {
   static const String title = 'auth_cookies';

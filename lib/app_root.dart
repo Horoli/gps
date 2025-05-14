@@ -1,4 +1,4 @@
-part of gps_test;
+part of FlightSteps;
 
 class AppRoot extends StatefulWidget {
   const AppRoot({super.key});
@@ -21,7 +21,7 @@ class AppRootState extends State<AppRoot> {
     };
 
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: TITLE.APP_TITLE,
       navigatorKey: GNavigationKey,
       navigatorObservers: [AppRouteObserver()],
       theme: ThemeData(

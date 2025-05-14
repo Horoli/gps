@@ -1,4 +1,4 @@
-library gps_test;
+library FlightSteps;
 
 import 'dart:async';
 import 'dart:convert';
@@ -11,14 +11,14 @@ import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:dio/dio.dart';
 import 'package:flat/flat.dart';
 
-import 'package:gps_test/preset/msg.dart' as MSG;
-import 'package:gps_test/preset/url.dart' as URL;
-import 'package:gps_test/preset/title.dart' as TITLE;
-import 'package:gps_test/preset/path.dart' as PATH;
-import 'package:gps_test/preset/state.dart' as STATE;
-import 'package:gps_test/preset/id.dart' as ID;
-import 'package:gps_test/preset/color.dart' as COLOR;
-import 'package:gps_test/preset/size.dart' as SIZE;
+import 'package:flight_steps/preset/msg.dart' as MSG;
+import 'package:flight_steps/preset/url.dart' as URL;
+import 'package:flight_steps/preset/title.dart' as TITLE;
+import 'package:flight_steps/preset/path.dart' as PATH;
+import 'package:flight_steps/preset/state.dart' as STATE;
+import 'package:flight_steps/preset/id.dart' as ID;
+import 'package:flight_steps/preset/color.dart' as COLOR;
+import 'package:flight_steps/preset/size.dart' as SIZE;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';

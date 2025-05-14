@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:geolocator/geolocator.dart';
-import 'gps_test.dart';
+import 'flight_steps.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

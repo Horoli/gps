@@ -1,4 +1,4 @@
-part of gps_test;
+part of FlightSteps;
 // 사용자 모델
 
 // 현재 작업 모델 (메인 모델)

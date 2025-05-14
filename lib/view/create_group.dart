@@ -1,4 +1,4 @@
-part of gps_test;
+part of FlightSteps;
 
 class ViewCreateGroup extends StatefulWidget {
   const ViewCreateGroup({super.key});
@@ -34,10 +34,7 @@ class ViewCreateGroupState extends State<ViewCreateGroup> {
                       builder: (context, snapshot) {
                         final selectedMember = snapshot.data;
                         return ListView.separated(
-                          separatorBuilder: (context, index) => const Divider(
-                            indent: 15,
-                            endIndent: 15,
-                          ),
+                          separatorBuilder: (context, index) => SIZE.DIVIDER,
                           itemCount: setFilteredMembers.length,
                           itemBuilder: (context, index) {
                             final MMember member = setFilteredMembers[index];

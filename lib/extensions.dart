@@ -1,4 +1,4 @@
-part of gps_test;
+part of FlightSteps;
 
 extension WidgetExtensions on Widget {
   Widget get center => Center(child: this);

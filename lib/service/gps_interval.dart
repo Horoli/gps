@@ -1,4 +1,4 @@
-part of gps_test;
+part of FlightSteps;
 
 class ServiceGPSInterval extends CommonService {
   static ServiceGPSInterval? _instance;

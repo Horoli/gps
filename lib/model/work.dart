@@ -1,4 +1,4 @@
-part of gps_test;
+part of FlightSteps;
 
 class MWorkData extends CommonModel<MWorkData> {
   final String name; // 항공편 번호 (예: LJ221)

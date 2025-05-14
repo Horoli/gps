@@ -1,4 +1,4 @@
-part of gps_test;
+part of FlightSteps;
 
 class MWorkList extends CommonModel<MWorkList> {
   final CurrentWork? currentWork;

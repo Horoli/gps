@@ -1,4 +1,4 @@
-part of gps_test;
+part of FlightSteps;
 
 class MUser extends CommonModel<MUser> {
   final String uuid;
