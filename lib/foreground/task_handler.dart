@@ -225,72 +225,76 @@ class ForegroundTaskHandler extends TaskHandler {
       },
     );
     return;
-    //  network 사용 가능 확인
-    // bool internetAvailable = await isInternetAvailable();
-
-    // debugPrint('internetAvailable $internetAvailable');
-
-    // FlutterForegroundTask.sendDataToMain('check');
-    // Position position = await Geolocator.getCurrentPosition();
-    // final List<String> cookies = await CookieManager.load();
-    // debugPrint('repeat $timestamp : $cookies');
-
-    // Map<String, dynamic> data = {
-    //   "lng": position.longitude,
-    //   "lat": position.latitude,
-    //   "timestamp": timestamp.toIso8601String()
-    // };
-
-    // // network 사용 불가능 시, localStorage에 datas를 저장(array로 저장)
-    // if (internetAvailable == false) {
-    //   debugPrint('network unavailable, save to localStorage $data');
-    //   await LocationManager.save(data);
-    //   return;
-    // }
-
-    // // network 사용 가능 시, localStorage에 저장된 datas가 있는지 확인
-    // await LocationManager.hasData().then((hasData) async {
-    //   if (hasData) {
-    //     // localStorage에 저장된 datas가 있으면, 서버에 모두 post
-    //     List<Map<String, dynamic>> locationData = await LocationManager.load();
-
-    //     debugPrint('locationData $locationData');
-    //     for (Map<String, dynamic> item in locationData) {
-    //       final Response response = await HttpConnector.post(
-    //         dio: _dio,
-    //         url: '${URL.BASE_URL}/${URL.USER_LOCATION}',
-    //         cookies: cookies,
-    //         data: item,
-    //       );
-    //       // 응답 확인
-    //       if (response.statusCode == 200) {
-    //         debugPrint('위치 전송 성공 : $response');
-    //       } else {
-    //         // TODO : 서버에 전송 실패 시, localstorage에 저장된 datas는 그대로 유지
-    //         debugPrint('위치 전송 실패: ${response}');
-    //         return;
-    //       }
-    //     }
-    //     // 서버에 전송 완료 시, localstorage에 저장된 datas 삭제
-    //     await LocationManager.clear();
-    //   }
-    // });
-
-    // network 사용 가능 시, localStorage에 저장된 datas가 없으면 현재 data를 서버에 post
-    // final Response response = await HttpConnector.post(
-    //   dio: _dio,
-    //   url: '${URL.BASE_URL}/${URL.USER_LOCATION}',
-    //   cookies: cookies,
-    //   data: data,
-    // );
-
-    // // 응답 확인
-    // if (response.statusCode == 200) {
-    //   debugPrint('위치 전송 성공 : $response');
-    // } else {
-    //   debugPrint('위치 전송 실패: ${response}');
-    // }
   }
+
+  // void onRepeatEvent()async{
+
+  //  network 사용 가능 확인
+  // bool internetAvailable = await isInternetAvailable();
+
+  // debugPrint('internetAvailable $internetAvailable');
+
+  // FlutterForegroundTask.sendDataToMain('check');
+  // Position position = await Geolocator.getCurrentPosition();
+  // final List<String> cookies = await CookieManager.load();
+  // debugPrint('repeat $timestamp : $cookies');
+
+  // Map<String, dynamic> data = {
+  //   "lng": position.longitude,
+  //   "lat": position.latitude,
+  //   "timestamp": timestamp.toIso8601String()
+  // };
+
+  // // network 사용 불가능 시, localStorage에 datas를 저장(array로 저장)
+  // if (internetAvailable == false) {
+  //   debugPrint('network unavailable, save to localStorage $data');
+  //   await LocationManager.save(data);
+  //   return;
+  // }
+
+  // // network 사용 가능 시, localStorage에 저장된 datas가 있는지 확인
+  // await LocationManager.hasData().then((hasData) async {
+  //   if (hasData) {
+  //     // localStorage에 저장된 datas가 있으면, 서버에 모두 post
+  //     List<Map<String, dynamic>> locationData = await LocationManager.load();
+
+  //     debugPrint('locationData $locationData');
+  //     for (Map<String, dynamic> item in locationData) {
+  //       final Response response = await HttpConnector.post(
+  //         dio: _dio,
+  //         url: '${URL.BASE_URL}/${URL.USER_LOCATION}',
+  //         cookies: cookies,
+  //         data: item,
+  //       );
+  //       // 응답 확인
+  //       if (response.statusCode == 200) {
+  //         debugPrint('위치 전송 성공 : $response');
+  //       } else {
+  //         // TODO : 서버에 전송 실패 시, localstorage에 저장된 datas는 그대로 유지
+  //         debugPrint('위치 전송 실패: ${response}');
+  //         return;
+  //       }
+  //     }
+  //     // 서버에 전송 완료 시, localstorage에 저장된 datas 삭제
+  //     await LocationManager.clear();
+  //   }
+  // });
+
+  // network 사용 가능 시, localStorage에 저장된 datas가 없으면 현재 data를 서버에 post
+  // final Response response = await HttpConnector.post(
+  //   dio: _dio,
+  //   url: '${URL.BASE_URL}/${URL.USER_LOCATION}',
+  //   cookies: cookies,
+  //   data: data,
+  // );
+
+  // // 응답 확인
+  // if (response.statusCode == 200) {
+  //   debugPrint('위치 전송 성공 : $response');
+  // } else {
+  //   debugPrint('위치 전송 실패: ${response}');
+  // }
+  // }
 
   @override
   Future<void> onDestroy(DateTime timestamp, bool isTimeout) async {
