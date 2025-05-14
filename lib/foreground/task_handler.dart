@@ -111,7 +111,7 @@ class ForegroundTaskHandler extends TaskHandler {
     debugPrint('onStart : $timestamp');
   }
 
-  // Called every [interval] milliseconds in [ForegroundTaskOptions].
+  /// 해당 코드 수정 시 [ServiceLocation]의 setLocationListener() 코드도 같이 수정해야함
   @override
   void onRepeatEvent(DateTime timestamp) async {
     final Response response = await HttpConnector.get(

@@ -15,6 +15,8 @@ class ServiceLocation extends CommonService {
 
   Stream<Position?> get stream => _subject.stream;
 
+  /// 해당 코드는 foreground에서 사용할 수없어서 해당 코드 수정 시
+  /// [ForegroundTaskHandler]의 onRepeatEvent() 코드도 같이 수정해야함
   Future<void> setLocationListener() async {
     final Response response = await HttpConnector.get(
       dio: dio,
