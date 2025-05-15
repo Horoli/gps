@@ -24,17 +24,21 @@ class ServiceWork extends CommonService {
     required List<String> members,
   }) async {
     try {
+      if (selectedWork == null) {
+        debugPrint('selectedWork is null');
+        return;
+      }
       final List<String> cookies = await CookieManager.load();
       debugPrint('cookies $cookies');
       final Map<String, dynamic> headers =
           HttpConnector.headersByCookie(cookies);
       dio.options.extra['withCredentials'] = true;
 
-      Position position = await Geolocator.getCurrentPosition();
-
-      if (selectedWork == null) {
-        return;
-      }
+      // Position position = await Geolocator.getCurrentPosition();
+      // Position position = GServiceLocation.currentPosition!;
+      // print('position $position');
+      Position? position = await Geolocator.getLastKnownPosition();
+      position ??= await Geolocator.getCurrentPosition();
 
       final Response response = await HttpConnector.post(
         dio: dio,
@@ -49,6 +53,7 @@ class ServiceWork extends CommonService {
         },
         cookies: cookies,
       );
+      return;
     } catch (e) {
       if (e is DioException) {
         if (e.response != null) {

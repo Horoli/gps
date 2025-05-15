@@ -62,20 +62,17 @@ class TileWork extends StatelessWidget {
             await GServiceWork.select(workData: workItem);
           });
     }
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      color: COLOR.SELECTED,
-      alignment: Alignment.center,
+    return buildElevatedButton(
+      onPressed: null,
+      usePadding: false,
       child: const Text(
         '작업완료',
         style: TextStyle(
-          color: COLOR.WHITE,
-          fontSize: 18,
-          fontWeight: FontWeight.w500,
+          fontSize: 16,
+          // fontWeight: FontWeight.w500,
+          // color: COLOR.WHITE,
         ),
       ),
     );
-    // return Container(child: Text('${workItem.state}'));
   }
 }

@@ -15,6 +15,8 @@ class ServiceLocation extends CommonService {
 
   Stream<Position?> get stream => _subject.stream;
 
+  Position? get currentPosition => _subject.valueOrNull;
+
   /// 해당 코드는 foreground에서 사용할 수없어서 해당 코드 수정 시
   /// [ForegroundTaskHandler]의 onRepeatEvent() 코드도 같이 수정해야함
   Future<void> setLocationListener() async {
@@ -135,74 +137,121 @@ class ServiceLocation extends CommonService {
     }
   }
 
-  Future<LocationPermission> checkAndRequestLocationPermission() async {
+  Future<void> checkAndRequestLocationPermission() async {
     // 현재 권한 상태 확인
-    LocationPermission permission = await Geolocator.checkPermission();
-
-    // 권한이 영구적으로 거부된 경우
-    if (permission == LocationPermission.deniedForever) {
-      // 사용자에게 설정 화면으로 이동하도록 안내하는 다이얼로그 표시
-      bool goToSettings = await showDialog(
+    NotificationPermission notificationPermission =
+        await ForegroundTaskHandler.checkPermissions();
+    LocationPermission locationPermission = await Geolocator.checkPermission();
+    // TODO : 권한이 항상 허용되지 않은 경우 팝업을 계속 띄워야함
+    if (notificationPermission != NotificationPermission.granted ||
+        locationPermission != LocationPermission.always) {
+      bool openSettings = await showDialog(
             context: GNavigationKey.currentContext!,
+            barrierDismissible: false,
             builder: (BuildContext context) => AlertDialog(
-              title: Text('위치 권한 필요'),
-              content: Text('이 앱은 위치 정보가 필요합니다. 설정에서 위치 권한을 허용해주세요.'),
+              title: const Text(TITLE.LOCATION_PERMISSION),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(MSG.LOCATION_PERMISSION_REQUEST),
+                  Text('locationPermission: $locationPermission'),
+                  Text('notificationPermission: $notificationPermission'),
+                ],
+              ),
               actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(false),
-                  child: Text('취소'),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(true),
-                  child: Text('설정으로 이동'),
-                ),
-              ],
-            ),
-          ) ??
-          false;
-
-      // 사용자가 설정으로 이동하기로 선택한 경우
-      if (goToSettings) {
-        await Geolocator.openAppSettings(); // 앱 설정 페이지 열기
-        // 또는 Geolocator.openLocationSettings(); // 위치 설정 페이지 열기
-      }
-    }
-    // 권한이 거부되었지만 영구적으로 거부되지 않은 경우
-    else if (permission == LocationPermission.denied) {
-      // 권한 요청
-      permission = await Geolocator.requestPermission();
-    }
-
-    // 권한이 항상 허용되지 않은 경우 (whileInUse 상태인 경우)
-    if (permission == LocationPermission.whileInUse) {
-      // 항상 허용 권한을 요청하는 다이얼로그 표시
-      bool requestAlways = await showDialog(
-            context: GNavigationKey.currentContext!,
-            builder: (BuildContext context) => AlertDialog(
-              title: Text('백그라운드 위치 권한'),
-              content: Text('앱이 백그라운드에서도 위치 정보를 사용할 수 있도록 허용하시겠습니까?'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(false),
-                  child: Text('아니오'),
-                ),
                 TextButton(
                   onPressed: () async {
-                    Navigator.of(context).pop();
-                    await Geolocator.openAppSettings(); // 앱 설정 페이지 열기
+                    if (locationPermission == LocationPermission.always ||
+                        notificationPermission ==
+                            NotificationPermission.granted) {
+                      return Navigator.of(context).pop(false);
+                    }
+                    Navigator.of(context).pop(true);
                   },
-                  child: Text('예'),
+                  child: locationPermission == LocationPermission.always
+                      ? const Text(MSG.CLOSE)
+                      : const Text(MSG.YES),
                 ),
               ],
             ),
           ) ??
           false;
 
-      // 사용자가 항상 허용을 선택한 경우
-      if (requestAlways) {
-        permission = await Geolocator.requestPermission();
+      if (openSettings) {
+        await Geolocator.openAppSettings(); // 앱 설정 페이지 열기
+
+        locationPermission = await Geolocator.checkPermission();
+        if (locationPermission != LocationPermission.always) {
+          return await checkAndRequestLocationPermission();
+        }
       }
     }
-    return permission;
   }
+
+  // 권한이 영구적으로 거부된 경우
+  //   if (permission == LocationPermission.deniedForever) {
+  //     // 사용자에게 설정 화면으로 이동하도록 안내하는 다이얼로그 표시
+  //     bool goToSettings = await showDialog(
+  //           context: GNavigationKey.currentContext!,
+  //           builder: (BuildContext context) => AlertDialog(
+  //             title: Text('위치 권한 필요'),
+  //             content: Text('이 앱은 위치 정보가 필요합니다. 설정에서 위치 권한을 허용해주세요.'),
+  //             actions: [
+  //               TextButton(
+  //                 onPressed: () => Navigator.of(context).pop(false),
+  //                 child: Text('취소'),
+  //               ),
+  //               TextButton(
+  //                 onPressed: () => Navigator.of(context).pop(true),
+  //                 child: Text('설정으로 이동'),
+  //               ),
+  //             ],
+  //           ),
+  //         ) ??
+  //         false;
+
+  //     // 사용자가 설정으로 이동하기로 선택한 경우
+  //     if (goToSettings) {
+  //       await Geolocator.openAppSettings(); // 앱 설정 페이지 열기
+  //       // 또는 Geolocator.openLocationSettings(); // 위치 설정 페이지 열기
+  //     }
+  //   }
+  //   // 권한이 거부되었지만 영구적으로 거부되지 않은 경우
+  //   else if (permission == LocationPermission.denied) {
+  //     // 권한 요청
+  //     permission = await Geolocator.requestPermission();
+  //   }
+
+  //   // 권한이 항상 허용되지 않은 경우 (whileInUse 상태인 경우)
+  //   if (permission == LocationPermission.whileInUse) {
+  //     // 항상 허용 권한을 요청하는 다이얼로그 표시
+  //     bool requestAlways = await showDialog(
+  //           context: GNavigationKey.currentContext!,
+  //           builder: (BuildContext context) => AlertDialog(
+  //             title: const Text(TITLE.LOCATION_PERMISSION),
+  //             content: const Text(MSG.LOCATION_PERMISSION_REQUEST),
+  //             actions: [
+  //               TextButton(
+  //                 onPressed: () => Navigator.of(context).pop(false),
+  //                 child: const Text(MSG.NO),
+  //               ),
+  //               TextButton(
+  //                 onPressed: () async {
+  //                   Navigator.of(context).pop();
+  //                   await Geolocator.openAppSettings(); // 앱 설정 페이지 열기
+  //                 },
+  //                 child: const Text(MSG.YES),
+  //               ),
+  //             ],
+  //           ),
+  //         ) ??
+  //         false;
+
+  //     // 사용자가 항상 허용을 선택한 경우
+  //     if (requestAlways) {
+  //       permission = await Geolocator.requestPermission();
+  //     }
+  //   }
+  //   return permission;
+  // }
 }

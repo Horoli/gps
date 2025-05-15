@@ -1,3 +1,5 @@
+import 'package:flight_steps/preset/msg.dart' as MSG;
+import 'package:flight_steps/preset/title.dart' as TITLE;
 import 'package:flutter/material.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:geolocator/geolocator.dart';
@@ -9,6 +11,66 @@ Future<void> main() async {
   await foregroundInit();
   await checkAndRequestLocationPermission();
   runApp(const AppRoot());
+
+  bool insufficientPermissions = await checkPermissions();
+  do {
+    //
+    debugPrint('step 1 condition: $insufficientPermissions');
+    if (!insufficientPermissions) {
+      return;
+    }
+    debugPrint('step 2 condition: $insufficientPermissions');
+
+    bool openSettings = await showDialog(
+          context: GNavigationKey.currentContext!,
+          barrierDismissible: false,
+          builder: (BuildContext context) => AlertDialog(
+            title: const Text(TITLE.LOCATION_PERMISSION),
+            content: const Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(MSG.LOCATION_PERMISSION_REQUEST),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () async {
+                  // if (locationPermission == LocationPermission.always ||
+                  //     notificationPermission ==
+                  //         NotificationPermission.granted) {
+
+                  debugPrint('step 3 condition: $insufficientPermissions');
+                  if (insufficientPermissions) {
+                    return Navigator.of(context).pop(true);
+                  }
+                  return Navigator.of(context).pop(false);
+                },
+                child: insufficientPermissions
+                    // locationPermission == LocationPermission.always
+                    ? const Text(MSG.OPEN_SETTINGS)
+                    : const Text(MSG.CLOSE),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+
+    if (openSettings) {
+      await Geolocator.openAppSettings(); // 앱 설정 페이지 열기
+      debugPrint('step 4 condition: $insufficientPermissions');
+      insufficientPermissions = await checkPermissions();
+      debugPrint('step 5 condition: $insufficientPermissions');
+    }
+  } while (insufficientPermissions);
+}
+
+Future<bool> checkPermissions() async {
+  NotificationPermission notificationPermission =
+      await ForegroundTaskHandler.checkPermissions();
+  LocationPermission locationPermission = await Geolocator.checkPermission();
+
+  return notificationPermission != NotificationPermission.granted ||
+      locationPermission != LocationPermission.always;
 }
 
 Future<void> foregroundInit() async {

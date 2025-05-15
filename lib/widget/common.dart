@@ -1,6 +1,10 @@
 part of FlightSteps;
 
-PreferredSizeWidget CommonAppBar({
+Widget buildIndicator({Color? color}) {
+  return CircularProgressIndicator(color: color);
+}
+
+PreferredSizeWidget commonAppBar({
   required String title,
   bool useTrailing = true,
 }) {
@@ -34,32 +38,47 @@ Widget buildElevatedButton({
   required Widget child,
 }) {
   return Padding(
-    padding: EdgeInsets.all(usePadding ? 16 : 0),
+    padding: usePadding ? SIZE.BUTTON_PADDING : EdgeInsets.zero,
     child: SizedBox(
       width: double.infinity,
       height: 50,
       child: ElevatedButton(
         onPressed: onPressed,
+        style: SIZE.BUTTON_STYLE,
         child: child,
       ),
     ),
   );
 }
 
-Widget buildNavigationButtonWithDialog({
+Widget buildNavigationButton({
+  required BuildContext context,
   required String title,
+  required String routerName,
   bool useReplacement = false,
+  bool usePadding = true,
   VoidCallback? onPressed,
 }) {
   return Padding(
-    padding: const EdgeInsets.all(16.0),
+    padding: usePadding ? SIZE.BUTTON_PADDING : EdgeInsets.zero,
     child: SizedBox(
       width: double.infinity,
       height: 50,
       child: ElevatedButton(
-        onPressed: onPressed,
+        onPressed: () async {
+          if (onPressed != null) {
+            onPressed();
+          }
+
+          useReplacement
+              ? await Navigator.pushNamedAndRemoveUntil(
+                  GNavigationKey.currentContext!,
+                  routerName,
+                  ModalRoute.withName(('/')))
+              : await Navigator.pushNamed(
+                  GNavigationKey.currentContext!, routerName);
+        },
         style: ElevatedButton.styleFrom(
-          // backgroundColor: const Color(0xFF4B5EFC), // 파란색 버튼
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(4),
           ),
@@ -76,36 +95,18 @@ Widget buildNavigationButtonWithDialog({
   );
 }
 
-Widget buildNavigationButton({
-  required BuildContext context,
+Widget buildNavigationButtonWithDialog({
   required String title,
-  required String routerName,
   bool useReplacement = false,
-  bool usePadding = true,
   VoidCallback? onPressed,
 }) {
   return Padding(
-    padding: EdgeInsets.all(usePadding ? 16 : 0),
+    padding: SIZE.BUTTON_PADDING,
     child: SizedBox(
       width: double.infinity,
       height: 50,
       child: ElevatedButton(
-        onPressed: () async {
-          if (onPressed != null) {
-            onPressed();
-          }
-          // useReplacement
-          //     ? await Navigator.pushReplacementNamed(context, routerName)
-          //     : await Navigator.pushNamed(context, routerName);
-
-          useReplacement
-              ? await Navigator.pushNamedAndRemoveUntil(
-                  GNavigationKey.currentContext!,
-                  routerName,
-                  ModalRoute.withName(('/')))
-              : await Navigator.pushNamed(
-                  GNavigationKey.currentContext!, routerName);
-        },
+        onPressed: onPressed,
         style: ElevatedButton.styleFrom(
           // backgroundColor: const Color(0xFF4B5EFC), // 파란색 버튼
           shape: RoundedRectangleBorder(

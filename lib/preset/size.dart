@@ -13,3 +13,16 @@ const Divider DIVIDER = Divider(
   indent: 15,
   endIndent: 15,
 );
+
+const EdgeInsets BUTTON_PADDING = EdgeInsets.only(
+  top: 16,
+  bottom: 16,
+  left: 16,
+  right: 16,
+);
+
+ButtonStyle BUTTON_STYLE = ElevatedButton.styleFrom(
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(4),
+  ),
+);

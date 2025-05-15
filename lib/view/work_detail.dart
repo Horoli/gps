@@ -14,7 +14,7 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
     int _currentProcedureIndex = 0;
 
     return Scaffold(
-      appBar: CommonAppBar(title: TITLE.WORK),
+      appBar: commonAppBar(title: TITLE.WORK),
       body: StreamBuilder<MWorkList?>(
         stream: GServiceWorklist.stream,
         builder: (context, snapshot) {
@@ -229,8 +229,7 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
                         fontSize: 12,
                         fontWeight:
                             isCurrent ? FontWeight.bold : FontWeight.normal,
-                        color:
-                            isCurrent ? const Color(0xFF4B5EFC) : Colors.black,
+                        color: isCurrent ? COLOR.BASE : Colors.black,
                       ),
                     ),
                   ],

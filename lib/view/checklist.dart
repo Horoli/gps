@@ -8,10 +8,11 @@ class ViewChecklist extends StatefulWidget {
 }
 
 class ViewChecklistState extends State<ViewChecklist> {
+  List<BehaviorSubject<bool>> subjects = [];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CommonAppBar(title: TITLE.CHECKLIST),
+      appBar: commonAppBar(title: TITLE.CHECKLIST),
       body: SafeArea(
         child: Column(
           children: [
@@ -43,6 +44,12 @@ class ViewChecklistState extends State<ViewChecklist> {
                   }
 
                   final List<MChecklistData> checklists = snapshot.data!;
+                  subjects = [];
+                  checklists.map((item) {
+                    subjects.add(
+                      BehaviorSubject<bool>.seeded(false),
+                    );
+                  }).toList();
 
                   return ListView.separated(
                     padding: const EdgeInsets.all(16),
@@ -51,15 +58,37 @@ class ViewChecklistState extends State<ViewChecklist> {
                         const SizedBox(height: 16),
                     itemBuilder: (context, int index) {
                       final MChecklistData item = checklists[index];
-                      return buildChecklistItem(item, index + 1);
+                      return buildChecklistItem(item, index);
                     },
                   );
                 }).expand(),
-            buildNavigationButton(
-              context: context,
-              title: TITLE.CONFIRM,
-              routerName: PATH.ROUTE_WORKLIST,
-              useReplacement: true,
+            buildNavigationButtonWithDialog(
+              title: '확인',
+              onPressed: () async {
+                bool falseInSubjects = await getSubjectResult();
+                if (falseInSubjects) {
+                  return await showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: const Text('동의가 필요합니다'),
+                        content: const Text('모든 체크리스트에 동의해야 합니다.'),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text('확인'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                }
+
+                await Navigator.of(context).pushNamedAndRemoveUntil(
+                    PATH.ROUTE_WORKLIST, (route) => false);
+              },
             ),
           ],
         ),
@@ -80,7 +109,7 @@ class ViewChecklistState extends State<ViewChecklist> {
         children: [
           // 체크리스트 제목
           Text(
-            '체크리스트 $number',
+            '체크리스트 ${number + 1}',
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -107,10 +136,18 @@ class ViewChecklistState extends State<ViewChecklist> {
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              Switch(
-                value: item.value ?? false,
-                onChanged: (value) {},
-                activeColor: const Color.fromARGB(255, 21, 25, 61),
+              StreamBuilder<bool>(
+                stream: subjects[number],
+                builder: (context, snapshot) {
+                  return Switch(
+                    value: snapshot.data ?? false,
+                    onChanged: (value) {
+                      print('value: $value');
+                      subjects[number].add(value);
+                    },
+                    activeColor: const Color.fromARGB(255, 21, 25, 61),
+                  );
+                },
               ),
             ],
           ),
@@ -123,7 +160,8 @@ class ViewChecklistState extends State<ViewChecklist> {
   void initState() {
     super.initState();
     initForegroundTask();
-    GServiceLocation.checkAndRequestLocationPermission();
+    // GServiceLocation.checkAndRequestLocationPermission();
+    mounted;
   }
 
   Future<void> initForegroundTask() async {
@@ -133,12 +171,31 @@ class ViewChecklistState extends State<ViewChecklist> {
     await ForegroundTaskHandler.startService();
   }
 
+  Future<bool> getSubjectResult() async {
+    List<bool> results = [];
+
+    for (var subject in subjects) {
+      results.add(subject.value);
+    }
+    print('results: $results');
+    return results.contains(false);
+  }
+
+  Future<void> subjectDispose() async {
+    for (var subject in subjects) {
+      await subject.close();
+    }
+    subjects.clear();
+    subjects = [];
+  }
+
   @override
   void dispose() {
     if (useForeground) {
       FlutterForegroundTask.removeTaskDataCallback(
           ForegroundTaskHandler.onReceiveTaskData);
     }
+    subjectDispose();
     super.dispose();
   }
 }

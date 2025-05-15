@@ -11,7 +11,7 @@ class ViewPreferencesState extends State<ViewPreferences> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CommonAppBar(
+      appBar: commonAppBar(
         title: TITLE.PREFERENCES,
         useTrailing: false,
       ),
@@ -21,7 +21,7 @@ class ViewPreferencesState extends State<ViewPreferences> {
           stream: GServiceUser.stream,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
+              return Center(child: buildIndicator());
             }
 
             if (snapshot.hasError) {
@@ -188,7 +188,10 @@ class ViewPreferencesState extends State<ViewPreferences> {
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
-                child: const Text('로그아웃', style: TextStyle(color: Colors.red)),
+                child: const Text(
+                  '로그아웃',
+                  style: TextStyle(color: Colors.red),
+                ),
               ),
             ],
           ),
@@ -201,14 +204,23 @@ class ViewPreferencesState extends State<ViewPreferences> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => const Center(
-          child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircularProgressIndicator(),
-          Text('로그아웃 중입니다...'),
-        ],
-      )),
+      builder: (context) => Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            buildIndicator(color: COLOR.WHITE),
+            const Padding(padding: EdgeInsets.all(8)),
+            const Text(
+              '로그아웃 중입니다...',
+              style: TextStyle(
+                color: COLOR.WHITE,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
 
     try {

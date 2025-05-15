@@ -80,14 +80,11 @@ class ViewLoginState extends State<ViewLogin> {
                   },
                   child: Text('홍길동')),
               ElevatedButton(
-                  onPressed: () async {
-                    debugPrint(
-                        'subscription ${GServiceLocation.subscription == null}');
-                    debugPrint('hasValue ${GServiceLocation._subject.value}');
-                    debugPrint(
-                        'location stream last : ${GServiceLocation._subject.valueOrNull}');
-                  },
-                  child: Text('location')),
+                onPressed: () async {
+                  await Geolocator.openAppSettings(); // 앱 설정 페이지 열기
+                },
+                child: Text('permission'),
+              ),
             ],
           ),
         ),
@@ -149,7 +146,7 @@ class ViewLoginState extends State<ViewLogin> {
   @override
   void initState() {
     super.initState();
-    GServiceLocation.checkAndRequestLocationPermission();
+    // GServiceLocation.checkAndRequestLocationPermission();
     checkLocalStorage();
   }
 

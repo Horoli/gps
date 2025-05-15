@@ -1,3 +1,5 @@
+// ignore_for_file: constant_identifier_names
+
 const String APP_TITLE = 'Flight Steps';
 const String PHONE_NUMBER = '휴대폰 번호';
 const String EMPLOYEE_ID = '직원 ID';
@@ -9,3 +11,5 @@ const String CREATE_GROUP = '그룹 생성';
 const String WORK = '작업';
 
 const String PREFERENCES = '설정';
+
+const String LOCATION_PERMISSION = '백그라운드 위치 권한';

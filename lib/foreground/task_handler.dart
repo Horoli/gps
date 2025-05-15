@@ -8,6 +8,13 @@ void startCallback() {
 class ForegroundTaskHandler extends TaskHandler {
   StreamSubscription<Position>? subscription;
 
+  static Future<NotificationPermission> checkPermissions() async {
+    final NotificationPermission notificationPermission =
+        await FlutterForegroundTask.checkNotificationPermission();
+
+    return notificationPermission;
+  }
+
   static Future<void> requestPermissions() async {
     final NotificationPermission notificationPermission =
         await FlutterForegroundTask.checkNotificationPermission();

@@ -153,6 +153,9 @@ class ServiceSSE extends CommonService {
     if (_isConnected) {
       await disconnect(ignoreErrors: true);
     }
+    if (connectivitySubscription == null) {
+      setNetworkListener();
+    }
 
     _dio = _getNewDioInstance();
 
@@ -201,100 +204,6 @@ class ServiceSSE extends CommonService {
           }
         }
 
-        // String uuid = data['uuid'];
-        // debugPrint('check uuid... ${getCurrentWork?.uuid == uuid}');
-        // if (getCurrentWork != null && getCurrentWork.uuid == uuid) {
-        //   debugPrint('valid uuid');
-        //   Map<String, dynamic> unflattenedData = unflatten(data['update']);
-
-        //   debugPrint('unflattenedData $unflattenedData');
-        //   if (unflattenedData.containsKey('procedures') &&
-        //       unflattenedData['procedures'] is List) {
-        //     List updatedProcedures = List.from(unflattenedData['procedures']);
-
-        //     int getIndex = List.from(updatedProcedures).indexWhere((e) {
-        //       return e != null;
-        //     });
-        //     debugPrint('getIndex $getIndex');
-        //     debugPrint('work ${GServiceWorklist.lastValue!.currentWork}');
-        //     if (getIndex < 4) {
-        //       // 현재 작업 가져오기
-        //       CurrentWork currentWork = getCurrentWork;
-
-        //       // 현재 작업의 procedures 가져오기
-        //       List<MProcedureInCurrentWork> currentProcedures =
-        //           currentWork.procedures;
-
-        //       // 업데이트할 procedures 가져오기
-        //       // 가져온 updatedProcedures[getIndex]를 포메팅해줘야함
-        //       Map<String, dynamic> updatedProcedureData = {};
-        //       if (updatedProcedures[getIndex] != null) {
-        //         Map originalMap = updatedProcedures[getIndex] as Map;
-        //         originalMap.forEach((key, value) {
-        //           updatedProcedureData[key.toString()] = value;
-        //         });
-        //       }
-
-        //       debugPrint('updatedProcedureData $updatedProcedureData');
-
-        //       // 기존 procedure가져오기
-        //       MProcedureInCurrentWork existingProcedure =
-        //           currentProcedures[getIndex];
-
-        //       DateTime? updatedDate = updatedProcedureData.containsKey('date')
-        //           ? updatedProcedureData['date'] == null
-        //               ? null // work가 최초 생성됐을 경우엔 null임
-        //               : DateTime.parse(updatedProcedureData['date'] as String)
-        //           : existingProcedure.date;
-
-        //       List<double>? updatedLocation;
-        //       if (updatedProcedureData.containsKey('location') &&
-        //           updatedProcedureData['location'] is List) {
-        //         List locationList = updatedProcedureData['location'];
-        //         if (locationList.length >= 2) {
-        //           updatedLocation = [
-        //             locationList[0] is double
-        //                 ? locationList[0]
-        //                 : (locationList[0] as num).toDouble(),
-        //             locationList[1] is double
-        //                 ? locationList[1]
-        //                 : (locationList[1] as num).toDouble()
-        //           ];
-        //         }
-        //       } else {
-        //         updatedLocation = existingProcedure.location;
-        //       }
-
-        //       // 업데이트된 procedure를 저장
-        //       MProcedureInCurrentWork updatedProcedure =
-        //           existingProcedure.copyWith(
-        //         date: updatedDate,
-        //         location: updatedLocation,
-        //       );
-
-        //       // 현재 작업의 procedure에 업데이트된 procedure를 할당
-        //       currentProcedures[getIndex] = updatedProcedure;
-
-        //       // 현재 작업을 업데이트
-        //       CurrentWork updatedCurrentWork =
-        //           currentWork.copyWith(procedures: currentProcedures);
-
-        //       // 작업리스트를 업데이트
-        //       MWorkList updatedWorkList = GServiceWorklist.lastValue!
-        //           .copyWith(currentWork: updatedCurrentWork);
-
-        //       GServiceWorklist.subject.add(updatedWorkList);
-        //       debugPrint('stream complete');
-        //     }
-
-        //     // 마지막 작업이 완료되면 getCurrentWork가 null이 되기 때문에
-        //     // 마지막 작업이 완료되면 ViewWorklist로 이동
-        //     if (getIndex == 4) {
-        //       Navigator.of(GNavigationKey.currentState!.context)
-        //           .pushReplacementNamed(PATH.ROUTE_WORKLIST);
-        //     }
-        //   }
-        // }
         _processWorkUpdate(data, getCurrentWork!);
       } finally {
         stopwatch.stop();
@@ -328,7 +237,7 @@ class ServiceSSE extends CommonService {
   // 이벤트 데이터 처리 로직을 별도 메서드로 분리
   void _processWorkUpdate(Map<String, dynamic> data, CurrentWork currentWork) {
     // unflatten 작업은 비용이 큰 작업이므로 필요한 경우에만 수행
-    // if (!data.containsKey('update')) return;
+    if (!data.containsKey('update')) return;
 
     Map<String, dynamic> unflattenedData = unflatten(data['update']);
     debugPrint('unflattenedData $unflattenedData');
@@ -558,15 +467,15 @@ class ServiceSSE extends CommonService {
       }
 
       // 4. 연결 상태 구독 강제 취소
-      if (connectivitySubscription != null) {
-        try {
-          await connectivitySubscription!.cancel();
-          debugPrint('Connectivity subscription canceled');
-        } catch (e) {
-          debugPrint('Error canceling connectivity subscription: $e');
-        }
-        connectivitySubscription = null;
-      }
+      // if (connectivitySubscription != null) {
+      //   try {
+      //     await connectivitySubscription!.cancel();
+      //     debugPrint('Connectivity subscription canceled');
+      //   } catch (e) {
+      //     debugPrint('Error canceling connectivity subscription: $e');
+      //   }
+      //   connectivitySubscription = null;
+      // }
 
       // 4. 상태 초기화
       _isConnected = false;

@@ -11,7 +11,7 @@ class ViewWorklistState extends State<ViewWorklist> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CommonAppBar(title: TITLE.WORKLIST),
+      appBar: commonAppBar(title: TITLE.WORKLIST),
       body: StreamBuilder<MWorkList?>(
         stream: GServiceWorklist.stream,
         builder: (context, snapshot) {
@@ -74,7 +74,7 @@ class ViewWorklistState extends State<ViewWorklist> {
   @override
   void initState() {
     super.initState();
-    GServiceLocation.checkAndRequestLocationPermission();
+    // GServiceLocation.checkAndRequestLocationPermission();
     getData();
   }
 

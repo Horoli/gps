@@ -16,7 +16,7 @@ class ViewCreateGroupState extends State<ViewCreateGroup> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CommonAppBar(title: TITLE.CREATE_GROUP),
+      appBar: commonAppBar(title: TITLE.CREATE_GROUP),
       body: Column(
         children: [
           // 검색 입력 필드
@@ -68,25 +68,20 @@ class ViewCreateGroupState extends State<ViewCreateGroup> {
                 return;
               }
 
-              // TODO : geolocation
-              // Position position = await Geolocator.getCurrentPosition();
-              // debugPrint(position.longitude);
-
               debugPrint(GServiceMember.selectedMember!.uuid);
+              debugPrint('create step 1');
               await GServiceWork.create(
                   members: [GServiceMember.selectedMember!.uuid]);
+              debugPrint('create step 2');
 
-              await GServiceWorklist.get();
+              // await GServiceWorklist.get();
 
-              // useReplacement
-              // ?
-
+              debugPrint('create step 3');
               await Navigator.of(GNavigationKey.currentContext!)
                   .pushNamedAndRemoveUntil(
                 PATH.ROUTE_WORK_DETAIL,
                 (route) => false,
               );
-              // : await Navigator.pushNamed(context, PATH.ROUTE_WORK_DETAIL);
             },
           )
         ],
