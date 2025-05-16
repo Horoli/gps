@@ -6,7 +6,7 @@ late ServiceWorklist GServiceWorklist;
 late ServiceWork GServiceWork;
 late ServiceMember GServiceMember;
 late ServiceSSE GServiceSSE;
-late ServiceGPSInterval GServiceGPSInterval;
+// late ServiceGPSInterval GServiceGPSInterval;
 late ServiceLocation GServiceLocation;
 late RouterManager GServiceRouterManager;
 

@@ -6,7 +6,7 @@ String GET_WORK_LIST = 'api/user/work';
 String POST_WORK_LIST = 'api/user/work';
 String MEMBER_LIST = 'api/user/work/members/available';
 String STREAM = 'api/stream';
-String GPS_INTERVAL = 'api/config/gps';
+String CONFIG_GPS = 'api/config/gps';
 
 String PREFIX_PROCEDURE_COMPLETE = 'api/user/work';
 String SUFFIX_PROCEDURE_COMPLETE = 'procedure/complete';

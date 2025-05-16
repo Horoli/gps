@@ -22,7 +22,7 @@ class ServiceLocation extends CommonService {
   Future<void> setLocationListener() async {
     final Response response = await HttpConnector.get(
       dio: dio,
-      url: '${URL.BASE_URL}/${URL.GPS_INTERVAL}',
+      url: '${URL.BASE_URL}/${URL.CONFIG_GPS}',
     );
 
     List<MConfig> result = List.from(response.data ?? [])

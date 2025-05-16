@@ -123,7 +123,7 @@ class ForegroundTaskHandler extends TaskHandler {
   void onRepeatEvent(DateTime timestamp) async {
     final Response response = await HttpConnector.get(
       dio: _dio,
-      url: '${URL.BASE_URL}/${URL.GPS_INTERVAL}',
+      url: '${URL.BASE_URL}/${URL.CONFIG_GPS}',
     );
 
     debugPrint('initTask response ${response.data}');
