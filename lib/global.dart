@@ -12,6 +12,8 @@ late RouterManager GServiceRouterManager;
 
 bool useForeground = true;
 
+bool nowShowingDialog = false;
+
 const String tmpNumber = "01041850688";
 const String tmpID = 'devel';
 

@@ -155,6 +155,9 @@ class ForegroundTaskHandler extends TaskHandler {
       'reduced': LocationAccuracy.reduced,
     };
 
+    // TODO : platform에 따라 accuracy 설정
+    // 현재는 androidAccuracy만 사용하고, iosAccuracy는 사용하지 않음
+
     LocationAccuracy accuracy =
         accuracyMap[androidAccuracy.value] ?? LocationAccuracy.high; // 기본값 설정
 

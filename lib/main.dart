@@ -10,6 +10,8 @@ Future<void> main() async {
   await initService();
   await foregroundInit();
   await checkAndRequestLocationPermission();
+  WidgetsBinding.instance.addObserver(AppLifcycleObserver());
+
   runApp(const AppRoot());
 
   bool insufficientPermissions = await checkPermissions();
@@ -20,6 +22,7 @@ Future<void> main() async {
       return;
     }
     debugPrint('step 2 condition: $insufficientPermissions');
+    nowShowingDialog = true;
 
     bool openSettings = await showDialog(
           context: GNavigationKey.currentContext!,
@@ -40,10 +43,12 @@ Future<void> main() async {
                   //         NotificationPermission.granted) {
 
                   debugPrint('step 3 condition: $insufficientPermissions');
-                  if (insufficientPermissions) {
-                    return Navigator.of(context).pop(true);
-                  }
-                  return Navigator.of(context).pop(false);
+
+                  await Geolocator.openAppSettings(); // 앱 설정 페이지 열기
+                  // if (insufficientPermissions) {
+                  //   return Navigator.of(context).pop(true);
+                  // }
+                  // return Navigator.of(context).pop(false);
                 },
                 child: insufficientPermissions
                     // locationPermission == LocationPermission.always
@@ -55,13 +60,36 @@ Future<void> main() async {
         ) ??
         false;
 
-    if (openSettings) {
-      await Geolocator.openAppSettings(); // 앱 설정 페이지 열기
-      debugPrint('step 4 condition: $insufficientPermissions');
-      insufficientPermissions = await checkPermissions();
-      debugPrint('step 5 condition: $insufficientPermissions');
-    }
+    // if (openSettings) {
+    //   await Geolocator.openAppSettings(); // 앱 설정 페이지 열기
+    //   debugPrint('step 4 condition: $insufficientPermissions');
+    insufficientPermissions = await checkPermissions();
+    //   debugPrint('step 5 condition: $insufficientPermissions');
+    // }
   } while (insufficientPermissions);
+}
+
+class AppLifcycleObserver extends WidgetsBindingObserver {
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    debugPrint('AppLifecycleState: $state');
+    if (state == AppLifecycleState.resumed) {
+      // 앱이 활성화되었을 때의 처리
+      Future.delayed(const Duration(milliseconds: 500), () async {
+        // 권한 재확인은 메인 루프에서 처리하므로 여기서는 필요 없음
+        // 다이얼로그가 표시 중이라면 상태 정리
+
+        bool insufficientPermissions = await checkPermissions();
+        if (!insufficientPermissions &&
+            nowShowingDialog &&
+            Navigator.of(GNavigationKey.currentContext!).canPop()) {
+          Navigator.of(GNavigationKey.currentContext!).pop();
+          nowShowingDialog = false;
+        }
+      });
+    }
+  }
 }
 
 Future<bool> checkPermissions() async {
