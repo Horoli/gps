@@ -4,6 +4,37 @@ Widget buildIndicator({Color? color}) {
   return CircularProgressIndicator(color: color);
 }
 
+Widget buildFittedBox({
+  required Widget child,
+  BoxFit fit = BoxFit.scaleDown,
+}) {
+  return FittedBox(
+    fit: fit,
+    child: child,
+  );
+}
+
+Widget buildFittedText({
+  required String text,
+  TextAlign textAlign = TextAlign.center,
+  double fontSize = 16.0,
+  FontWeight? fontWeight,
+  Color? color,
+}) {
+  return FittedBox(
+    fit: BoxFit.scaleDown,
+    child: Text(
+      text,
+      style: TextStyle(
+        color: color ?? Colors.black,
+        fontSize: fontSize,
+        fontWeight: fontWeight ?? FontWeight.normal,
+      ),
+      textAlign: textAlign,
+    ),
+  );
+}
+
 PreferredSizeWidget commonAppBar({
   required String title,
   bool useTrailing = true,

@@ -52,12 +52,12 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
           }
           return Column(
             children: [
-              buildWorkInfo(currentWork).expand(flex: 2),
+              buildWorkInfo(currentWork).flex(flex: 2),
               buildCurrentWork(procedures[_currentProcedureIndex])
-                  .expand(flex: 2),
+                  .flex(flex: 2),
               buildWorkHistory(procedures, _currentProcedureIndex)
-                  .expand(flex: 2),
-              buildWorkers(currentWork).expand(flex: 3),
+                  .flex(flex: 2),
+              buildWorkers(currentWork).flex(flex: 3),
               // 현재 작업 완료 버튼
               buildElevatedButton(
                 onPressed: () async {
@@ -90,52 +90,45 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
+            const AutoSizeText(
               '작업 정보',
+              minFontSize: SIZE.WORK_DETAIL_HEADER,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: SIZE.WORK_DETAIL_HEADER,
+                // fontSize: SIZE.WORK_DETAIL_HEADER,
                 fontWeight: FontWeight.w600,
                 color: Colors.black87,
               ),
-            ),
-            const SizedBox(height: 16),
+            ).expand(),
+            // const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Column(
                   children: [
-                    const Text(
-                      '편명',
-                      style: TextStyle(
-                        fontSize: SIZE.WORK_DETAIL_CHILD,
-                        color: COLOR.GREY,
-                      ),
-                    ),
-                    Text(
-                      currentWork.aircraft.name,
-                      style: const TextStyle(
-                        fontSize: SIZE.WORK_DETAIL_CHILD,
-                        color: COLOR.GREY,
-                      ),
+                    buildFittedText(
+                      text: '편명',
+                      fontSize: SIZE.WORK_DETAIL_CHILD,
+                      color: COLOR.GREY,
+                    ).expand(),
+                    buildFittedText(
+                      text: currentWork.aircraft.name,
+                      fontSize: SIZE.WORK_DETAIL_CHILD,
+                      color: COLOR.GREY,
                     ).expand(),
                   ],
                 ).expand(),
                 Column(
                   children: [
-                    const Text(
-                      '출발시간',
-                      style: TextStyle(
-                        fontSize: SIZE.WORK_DETAIL_CHILD,
-                        color: COLOR.GREY,
-                      ),
-                    ),
-                    Text(
-                      currentWork.aircraft.departureTime,
-                      style: const TextStyle(
-                        fontSize: SIZE.WORK_DETAIL_CHILD,
-                        color: COLOR.GREY,
-                      ),
+                    buildFittedText(
+                      text: '출발시간',
+                      fontSize: SIZE.WORK_DETAIL_CHILD,
+                      color: COLOR.GREY,
+                    ).expand(),
+                    buildFittedText(
+                      text: currentWork.aircraft.departureTime,
+                      fontSize: SIZE.WORK_DETAIL_CHILD,
+                      color: COLOR.GREY,
                     ).expand(),
                   ],
                 ).expand(),
@@ -157,20 +150,14 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              '현재 작업',
-              style: TextStyle(
-                fontSize: SIZE.WORK_DETAIL_HEADER,
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.center,
+            buildFittedText(
+              text: '현재 작업',
+              fontSize: SIZE.WORK_DETAIL_HEADER,
+              fontWeight: FontWeight.w500,
             ),
-            Text(
-              currentProcedure.name,
-              style: const TextStyle(
-                fontSize: SIZE.WORK_DETAIL_CHILD,
-              ),
-              textAlign: TextAlign.center,
+            buildFittedText(
+              text: currentProcedure.name,
+              fontSize: SIZE.WORK_DETAIL_CHILD,
             ),
           ],
         ),
@@ -189,14 +176,10 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              '작업 기록',
-              style: TextStyle(
-                fontSize: SIZE.WORK_DETAIL_HEADER,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
-              ),
-              textAlign: TextAlign.center,
+            buildFittedText(
+              text: '작업 기록',
+              fontSize: SIZE.WORK_DETAIL_HEADER,
+              fontWeight: FontWeight.w500,
             ),
             const SizedBox(height: 16),
             // 절차 단계 표시
@@ -251,13 +234,10 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
         child: Column(
           children: [
             // 작업자 정보
-            const Text(
-              '작업자',
-              style: TextStyle(
-                fontSize: SIZE.WORK_DETAIL_HEADER,
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.center,
+            buildFittedText(
+              text: '작업자',
+              fontSize: SIZE.WORK_DETAIL_HEADER,
+              fontWeight: FontWeight.w500,
             ),
             ListView.separated(
               separatorBuilder: (context, index) => SIZE.DIVIDER,
