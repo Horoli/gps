@@ -174,12 +174,12 @@ class ViewLoginState extends State<ViewLogin> {
       phoneNumber: phoneNumber,
       id: employeeId,
     ).then((user) {
-      debugPrint(
-          'login step 1 ${GServiceSSE.connectivitySubscription == null}');
+      // debugPrint(
+      //     'login step 1 ${GServiceSSE.connectivitySubscription == null}');
 
-      if (GServiceSSE.connectivitySubscription == null) {
-        GServiceSSE.setNetworkListener();
-      }
+      // if (GServiceSSE.connectivitySubscription == null) {
+      //   GServiceSSE.setNetworkListener();
+      // }
       if (GServiceLocation.subscription == null) {
         debugPrint('checkPermission');
         Geolocator.checkPermission();

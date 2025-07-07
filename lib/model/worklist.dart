@@ -1,27 +1,28 @@
 part of FlightSteps;
 
 class MWorkList extends CommonModel<MWorkList> {
-  final CurrentWork? currentWork;
-  final List<MWorkData> works;
+  final List<MExtraWorkData> extraWorkList;
+  // final CurrentWork? currentWork;
+  final List<MWorkData> workList;
   final List<String> step;
   final String date;
 
   MWorkList({
-    this.currentWork,
-    required this.works,
+    // this.currentWork,
+    required this.extraWorkList,
+    required this.workList,
     required this.step,
     required this.date,
   });
 
   // JSON에서 MWorkList 객체로 변환하는 팩토리 생성자
   factory MWorkList.fromMap(Map<String, dynamic> item) {
-    final CurrentWork? parsedCurrentWork =
-        item.containsKey('currentWork') && item['currentWork'] != null
-            ? CurrentWork.fromMap(item['currentWork'] as Map<String, dynamic>)
-            : null;
     return MWorkList(
-      currentWork: parsedCurrentWork,
-      works: (item['workList'] as List<dynamic>)
+      extraWorkList: (item['extraWorkList'] as List<dynamic>)
+          .map((extraworkJson) =>
+              MExtraWorkData.fromMap(extraworkJson as Map<String, dynamic>))
+          .toList(),
+      workList: (item['workList'] as List<dynamic>)
           .map(
               (workJson) => MWorkData.fromMap(workJson as Map<String, dynamic>))
           .toList(),
@@ -34,28 +35,26 @@ class MWorkList extends CommonModel<MWorkList> {
   @override
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> result = {
-      'workList': works.map((work) => work.toJson()).toList(),
+      'extraWorkList':
+          extraWorkList.map((extraWork) => extraWork.toJson()).toList(),
+      'workList': workList.map((work) => work.toJson()).toList(),
       'step': step,
       'date': date,
     };
-
-    if (currentWork != null) {
-      result['currentWork'] = currentWork!.toJson();
-    }
 
     return result;
   }
 
   @override
   MWorkList copyWith({
-    CurrentWork? currentWork,
-    List<MWorkData>? works,
+    List<MExtraWorkData>? extraWorkList,
+    List<MWorkData>? workList,
     List<String>? step,
     String? date,
   }) {
     return MWorkList(
-      currentWork: currentWork ?? this.currentWork,
-      works: works ?? this.works,
+      extraWorkList: extraWorkList ?? this.extraWorkList,
+      workList: workList ?? this.workList,
       step: step ?? this.step,
       date: date ?? this.date,
     );
@@ -63,7 +62,7 @@ class MWorkList extends CommonModel<MWorkList> {
 
   @override
   String toString() {
-    return 'MWorkList(currentWork: $currentWork, works: $works, step: $step, date: $date)';
+    return 'MWorkList(extraWorkList: $extraWorkList, workList: $workList, step: $step, date: $date)';
   }
 
   // 날짜를 DateTime으로 변환

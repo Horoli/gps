@@ -1,11 +1,11 @@
 part of FlightSteps;
 
-class TileWork extends StatelessWidget {
-  final MWorkData workItem;
+class TileExtraWork extends StatelessWidget {
+  final MExtraWorkData extraWorkItem;
 
-  const TileWork({
+  const TileExtraWork({
     super.key,
-    required this.workItem,
+    required this.extraWorkItem,
   });
 
   @override
@@ -23,19 +23,24 @@ class TileWork extends StatelessWidget {
             child: Column(
               children: [
                 // 항공편 정보 행
-                buildFittedText(
-                  text: workItem.name,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w500,
+                Text(
+                  extraWorkItem.name,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 // 출발 시간 행
-                buildFittedText(
-                  text: '출발시간: ${workItem.departureTime}',
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500,
-                ),
+                // Text(
+                //   '출발시간: ${extraWorkItem.departureTime}',
+                //   style: const TextStyle(
+                //     fontSize: 20,
+                //     fontWeight: FontWeight.w500,
+                //   ),
+                // ),
                 const SizedBox(height: 12),
+
                 // 상태 버튼
                 buildStartButton(context),
               ],
@@ -47,16 +52,16 @@ class TileWork extends StatelessWidget {
   }
 
   Widget buildStartButton(BuildContext context) {
-    if (workItem.state == STATE.WORKSTATE_NORMAL) {
-      return buildNavigationButton(
-          context: context,
-          title: '작업시작',
-          usePadding: false,
-          routerName: PATH.ROUTE_CREATE_GROUP,
-          onPressed: () async {
-            await GServiceWork.select(workData: workItem);
-          });
-    }
+    // if (extraWorkItem. == STATE.WORKSTATE_NORMAL) {
+    //   return buildNavigationButton(
+    //       context: context,
+    //       title: '작업시작',
+    //       usePadding: false,
+    //       routerName: PATH.ROUTE_CREATE_GROUP,
+    //       onPressed: () async {
+    //         await GServiceWork.select(workData: extraWorkItem);
+    //       });
+    // }
     return buildElevatedButton(
       onPressed: null,
       usePadding: false,

@@ -121,7 +121,7 @@ Future<void> initService() async {
   GServiceWorklist = ServiceWorklist.getInstance();
   GServiceWork = ServiceWork.getInstance();
   GServiceMember = ServiceMember.getInstance();
-  GServiceSSE = ServiceSSE.getInstance();
+  // GServiceSSE = ServiceSSE.getInstance();
   // GServiceGPSInterval = ServiceGPSInterval.getInstance();
   GServiceLocation = ServiceLocation.getInstance();
 }

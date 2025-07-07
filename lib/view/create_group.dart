@@ -101,9 +101,9 @@ class ViewCreateGroupState extends State<ViewCreateGroup> {
       isLoading = true;
     });
     // currentWork가 있으면 자동으로 WORK_VIEW로 이동
-    if (GServiceWorklist.lastValue?.currentWork != null) {
-      await Navigator.pushReplacementNamed(context, PATH.ROUTE_WORK_DETAIL);
-    }
+    // if (GServiceWorklist.lastValue?.currentWork != null) {
+    //   await Navigator.pushReplacementNamed(context, PATH.ROUTE_WORK_DETAIL);
+    // }
 
     try {
       final List<MMember> members = await GServiceMember.get();

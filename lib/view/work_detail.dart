@@ -10,76 +10,77 @@ class ViewWorkDetail extends StatefulWidget {
 class ViewWorkDetailState extends State<ViewWorkDetail> {
   @override
   Widget build(BuildContext context) {
+    return Container();
     // 현재 선택된 절차 인덱스
     int _currentProcedureIndex = 0;
 
-    return Scaffold(
-      appBar: commonAppBar(title: TITLE.WORK),
-      body: StreamBuilder<MWorkList?>(
-        stream: GServiceWorklist.stream,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return StreamExceptionWidgets.waiting(context: context);
-          }
+    // return Scaffold(
+    //   appBar: commonAppBar(title: TITLE.WORK),
+    //   body: StreamBuilder<MWorkList?>(
+    //     stream: GServiceWorklist.stream,
+    //     builder: (context, snapshot) {
+    //       if (snapshot.connectionState == ConnectionState.waiting) {
+    //         return StreamExceptionWidgets.waiting(context: context);
+    //       }
 
-          if (snapshot.hasError) {
-            return StreamExceptionWidgets.hasError(
-              context: context,
-              refreshPressed: () async {
-                await GServiceWorklist.get();
-              },
-            );
-          }
+    //       if (snapshot.hasError) {
+    //         return StreamExceptionWidgets.hasError(
+    //           context: context,
+    //           refreshPressed: () async {
+    //             await GServiceWorklist.get();
+    //           },
+    //         );
+    //       }
 
-          if (!snapshot.hasData || snapshot.data?.currentWork == null) {
-            // GServiceWorklist.navigatorWithHasCurrentWork();
-            return StreamExceptionWidgets.noData(
-                context: context, title: '작업 정보가 없습니다');
-          }
+    //       if (!snapshot.hasData || snapshot.data?.currentWork == null) {
+    //         // GServiceWorklist.navigatorWithHasCurrentWork();
+    //         return StreamExceptionWidgets.noData(
+    //             context: context, title: '작업 정보가 없습니다');
+    //       }
 
-          final CurrentWork currentWork = snapshot.data!.currentWork!;
-          final List<MProcedureInCurrentWork> procedures =
-              currentWork.procedures;
+    //       final CurrentWork currentWork = snapshot.data!.currentWork!;
+    //       final List<MProcedureInCurrentWork> procedures =
+    //           currentWork.procedures;
 
-          // 현재 진행 중인 절차 찾기
-          for (int i = 0; i < procedures.length; i++) {
-            if (procedures[i].date == null ||
-                procedures[i].date!.year == 1970) {
-              // 기본값 날짜 체크
-              _currentProcedureIndex = i;
-              break;
-            }
-          }
-          return Column(
-            children: [
-              buildWorkInfo(currentWork).flex(flex: 2),
-              buildCurrentWork(procedures[_currentProcedureIndex])
-                  .flex(flex: 2),
-              buildWorkHistory(procedures, _currentProcedureIndex)
-                  .flex(flex: 2),
-              buildWorkers(currentWork).flex(flex: 3),
-              // 현재 작업 완료 버튼
-              buildElevatedButton(
-                onPressed: () async {
-                  await showConfirmationDialog(
-                    context,
-                    procedures[_currentProcedureIndex].name,
-                  );
-                },
-                child: const Text(
-                  '현재 작업 완료',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ],
-          );
-        },
-      ),
-    );
+    //       // 현재 진행 중인 절차 찾기
+    //       for (int i = 0; i < procedures.length; i++) {
+    //         if (procedures[i].date == null ||
+    //             procedures[i].date!.year == 1970) {
+    //           // 기본값 날짜 체크
+    //           _currentProcedureIndex = i;
+    //           break;
+    //         }
+    //       }
+    //       return Column(
+    //         children: [
+    //           buildWorkInfo(currentWork).flex(flex: 2),
+    //           buildCurrentWork(procedures[_currentProcedureIndex])
+    //               .flex(flex: 2),
+    //           buildWorkHistory(procedures, _currentProcedureIndex)
+    //               .flex(flex: 2),
+    //           buildWorkers(currentWork).flex(flex: 3),
+    //           // 현재 작업 완료 버튼
+    //           buildElevatedButton(
+    //             onPressed: () async {
+    //               await showConfirmationDialog(
+    //                 context,
+    //                 procedures[_currentProcedureIndex].name,
+    //               );
+    //             },
+    //             child: const Text(
+    //               '현재 작업 완료',
+    //               style: TextStyle(
+    //                 fontSize: 16,
+    //                 fontWeight: FontWeight.bold,
+    //                 color: Colors.white,
+    //               ),
+    //             ),
+    //           ),
+    //         ],
+    //       );
+    //     },
+    //   ),
+    // );
   }
 
   Widget buildWorkInfo(CurrentWork currentWork) {
@@ -333,13 +334,13 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
 
       // 작업 완료 API 호출
 
-      debugPrint('완료 처리 ${DateTime.now().millisecondsSinceEpoch}');
-      await GServiceWorklist.completeProcedure();
-      debugPrint(
-          'GServiceWorklist.lastValue?.currentWork == null ${GServiceWorklist.lastValue?.currentWork == null}');
-      if (GServiceWorklist.lastValue?.currentWork == null) {
-        await Navigator.of(context).pushReplacementNamed(PATH.ROUTE_WORKLIST);
-      }
+      // debugPrint('완료 처리 ${DateTime.now().millisecondsSinceEpoch}');
+      // await GServiceWorklist.completeProcedure();
+      // debugPrint(
+      //     'GServiceWorklist.lastValue?.currentWork == null ${GServiceWorklist.lastValue?.currentWork == null}');
+      // if (GServiceWorklist.lastValue?.currentWork == null) {
+      //   await Navigator.of(context).pushReplacementNamed(PATH.ROUTE_WORKLIST);
+      // }
 
       // 성공 메시지
       if (mounted) {
