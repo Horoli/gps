@@ -28,12 +28,13 @@ import 'package:auto_size_text/auto_size_text.dart';
 part 'model/common.dart';
 part 'model/user.dart';
 part 'model/checklist.dart';
-part 'model/work.dart';
-part 'model/worklist.dart';
-part 'model/work_current.dart';
-part 'model/work_extra.dart';
+part 'model/work/work.dart';
+part 'model/work/worklist.dart';
+part 'model/work/work_current.dart';
+part 'model/work/work_extra.dart';
 part 'model/member.dart';
 part 'model/config.dart';
+// part 'model/work/work_available.dart';
 
 part 'service/abstract/common.dart';
 part 'service/user.dart';
@@ -58,8 +59,11 @@ part 'view/login.dart';
 part 'view/preferences.dart';
 part 'view/checklist.dart';
 part 'view/worklist.dart';
-part 'view/create_group.dart';
 part 'view/work_detail.dart';
+
+part 'view/create/abstract.dart';
+part 'view/create/aircraft.dart';
+part 'view/create/group.dart';
 
 part 'global.dart';
 

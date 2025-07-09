@@ -10,3 +10,5 @@ String CONFIG_GPS = 'api/config/gps';
 
 String PREFIX_PROCEDURE_COMPLETE = 'api/user/work';
 String SUFFIX_PROCEDURE_COMPLETE = 'procedure/complete';
+
+String AVAILABLE_WORKS = 'api/user/work/aircraft/available';

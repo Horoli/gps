@@ -1,11 +1,11 @@
 part of FlightSteps;
 
 class TileWork extends StatelessWidget {
-  final MWorkData workItem;
+  final MWorkData workData;
 
   const TileWork({
     super.key,
-    required this.workItem,
+    required this.workData,
   });
 
   @override
@@ -24,14 +24,15 @@ class TileWork extends StatelessWidget {
               children: [
                 // 항공편 정보 행
                 buildFittedText(
-                  text: workItem.name,
+                  text: '${workData.name} (${workData.type})',
                   fontSize: 24,
                   fontWeight: FontWeight.w500,
                 ),
                 const SizedBox(height: 8),
                 // 출발 시간 행
                 buildFittedText(
-                  text: '출발시간: ${workItem.departureTime}',
+                  text: '출발시간: ${workData.departureTime}',
+                  color: Colors.grey,
                   fontSize: 18,
                   fontWeight: FontWeight.w500,
                 ),
@@ -47,14 +48,14 @@ class TileWork extends StatelessWidget {
   }
 
   Widget buildStartButton(BuildContext context) {
-    if (workItem.state == STATE.WORKSTATE_NORMAL) {
+    if (workData.state == STATE.WORKSTATE_NORMAL) {
       return buildNavigationButton(
           context: context,
           title: '작업시작',
           usePadding: false,
-          routerName: PATH.ROUTE_CREATE_GROUP,
+          routerName: PATH.ROUTE_CREATE_GROUP_AIRCRAFT,
           onPressed: () async {
-            await GServiceWork.select(workData: workItem);
+            await GServiceWork.select(workData: workData);
           });
     }
     return buildElevatedButton(

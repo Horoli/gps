@@ -1,14 +1,14 @@
 part of FlightSteps;
 
 class MWorkList extends CommonModel<MWorkList> {
+  // final List<CurrentWork> currentWork;
   final List<MExtraWorkData> extraWorkList;
-  // final CurrentWork? currentWork;
   final List<MWorkData> workList;
   final List<String> step;
   final String date;
 
   MWorkList({
-    // this.currentWork,
+    // required this.currentWork,
     required this.extraWorkList,
     required this.workList,
     required this.step,
@@ -17,6 +17,11 @@ class MWorkList extends CommonModel<MWorkList> {
 
   // JSON에서 MWorkList 객체로 변환하는 팩토리 생성자
   factory MWorkList.fromMap(Map<String, dynamic> item) {
+    // final CurrentWork? parsedCurrentWork =
+    // item.containsKey('currentWork') && item['currentWork'] != null
+    //     ? CurrentWork.fromMap(item['currentWork'] as Map<String, dynamic>)
+    //     : null;
+
     return MWorkList(
       extraWorkList: (item['extraWorkList'] as List<dynamic>)
           .map((extraworkJson) =>

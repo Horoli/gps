@@ -14,8 +14,7 @@ class ServiceWorklist extends CommonService {
 
   MWorkList? get lastValue => subject.valueOrNull;
 
-  // Future<MWorkList> get() async {
-  Future get() async {
+  Future<MWorkList> get() async {
     Completer<MWorkList> completer = Completer<MWorkList>();
     final List<String> cookies = await CookieManager.load();
 

@@ -22,26 +22,19 @@ class TileExtraWork extends StatelessWidget {
             ),
             child: Column(
               children: [
-                // 항공편 정보 행
-                Text(
-                  extraWorkItem.name,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w500,
-                  ),
+                buildFittedText(
+                  text: extraWorkItem.name,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w500,
                 ),
                 const SizedBox(height: 8),
-                // 출발 시간 행
-                // Text(
-                //   '출발시간: ${extraWorkItem.departureTime}',
-                //   style: const TextStyle(
-                //     fontSize: 20,
-                //     fontWeight: FontWeight.w500,
-                //   ),
-                // ),
+                buildFittedText(
+                  text: extraWorkItem.description,
+                  color: Colors.grey,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
+                ),
                 const SizedBox(height: 12),
-
-                // 상태 버튼
                 buildStartButton(context),
               ],
             ),

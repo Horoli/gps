@@ -16,6 +16,8 @@ class AppRootState extends State<AppRoot> {
       PATH.ROUTE_WORKLIST: (BuildContext context) => const ViewWorklist(),
       PATH.ROUTE_CREATE_GROUP: (BuildContext context) =>
           const ViewCreateGroup(),
+      PATH.ROUTE_CREATE_GROUP_AIRCRAFT: (BuildContext context) =>
+          const ViewCreateAircraft(),
       PATH.ROUTE_WORK_DETAIL: (BuildContext context) => const ViewWorkDetail(),
       PATH.ROUTE_PREFERENCES: (BuildContext context) => const ViewPreferences(),
     };

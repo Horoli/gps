@@ -99,7 +99,7 @@ class ViewWorklistState extends State<ViewWorklist> {
           child: ListView.builder(
             itemCount: works.length,
             itemBuilder: (BuildContext context, int index) {
-              return TileWork(workItem: works[index]);
+              return TileWork(workData: works[index]);
             },
           ),
         );
@@ -177,6 +177,7 @@ class ViewWorklistState extends State<ViewWorklist> {
 
   Future<void> getData() async {
     await GServiceWorklist.get();
+    await GServiceWork.getAvailableWorks();
 
     // currentWork가 있으면 자동으로 WORK_VIEW로 이동
     // await GServiceWorklist.navigatorWithHasCurrentWork();
@@ -184,17 +185,5 @@ class ViewWorklistState extends State<ViewWorklist> {
     // if (GServiceWorklist.lastValue?.currentWork != null) {
     //   await Navigator.pushReplacementNamed(context, PATH.ROUTE_WORK_DETAIL);
     // }
-  }
-
-  void _onBottomNavTapped(int index) {
-    switch (index) {
-      case 0:
-        // 작업목록 탭 - 현재 화면이므로 별도 동작 없음
-        break;
-      case 1:
-        // 추가작업 탭 - 추가작업 화면으로 이동
-        // Navigator.pushNamed(context, PATH.ROUTE_EXTRA_WORK);
-        break;
-    }
   }
 }

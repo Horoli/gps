@@ -70,8 +70,8 @@ class ViewCreateGroupState extends State<ViewCreateGroup> {
 
               debugPrint(GServiceMember.selectedMember!.uuid);
               debugPrint('create step 1');
-              await GServiceWork.create(
-                  members: [GServiceMember.selectedMember!.uuid]);
+              // await GServiceWork.create(
+              //     members: [GServiceMember.selectedMember!.uuid]);
               debugPrint('create step 2');
 
               // await GServiceWorklist.get();
