@@ -99,7 +99,22 @@ class ViewWorklistState extends State<ViewWorklist> {
           child: ListView.builder(
             itemCount: works.length,
             itemBuilder: (BuildContext context, int index) {
-              return TileWork(workData: works[index]);
+              final MWorkData work = works[index];
+
+              final MCurrentWork? matchingCurrentWork =
+                  worklist.currentWork.where(
+                (currentWork) {
+                  String workString =
+                      '${work.name}_${work.departureTime}_${work.type}';
+                  String currentString =
+                      '${currentWork.aircraft.name}_${currentWork.aircraft.departureTime}_${currentWork.aircraft.type}';
+                  return workString == currentString;
+                },
+              ).firstOrNull; // firstOrNull 사용
+              return TileWork(
+                workData: works[index],
+                currentWork: matchingCurrentWork,
+              );
             },
           ),
         );
@@ -178,7 +193,6 @@ class ViewWorklistState extends State<ViewWorklist> {
   Future<void> getData() async {
     await GServiceWorklist.get();
     await GServiceWork.getAvailableWorks();
-
     // currentWork가 있으면 자동으로 WORK_VIEW로 이동
     // await GServiceWorklist.navigatorWithHasCurrentWork();
 

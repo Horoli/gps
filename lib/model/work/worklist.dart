@@ -1,14 +1,14 @@
 part of FlightSteps;
 
 class MWorkList extends CommonModel<MWorkList> {
-  // final List<CurrentWork> currentWork;
+  final List<MCurrentWork> currentWork;
   final List<MExtraWorkData> extraWorkList;
   final List<MWorkData> workList;
   final List<String> step;
   final String date;
 
   MWorkList({
-    // required this.currentWork,
+    required this.currentWork,
     required this.extraWorkList,
     required this.workList,
     required this.step,
@@ -17,12 +17,16 @@ class MWorkList extends CommonModel<MWorkList> {
 
   // JSON에서 MWorkList 객체로 변환하는 팩토리 생성자
   factory MWorkList.fromMap(Map<String, dynamic> item) {
-    // final CurrentWork? parsedCurrentWork =
-    // item.containsKey('currentWork') && item['currentWork'] != null
-    //     ? CurrentWork.fromMap(item['currentWork'] as Map<String, dynamic>)
-    //     : null;
+    // final MCurrentWork? parsedCurrentWork =
+    //     item.containsKey('currentWork') && item['currentWork'] != null
+    //         ? MCurrentWork.fromMap(item['currentWork'] as Map<String, dynamic>)
+    //         : null;
 
     return MWorkList(
+      currentWork: (item['currentWork'] as List<dynamic>)
+          .map((currentWork) =>
+              MCurrentWork.fromMap(currentWork as Map<String, dynamic>))
+          .toList(),
       extraWorkList: (item['extraWorkList'] as List<dynamic>)
           .map((extraworkJson) =>
               MExtraWorkData.fromMap(extraworkJson as Map<String, dynamic>))
@@ -40,8 +44,8 @@ class MWorkList extends CommonModel<MWorkList> {
   @override
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> result = {
-      'extraWorkList':
-          extraWorkList.map((extraWork) => extraWork.toJson()).toList(),
+      'currentWork': currentWork.map((cur) => cur.toJson()).toList(),
+      'extraWorkList': extraWorkList.map((extra) => extra.toJson()).toList(),
       'workList': workList.map((work) => work.toJson()).toList(),
       'step': step,
       'date': date,
@@ -52,12 +56,14 @@ class MWorkList extends CommonModel<MWorkList> {
 
   @override
   MWorkList copyWith({
+    List<MCurrentWork>? currentWork,
     List<MExtraWorkData>? extraWorkList,
     List<MWorkData>? workList,
     List<String>? step,
     String? date,
   }) {
     return MWorkList(
+      currentWork: currentWork ?? this.currentWork,
       extraWorkList: extraWorkList ?? this.extraWorkList,
       workList: workList ?? this.workList,
       step: step ?? this.step,

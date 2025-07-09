@@ -30,7 +30,7 @@ class ViewCreateAbstractState<T extends ViewCreateAbstract> extends State<T> {
           // 검색 입력 필드
           buildTextField(searchController, 'search'),
           buildContent().expand(),
-          buildNavigationButton(),
+          buildNavButton(),
           // buildNavigationButtonWithDialog(
           //   // context: context,
           //   title: '완료',
@@ -50,7 +50,7 @@ class ViewCreateAbstractState<T extends ViewCreateAbstract> extends State<T> {
     loadData();
   }
 
-  Widget buildNavigationButton() {
+  Widget buildNavButton() {
     throw UnimplementedError('navigationButton must be implemented');
   }
 

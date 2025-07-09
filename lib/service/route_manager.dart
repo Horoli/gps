@@ -11,6 +11,13 @@ class RouterManager {
 
   void setCurrentRoute(String routeName) {
     _currentRouteName = routeName;
+
+    // WORKLIST 화면이 활성화되었을 때 실행
+    if (_currentRouteName == PATH.ROUTE_WORKLIST) {
+      GServiceWork.clearSelection();
+      GServiceMember.clearSelection();
+      print('WORKLIST 화면 활성화 - clearSelection 실행됨');
+    }
   }
 
   bool isWorklist() {
@@ -30,6 +37,7 @@ class AppRouteObserver extends NavigatorObserver {
       RouterManager().setCurrentRoute(route.settings.name ?? '');
     }
     super.didPush(route, previousRoute);
+    // _checkWorklistRoute(route);
   }
 
   @override
@@ -37,7 +45,12 @@ class AppRouteObserver extends NavigatorObserver {
     if (previousRoute is PageRoute) {
       RouterManager().setCurrentRoute(previousRoute.settings.name ?? '');
     }
+
     super.didPop(route, previousRoute);
+
+    // if (previousRoute != null) {
+    //   _checkWorklistRoute(route);
+    // }
   }
 
   @override
@@ -46,5 +59,16 @@ class AppRouteObserver extends NavigatorObserver {
       RouterManager().setCurrentRoute(newRoute.settings.name ?? '');
     }
     super.didReplace(newRoute: newRoute, oldRoute: oldRoute);
+    // if (newRoute != null) {
+    //   _checkWorklistRoute(newRoute);
+    // }
   }
+
+  // void _checkWorklistRoute(Route<dynamic> route) {
+  //   if (route.settings.name == PATH.ROUTE_WORKLIST) {
+  //     // WORKLIST 화면이 활성화되었을 때 실행
+  //     GServiceMember.clearSelection();
+  //     print('WORKLIST 화면 활성화 - clearSelection 실행됨');
+  //   }
+  // }
 }

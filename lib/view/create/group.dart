@@ -1,102 +1,79 @@
 part of FlightSteps;
 
-class ViewCreateGroup extends StatefulWidget {
+class ViewCreateGroup extends ViewCreateAbstract {
   const ViewCreateGroup({super.key});
 
   @override
   State<ViewCreateGroup> createState() => ViewCreateGroupState();
 }
 
-class ViewCreateGroupState extends State<ViewCreateGroup> {
-  final TextEditingController searchController = TextEditingController();
-  List<MMember> setMembers = [];
-  List<MMember> setFilteredMembers = [];
-  bool isLoading = true;
+class ViewCreateGroupState extends ViewCreateAbstractState<ViewCreateGroup> {
+  // final TextEditingController searchController = TextEditingController();
+  // List<MMember> setMembers = [];
+  // List<MMember> setFilteredMembers = [];
+  // bool isLoading = true;
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: commonAppBar(title: TITLE.CREATE_GROUP),
-      body: Column(
-        children: [
-          // 검색 입력 필드
-          buildTextField(searchController, 'search'),
+  Widget buildContent() {
+    return isLoading
+        ? StreamExceptionWidgets.waiting(context: context)
+        : setMembers.isEmpty
+            ? StreamExceptionWidgets.noData(
+                title: '멤버가 없습니다',
+                context: context,
+              )
+            : StreamBuilder<List<MMember>>(
+                stream: GServiceMember.stream,
+                builder: (context, snapshot) {
+                  final List<MMember> selectedMember = snapshot.data ?? [];
+                  return ListView.separated(
+                    separatorBuilder: (context, index) => SIZE.DIVIDER,
+                    itemCount: setFilteredMembers.length,
+                    itemBuilder: (context, index) {
+                      final MMember member = setFilteredMembers[index];
 
-          isLoading
-              ? StreamExceptionWidgets.waiting(context: context)
-              : setMembers.isEmpty
-                  ? StreamExceptionWidgets.noData(
-                      title: '멤버가 없습니다',
-                      context: context,
-                    )
-                  : StreamBuilder<MMember?>(
-                      stream: GServiceMember.stream,
-                      builder: (context, snapshot) {
-                        final selectedMember = snapshot.data;
-                        return ListView.separated(
-                          separatorBuilder: (context, index) => SIZE.DIVIDER,
-                          itemCount: setFilteredMembers.length,
-                          itemBuilder: (context, index) {
-                            final MMember member = setFilteredMembers[index];
-                            final bool isSelected =
-                                selectedMember?.uuid == member.uuid;
+                      print(selectedMember);
 
-                            debugPrint('$member');
-                            debugPrint('$isSelected');
+                      final bool isSelected = GServiceMember.isSelected(member);
 
-                            return MemberListTile(
-                              member: member,
-                              isSelected: isSelected,
-                              onPressed: () async {
-                                await GServiceMember.select(member: member);
-                              },
-                            );
-                          },
-                        );
-                      }).expand(),
-
-          buildNavigationButtonWithDialog(
-            // context: context,
-            title: '완료',
-            onPressed: () async {
-              // bool useReplacement = true;
-              if (GServiceMember.selectedMember == null) {
-                await ShowInformationWidgets.errorDialog(
-                  context,
-                  '멤버를 선택하세요',
-                );
-                return;
-              }
-
-              debugPrint(GServiceMember.selectedMember!.uuid);
-              debugPrint('create step 1');
-              // await GServiceWork.create(
-              //     members: [GServiceMember.selectedMember!.uuid]);
-              debugPrint('create step 2');
-
-              // await GServiceWorklist.get();
-
-              debugPrint('create step 3');
-              await Navigator.of(GNavigationKey.currentContext!)
-                  .pushNamedAndRemoveUntil(
-                PATH.ROUTE_WORK_DETAIL,
-                (route) => false,
+                      return MemberListTile(
+                        member: member,
+                        isSelected: isSelected,
+                        onPressed: () async {
+                          await GServiceMember.select(member: member);
+                        },
+                      );
+                    },
+                  );
+                },
               );
-            },
-          )
-        ],
-      ),
-    );
   }
 
   @override
   void initState() {
     super.initState();
     searchController.addListener(filterMembers);
-    getData();
+    loadData();
   }
 
-  Future<void> getData() async {
+  @override
+  Widget buildNavButton() {
+    return buildNavigationButton(
+      context: context,
+      title: '완료',
+      routerName: PATH.ROUTE_WORK_DETAIL,
+      onPressed: () async {
+        List<MMember> members = GServiceMember.selectedMember ?? [];
+
+        print('group step 1');
+        await GServiceWork.create(members: members.map((e) => e.uuid).toList());
+        print('group step 2');
+      },
+    );
+  }
+
+  @override
+  Future<void> loadData() async {
     setState(() {
       isLoading = true;
     });
@@ -138,7 +115,6 @@ class ViewCreateGroupState extends State<ViewCreateGroup> {
   @override
   void dispose() {
     searchController.dispose();
-    GServiceMember.clearSelection();
     super.dispose();
   }
 }

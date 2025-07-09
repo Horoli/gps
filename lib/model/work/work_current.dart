@@ -2,31 +2,34 @@ part of FlightSteps;
 // 사용자 모델
 
 // 현재 작업 모델 (메인 모델)
-class CurrentWork extends CommonModel<CurrentWork> {
+class MCurrentWork extends CommonModel<MCurrentWork> {
   final String uuid;
   final List<MUserInCurrentWork> users;
   final MAircraftInCurrentWork aircraft;
+  final String type;
   final List<MProcedureInCurrentWork> procedures;
   final String description;
   final DateTime date;
 
-  CurrentWork({
+  MCurrentWork({
     required this.uuid,
     required this.users,
     required this.aircraft,
+    required this.type,
     required this.procedures,
     required this.description,
     required this.date,
   });
 
-  factory CurrentWork.fromMap(Map<String, dynamic> item) {
-    return CurrentWork(
+  factory MCurrentWork.fromMap(Map<String, dynamic> item) {
+    return MCurrentWork(
       uuid: item['uuid'] as String,
       users: (item['users'] as List<dynamic>)
           .map((e) => MUserInCurrentWork.fromMap(e as Map<String, dynamic>))
           .toList(),
       aircraft: MAircraftInCurrentWork.fromMap(
           item['aircraft'] as Map<String, dynamic>),
+      type: item['type'] as String,
       procedures: (item['procedures'] as List<dynamic>)
           .map(
               (e) => MProcedureInCurrentWork.fromMap(e as Map<String, dynamic>))
@@ -42,6 +45,7 @@ class CurrentWork extends CommonModel<CurrentWork> {
       'uuid': uuid,
       'users': users.map((e) => e.toJson()).toList(),
       'aircraft': aircraft.toJson(),
+      'type': type,
       'procedures': procedures.map((e) => e.toJson()).toList(),
       'description': description,
       'date': date.toIso8601String(),
@@ -49,18 +53,20 @@ class CurrentWork extends CommonModel<CurrentWork> {
   }
 
   @override
-  CurrentWork copyWith({
+  MCurrentWork copyWith({
     String? uuid,
     List<MUserInCurrentWork>? users,
     MAircraftInCurrentWork? aircraft,
+    String? type,
     List<MProcedureInCurrentWork>? procedures,
     String? description,
     DateTime? date,
   }) {
-    return CurrentWork(
+    return MCurrentWork(
       uuid: uuid ?? this.uuid,
       users: users ?? this.users,
       aircraft: aircraft ?? this.aircraft,
+      type: type ?? this.type,
       procedures: procedures ?? this.procedures,
       description: description ?? this.description,
       date: date ?? this.date,
@@ -69,48 +75,66 @@ class CurrentWork extends CommonModel<CurrentWork> {
 
   @override
   String toString() {
-    return 'CurrentWork(uuid: $uuid, users: $users, aircraft: $aircraft, procedures: $procedures, description: $description, date: $date)';
+    return 'CurrentWork(uuid: $uuid, users: $users, aircraft: $aircraft, type: $type, procedures: $procedures, description: $description, date: $date)';
   }
 }
 
 class MUserInCurrentWork extends CommonModel<MUserInCurrentWork> {
+  final String uuid;
   final String username;
   final String phoneNumber;
+  final String employeeId;
+  final List<String> groups;
 
   MUserInCurrentWork({
+    required this.uuid,
     required this.username,
     required this.phoneNumber,
+    required this.employeeId,
+    required this.groups,
   });
 
   factory MUserInCurrentWork.fromMap(Map<String, dynamic> item) {
     return MUserInCurrentWork(
+      uuid: item['uuid'] as String,
       username: item['username'] as String,
       phoneNumber: item['phoneNumber'] as String,
+      employeeId: item['employeeId'] as String,
+      groups: List<String>.from(item['groups'] as List),
     );
   }
 
   @override
   Map<String, dynamic> toJson() {
     return {
+      'uuid': uuid,
       'username': username,
       'phoneNumber': phoneNumber,
+      'employeeId': employeeId,
+      'groups': groups,
     };
   }
 
   @override
   MUserInCurrentWork copyWith({
+    String? uuid,
     String? username,
     String? phoneNumber,
+    String? employeeId,
+    List<String>? groups,
   }) {
     return MUserInCurrentWork(
+      uuid: uuid ?? this.uuid,
       username: username ?? this.username,
       phoneNumber: phoneNumber ?? this.phoneNumber,
+      employeeId: employeeId ?? this.employeeId,
+      groups: groups ?? this.groups,
     );
   }
 
   @override
   String toString() {
-    return 'User(username: $username, phoneNumber: $phoneNumber)';
+    return 'MUserInCurrentWork(uuid: $uuid, username: $username, phoneNumber: $phoneNumber, employeeId: $employeeId, groups: $groups)';
   }
 }
 
@@ -118,16 +142,19 @@ class MUserInCurrentWork extends CommonModel<MUserInCurrentWork> {
 class MAircraftInCurrentWork extends CommonModel<MAircraftInCurrentWork> {
   final String name;
   final String departureTime;
+  final String type;
 
   MAircraftInCurrentWork({
     required this.name,
     required this.departureTime,
+    required this.type,
   });
 
   factory MAircraftInCurrentWork.fromMap(Map<String, dynamic> item) {
     return MAircraftInCurrentWork(
       name: item['name'] as String,
       departureTime: item['departureTime'] as String,
+      type: item['type'] as String,
     );
   }
 
@@ -136,6 +163,7 @@ class MAircraftInCurrentWork extends CommonModel<MAircraftInCurrentWork> {
     return {
       'name': name,
       'departureTime': departureTime,
+      'type': type,
     };
   }
 
@@ -143,16 +171,18 @@ class MAircraftInCurrentWork extends CommonModel<MAircraftInCurrentWork> {
   MAircraftInCurrentWork copyWith({
     String? name,
     String? departureTime,
+    String? type,
   }) {
     return MAircraftInCurrentWork(
       name: name ?? this.name,
       departureTime: departureTime ?? this.departureTime,
+      type: type ?? this.type,
     );
   }
 
   @override
   String toString() {
-    return 'Aircraft(name: $name, departureTime: $departureTime)';
+    return 'Aircraft(name: $name, departureTime: $departureTime, type: $type)';
   }
 }
 

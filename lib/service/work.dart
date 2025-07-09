@@ -16,7 +16,7 @@ class ServiceWork extends CommonService {
   final BehaviorSubject<List<MWorkData>> _selectedSubject =
       BehaviorSubject<List<MWorkData>>.seeded([]);
   Stream<List<MWorkData>> get selectedStream => _selectedSubject.stream;
-  List<MWorkData>? get selectedWorks => _selectedSubject.valueOrNull;
+  List<MWorkData> get selectedWorks => _selectedSubject.valueOrNull ?? [];
 
   bool isSelected(MWorkData workData) =>
       _selectedSubject.valueOrNull!.any((item) {
@@ -25,7 +25,7 @@ class ServiceWork extends CommonService {
         return selected == now;
       });
 
-  void dispose() {
+  Future<void> clearSelection() async {
     _selectedSubject.add([]);
   }
 
@@ -58,11 +58,6 @@ class ServiceWork extends CommonService {
     debugPrint('_selectedSubject.valueOrNull ${_selectedSubject.valueOrNull}');
   }
 
-  // 화면을 갱신하기 위한 함수
-  Future refreshAvailableWorks() async {
-    _availableSubject.add(_availableSubject.valueOrNull!);
-  }
-
   Future<List<MWorkData>> getAvailableWorks() async {
     Completer<List<MWorkData>> completer = Completer<List<MWorkData>>();
     final List<String> cookies = await CookieManager.load();
@@ -89,47 +84,65 @@ class ServiceWork extends CommonService {
     return completer.future;
   }
 
-  // Future<void> create({
-  //   required List<String> members,
-  // }) async {
-  //   try {
-  //     if (selectedWork == null) {
-  //       debugPrint('selectedWork is null');
-  //       return;
-  //     }
-  //     final List<String> cookies = await CookieManager.load();
-  //     debugPrint('cookies $cookies');
-  //     final Map<String, dynamic> headers =
-  //         HttpConnector.headersByCookie(cookies);
-  //     dio.options.extra['withCredentials'] = true;
+  // 화면을 갱신하기 위한 함수
+  Future refreshAvailableWorks() async {
+    _availableSubject.add(_availableSubject.valueOrNull!);
+  }
 
-  //     // Position position = await Geolocator.getCurrentPosition();
-  //     // Position position = GServiceLocation.currentPosition!;
-  //     // print('position $position');
-  //     Position? position = await Geolocator.getLastKnownPosition();
-  //     position ??= await Geolocator.getCurrentPosition();
+  Future<void> create({
+    required List<String> members,
+  }) async {
+    try {
+      if (selectedWorks.isEmpty) {
+        debugPrint('selectedWork is null');
+        return;
+      }
+      final List<String> cookies = await CookieManager.load();
+      debugPrint('cookies $cookies');
+      final Map<String, dynamic> headers =
+          HttpConnector.headersByCookie(cookies);
+      dio.options.extra['withCredentials'] = true;
 
-  //     final Response response = await HttpConnector.post(
-  //       dio: dio,
-  //       url: '${URL.BASE_URL}/${URL.GET_WORK_LIST}',
-  //       data: {
-  //         "members": members,
-  //         "lng": position.longitude,
-  //         "lat": position.latitude,
-  //         "aircraftName": selectedWork!.name,
-  //         "aircraftDepartureTime": selectedWork!.departureTime,
-  //         "timestamp": DateTime.now().toIso8601String(),
-  //       },
-  //       cookies: cookies,
-  //     );
-  //     return;
-  //   } catch (e) {
-  //     if (e is DioException) {
-  //       if (e.response != null) {
-  //         debugPrint('error statusCode : ${e.response?.statusCode}');
-  //         debugPrint('error data : ${e.response?.data}');
-  //       }
-  //     }
-  //   }
-  // }
+      // Position position = await Geolocator.getCurrentPosition();
+      // Position position = GServiceLocation.currentPosition!;
+      // print('position $position');
+      Position? position = await Geolocator.getLastKnownPosition();
+      position ??= await Geolocator.getCurrentPosition();
+
+      List<Map<String, dynamic>> aircraft = selectedWorks
+          .map((work) => {
+                'name': work.name,
+                'departurTime': work.departureTime,
+              })
+          .toList();
+
+      Map<String, dynamic> postData = {
+        "members": members,
+        "lng": position.longitude,
+        "lat": position.latitude,
+        "aircraft": aircraft,
+        "plateNumber": '1234',
+        "timestamp": DateTime.now().toIso8601String(),
+        // "aircraftName": selectedWork!.name,
+        // "aircraftDepartureTime": selectedWork!.departureTime,
+      };
+
+      print('postData $postData');
+
+      final Response response = await HttpConnector.post(
+        dio: dio,
+        url: '${URL.BASE_URL}/${URL.POST_WORK_LIST}',
+        data: postData,
+        cookies: cookies,
+      );
+      return;
+    } catch (e) {
+      if (e is DioException) {
+        if (e.response != null) {
+          debugPrint('error statusCode : ${e.response?.statusCode}');
+          debugPrint('error data : ${e.response?.data}');
+        }
+      }
+    }
+  }
 }

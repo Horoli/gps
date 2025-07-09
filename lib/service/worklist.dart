@@ -9,10 +9,20 @@ class ServiceWorklist extends CommonService {
 
   final BehaviorSubject<MWorkList?> subject =
       BehaviorSubject<MWorkList?>.seeded(null);
-
   Stream<MWorkList?> get stream => subject.stream;
-
   MWorkList? get lastValue => subject.valueOrNull;
+
+  final BehaviorSubject<MCurrentWork?> _selectedCurrentSubject =
+      BehaviorSubject<MCurrentWork?>.seeded(null);
+
+  Stream<MCurrentWork?> get selectedCurrentWorkStream =>
+      _selectedCurrentSubject.stream;
+  MCurrentWork? get selectedCurrentWorkLastValue =>
+      _selectedCurrentSubject.valueOrNull;
+
+  Future<void> select(MCurrentWork currentWork) async {
+    _selectedCurrentSubject.add(currentWork);
+  }
 
   Future<MWorkList> get() async {
     Completer<MWorkList> completer = Completer<MWorkList>();
@@ -26,10 +36,16 @@ class ServiceWorklist extends CommonService {
       cookies: cookies,
     );
 
-    print('response ${response}');
+    debugPrint('response ${response}');
 
     if (!completer.isCompleted) {
       final Map<String, dynamic> data = response.data as Map<String, dynamic>;
+
+      final List<dynamic> currentWorkData =
+          data['currentWork'] as List<dynamic>;
+
+      List<MCurrentWork> currentWork =
+          currentWorkData.map((cur) => MCurrentWork.fromMap(cur)).toList();
 
       final List<MExtraWorkData> extraWorkList =
           (data['extraWorkList'] as List<dynamic>)
@@ -54,12 +70,14 @@ class ServiceWorklist extends CommonService {
 
       // MWorkListData 객체 생성
       final MWorkList result = MWorkList(
-        // currentWork: currentWork,
+        currentWork: currentWork,
         extraWorkList: extraWorkList,
         workList: workList,
         step: steps,
         date: date,
       );
+
+      print('step 4 : ${result.currentWork}');
 
       subject.add(result);
       completer.complete(result);
@@ -69,44 +87,44 @@ class ServiceWorklist extends CommonService {
   }
 
   // 현재 작업 완료 함수
-  // Future<void> completeProcedure() async {
-  //   try {
-  //   final List<String> cookies = await CookieManager.load();
-  //   // final Map<String, dynamic> headers =
-  //   //     HttpConnector.headersByCookie(cookies);
-  //   dio.options.extra['withCredentials'] = true;
-  //   debugPrint('cookies $cookies');
+  Future<void> completeProcedure() async {
+    try {
+      final List<String> cookies = await CookieManager.load();
+      // final Map<String, dynamic> headers =
+      //     HttpConnector.headersByCookie(cookies);
+      dio.options.extra['withCredentials'] = true;
+      debugPrint('cookies $cookies');
 
-  //   // 현재 시간을 ISO 8601 형식의 문자열로 변환
-  //   String uuid = lastValue!.currentWork!.uuid;
-  //   // Position? position = await Geolocator.getLastKnownPosition();
-  //   Position? position = GServiceLocation._subject.valueOrNull;
-  //   if (position == null) {
-  //     return ShowInformationWidgets.errorDialog(
-  //         GNavigationKey.currentState!.context, 'GPS 값을 찾을 수 없습니다');
-  //   }
-  //   final String timestamp = DateTime.now().toIso8601String();
-  //   debugPrint(
-  //       '중간 : gps값 갱신 lat ${position.latitude} / lng ${position.longitude} ${DateTime.now().millisecondsSinceEpoch}');
+      // 현재 시간을 ISO 8601 형식의 문자열로 변환
+      String uuid = selectedCurrentWorkLastValue!.uuid;
+      // Position? position = await Geolocator.getLastKnownPosition();
+      Position? position = GServiceLocation._subject.valueOrNull;
+      if (position == null) {
+        return ShowInformationWidgets.errorDialog(
+            GNavigationKey.currentState!.context, 'GPS 값을 찾을 수 없습니다');
+      }
+      final String timestamp = DateTime.now().toIso8601String();
+      debugPrint(
+          '중간 : gps값 갱신 lat ${position.latitude} / lng ${position.longitude} ${DateTime.now().millisecondsSinceEpoch}');
 
-  //   final Response response = await HttpConnector.post(
-  //       dio: dio,
-  //       url: '${URL.BASE_URL}/api/user/work/$uuid/procedure/complete',
-  //       cookies: cookies,
-  //       data: {
-  //         "lng": position.longitude,
-  //         "lat": position.latitude,
-  //         "description": '',
-  //         "timestamp": timestamp
-  //       });
-  // } on DioException catch (e) {
-  //   if (e.response != null) {
-  //     ResponseBody errorBody = e.response?.data as ResponseBody;
+      final Response response = await HttpConnector.post(
+          dio: dio,
+          url: '${URL.BASE_URL}/api/user/work/$uuid/procedure/complete',
+          cookies: cookies,
+          data: {
+            "lng": position.longitude,
+            "lat": position.latitude,
+            "description": '',
+            "timestamp": timestamp
+          });
+    } on DioException catch (e) {
+      if (e.response != null) {
+        ResponseBody errorBody = e.response?.data as ResponseBody;
 
-  //     debugPrint('error statusCode : ${e.response?.statusCode}');
-  //     debugPrint('error message : ${errorBody.statusMessage}');
-  //     throw errorBody;
-  //   }
-  // }
-  // }
+        debugPrint('error statusCode : ${e.response?.statusCode}');
+        debugPrint('error message : ${errorBody.statusMessage}');
+        throw errorBody;
+      }
+    }
+  }
 }

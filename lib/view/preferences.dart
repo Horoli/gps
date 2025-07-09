@@ -91,7 +91,7 @@ class ViewPreferencesState extends State<ViewPreferences> {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      user.employeeId,
+                      user.employeeId!,
                       style: const TextStyle(
                         fontSize: 14,
                         color: Colors.black87,

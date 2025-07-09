@@ -7,12 +7,12 @@ class ServiceMember extends CommonService {
 
   ServiceMember._internal();
 
-  final BehaviorSubject<MMember?> _subject =
-      BehaviorSubject<MMember?>.seeded(null);
+  final BehaviorSubject<List<MMember>> _selectedSubject =
+      BehaviorSubject<List<MMember>>.seeded([]);
 
-  Stream<MMember?> get stream => _subject.stream;
+  Stream<List<MMember>> get stream => _selectedSubject.stream;
 
-  MMember? get selectedMember => _subject.valueOrNull;
+  List<MMember>? get selectedMember => _selectedSubject.valueOrNull;
 
   Future<List<MMember>> get() async {
     Completer<List<MMember>> completer = Completer<List<MMember>>();
@@ -35,11 +35,40 @@ class ServiceMember extends CommonService {
     return completer.future;
   }
 
+  bool isSelected(MMember member) =>
+      _selectedSubject.valueOrNull!.any((item) => item.uuid == member.uuid);
+  // // String selected = '${item.}_${item.departureTime}';
+  // // String now = '${workData.name}_${workData.departureTime}';
+  // return selected == now;
+  // ;
+
   Future<void> select({required MMember member}) async {
-    _subject.add(member);
+    print('isSelected ${isSelected(member)}');
+    if (_selectedSubject.valueOrNull == null ||
+        _selectedSubject.valueOrNull!.isEmpty) {
+      // 선택된 항공편이 비어있다면 새로운 리스트로 초기화
+      _selectedSubject.add([member]);
+      debugPrint('Work selected: ${member.uuid}');
+      return;
+    }
+
+    // 이미 선택된 항공편이 있는 경우, 중복 체크
+    if (isSelected(member)) {
+      // 이미 선택된 항공편인 경우, 리스트에서 제거
+      List<MMember> droppedList = _selectedSubject.valueOrNull!
+          .where((item) => item.uuid != member.uuid)
+          .toList();
+
+      _selectedSubject.add(droppedList);
+      return;
+    }
+
+    // 중복되지 않는 경우에만 추가
+    _selectedSubject.add([..._selectedSubject.value, member]);
+    debugPrint('_selectedSubject.valueOrNull ${_selectedSubject.valueOrNull}');
   }
 
   Future<void> clearSelection() async {
-    _subject.add(null);
+    _selectedSubject.add([]);
   }
 }

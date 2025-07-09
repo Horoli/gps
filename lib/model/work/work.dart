@@ -2,12 +2,14 @@ part of FlightSteps;
 
 class MWorkData extends CommonModel<MWorkData> {
   final String name; // 항공편 번호 (예: LJ221)
+  final List<MUser>? users;
   final String? type; // 항공기 타입 (예: 738)
   final String? state; // 상태 (예: normal)
   final String departureTime; // 출발 시간 (예: 0715)
 
   MWorkData({
     required this.name,
+    this.users,
     this.type,
     this.state,
     required this.departureTime,
@@ -17,6 +19,8 @@ class MWorkData extends CommonModel<MWorkData> {
   factory MWorkData.fromMap(Map<String, dynamic> item) {
     return MWorkData(
       name: item['name'] as String,
+      users:
+          List.from(item['users'] ?? []).map((u) => MUser.fromMap(u)).toList(),
       type: item['type'] ?? '',
       state: item['state'] ?? '',
       departureTime: item['departureTime'] as String,
@@ -28,6 +32,7 @@ class MWorkData extends CommonModel<MWorkData> {
   Map<String, dynamic> toJson() {
     return {
       'name': name,
+      'users': users,
       'type': type,
       'state': state,
       'departureTime': departureTime,
@@ -39,12 +44,14 @@ class MWorkData extends CommonModel<MWorkData> {
   MWorkData copyWith({
     String? name,
     String? type,
+    List<MUser>? users,
     String? state,
     String? departureTime,
   }) {
     return MWorkData(
       name: name ?? this.name,
       type: type ?? this.type,
+      users: users ?? this.users,
       state: state ?? this.state,
       departureTime: departureTime ?? this.departureTime,
     );
@@ -52,6 +59,6 @@ class MWorkData extends CommonModel<MWorkData> {
 
   @override
   String toString() {
-    return 'Work(name: $name, type: $type, state: $state, departureTime: $departureTime)';
+    return 'Work(name: $name, type: $type, users: $users, state: $state, departureTime: $departureTime)';
   }
 }

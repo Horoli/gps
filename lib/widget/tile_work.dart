@@ -2,10 +2,14 @@ part of FlightSteps;
 
 class TileWork extends StatelessWidget {
   final MWorkData workData;
+  final MCurrentWork? currentWork;
+  // final bool isWorking;
 
   const TileWork({
     super.key,
     required this.workData,
+    this.currentWork,
+    // required this.isWorking,
   });
 
   @override
@@ -58,6 +62,19 @@ class TileWork extends StatelessWidget {
             await GServiceWork.select(workData: workData);
           });
     }
+
+    if (workData.state == STATE.WORKSTATE_WORKING && currentWork != null) {
+      return buildNavigationButton(
+        context: context,
+        title: '작업 진행 중',
+        usePadding: false,
+        routerName: PATH.ROUTE_WORK_DETAIL,
+        onPressed: () async {
+          GServiceWorklist.select(currentWork!);
+        },
+      );
+    }
+
     return buildElevatedButton(
       onPressed: null,
       usePadding: false,

@@ -4,8 +4,8 @@ class MUser extends CommonModel<MUser> {
   final String uuid;
   final String username;
   final String phoneNumber;
-  final String employeeId;
-  final List<String> groups;
+  final String? employeeId;
+  final List<String>? groups;
 
   MUser({
     required this.uuid,
@@ -21,8 +21,8 @@ class MUser extends CommonModel<MUser> {
       uuid: item['uuid'] as String,
       username: item['username'] as String,
       phoneNumber: item['phoneNumber'] as String,
-      employeeId: item['employeeId'] as String,
-      groups: List<String>.from(item['groups'] as List),
+      employeeId: item['employeeId'] ?? '',
+      groups: List<String>.from(item['groups'] ?? []),
     );
   }
 
