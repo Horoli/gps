@@ -67,6 +67,7 @@ class ViewCreateGroupState extends ViewCreateAbstractState<ViewCreateGroup> {
 
         print('group step 1');
         await GServiceWork.create(members: members.map((e) => e.uuid).toList());
+
         print('group step 2');
       },
     );

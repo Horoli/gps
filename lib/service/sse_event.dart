@@ -343,18 +343,26 @@ class ServiceSSE extends CommonService {
     // 현재 작업을 업데이트
     MCurrentWork updatedCurrentWork =
         currentWork.copyWith(procedures: currentProcedures);
-    print('aaaaaaaaaaaa');
-    print('aaaaaaaaaaaa');
-    print('aaaaaaaaaaaa');
-    print('aaaaaaaaaaaa');
-    print('aaaaaaaaaaaa');
+
+    List<MCurrentWork> aaa = GServiceWorklist.lastValue!.currentWork.map((cur) {
+      if (cur.uuid == updatedCurrentWork.uuid) {
+        return updatedCurrentWork;
+      }
+      return cur;
+    }).toList();
 
     // 작업리스트를 업데이트
     MWorkList updatedWorkList =
-        GServiceWorklist.lastValue!.copyWith(currentWork: [updatedCurrentWork]);
+        GServiceWorklist.lastValue!.copyWith(currentWork: aaa);
+
+    // print('sssssssssssstep 1');
+    // print('sssssssssssstep 2');
+    // GServiceWorklist.selectedCurrentWorkSubject.add(updatedCurrentWork);
 
     // 상태 업데이트
-    // GServiceWorklist.subject.add(updatedWorkList);
+    GServiceWorklist.subject.add(updatedWorkList);
+    GServiceWorklist.selectedCurrentWorkSubject.add(updatedCurrentWork);
+
     debugPrint('SSE stream completed');
   }
 

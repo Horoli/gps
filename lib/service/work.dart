@@ -112,16 +112,16 @@ class ServiceWork extends CommonService {
       List<Map<String, dynamic>> aircraft = selectedWorks
           .map((work) => {
                 'name': work.name,
-                'departurTime': work.departureTime,
+                'departureTime': work.departureTime,
               })
           .toList();
 
       Map<String, dynamic> postData = {
-        "members": members,
+        "members": jsonEncode(members),
         "lng": position.longitude,
         "lat": position.latitude,
         "aircraft": aircraft,
-        "plateNumber": '1234',
+        "plateNumber": "1234".toString(),
         "timestamp": DateTime.now().toIso8601String(),
         // "aircraftName": selectedWork!.name,
         // "aircraftDepartureTime": selectedWork!.departureTime,
@@ -131,7 +131,7 @@ class ServiceWork extends CommonService {
 
       final Response response = await HttpConnector.post(
         dio: dio,
-        url: '${URL.BASE_URL}/${URL.POST_WORK_LIST}',
+        url: '${URL.BASE_URL}/${URL.POST_WORK_AIRCRAFT}',
         data: postData,
         cookies: cookies,
       );

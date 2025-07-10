@@ -12,16 +12,16 @@ class ServiceWorklist extends CommonService {
   Stream<MWorkList?> get stream => subject.stream;
   MWorkList? get lastValue => subject.valueOrNull;
 
-  final BehaviorSubject<MCurrentWork?> _selectedCurrentSubject =
+  final BehaviorSubject<MCurrentWork?> selectedCurrentWorkSubject =
       BehaviorSubject<MCurrentWork?>.seeded(null);
 
   Stream<MCurrentWork?> get selectedCurrentWorkStream =>
-      _selectedCurrentSubject.stream;
+      selectedCurrentWorkSubject.stream;
   MCurrentWork? get selectedCurrentWorkLastValue =>
-      _selectedCurrentSubject.valueOrNull;
+      selectedCurrentWorkSubject.valueOrNull;
 
   Future<void> select(MCurrentWork currentWork) async {
-    _selectedCurrentSubject.add(currentWork);
+    selectedCurrentWorkSubject.add(currentWork);
   }
 
   Future<MWorkList> get() async {

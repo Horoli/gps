@@ -8,19 +8,20 @@ class ViewWorkDetail extends StatefulWidget {
 }
 
 class ViewWorkDetailState extends State<ViewWorkDetail> {
+  int _currentProcedureIndex = 0;
   @override
   Widget build(BuildContext context) {
     // return Scaffold(
     //   appBar: commonAppBar(title: TITLE.WORK),
     // );
     // 현재 선택된 절차 인덱스
-    int _currentProcedureIndex = 0;
 
     return Scaffold(
       appBar: commonAppBar(title: TITLE.WORK),
-      body: StreamBuilder<MCurrentWork?>(
-        stream: GServiceWorklist.selectedCurrentWorkStream,
+      body: StreamBuilder<MWorkList?>(
+        stream: GServiceWorklist.stream,
         builder: (context, snapshot) {
+          print('snapshot $snapshot');
           if (snapshot.connectionState == ConnectionState.waiting) {
             return StreamExceptionWidgets.waiting(context: context);
           }
@@ -40,9 +41,16 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
                 context: context, title: '작업 정보가 없습니다');
           }
 
-          final MCurrentWork currentWork = snapshot.data!;
+          // final MCurrentWork currentWork = snapshot.data!;
+          final MCurrentWork? currentWork = snapshot.data!.currentWork
+              .where((MCurrentWork cur) =>
+                  cur.uuid ==
+                  GServiceWorklist.selectedCurrentWorkLastValue!.uuid)
+              .first;
+
+          print('detail : $currentWork');
           final List<MProcedureInCurrentWork> procedures =
-              currentWork.procedures;
+              currentWork!.procedures;
 
           // 현재 진행 중인 절차 찾기
           for (int i = 0; i < procedures.length; i++) {
@@ -270,6 +278,7 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
 
   Future<void> getData() async {
     await GServiceWorklist.get();
+    await GServiceSSE.connect();
   }
 
   Future<void> showConfirmationDialog(

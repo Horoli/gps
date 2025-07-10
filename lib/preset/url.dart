@@ -4,6 +4,7 @@ String USER_LOCATION = 'api/user/location';
 String CHECK_LIST = 'api/config/checklist';
 String GET_WORK_LIST = 'api/user/work';
 String POST_WORK_LIST = 'api/user/work';
+String POST_WORK_AIRCRAFT = 'api/user/work/aircraft';
 String MEMBER_LIST = 'api/user/work/members/available';
 String STREAM = 'api/stream';
 String CONFIG_GPS = 'api/config/gps';
