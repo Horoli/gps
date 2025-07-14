@@ -16,6 +16,10 @@ class RouterManager {
     if (_currentRouteName == PATH.ROUTE_WORKLIST) {
       GServiceWork.clearSelection();
       GServiceMember.clearSelection();
+      GServiceWorklist.clearSelection();
+      GServiceSSE.disconnect();
+      procedureIndexById = {};
+
       print('WORKLIST 화면 활성화 - clearSelection 실행됨');
     }
   }

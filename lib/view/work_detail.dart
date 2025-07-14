@@ -8,7 +8,8 @@ class ViewWorkDetail extends StatefulWidget {
 }
 
 class ViewWorkDetailState extends State<ViewWorkDetail> {
-  int _currentProcedureIndex = 0;
+  int currentProcedureIndex = 0;
+
   @override
   Widget build(BuildContext context) {
     // return Scaffold(
@@ -21,7 +22,7 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
       body: StreamBuilder<MWorkList?>(
         stream: GServiceWorklist.stream,
         builder: (context, snapshot) {
-          print('snapshot $snapshot');
+          print('workDetail snapshot $snapshot');
           if (snapshot.connectionState == ConnectionState.waiting) {
             return StreamExceptionWidgets.waiting(context: context);
           }
@@ -41,16 +42,20 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
                 context: context, title: '작업 정보가 없습니다');
           }
 
-          // final MCurrentWork currentWork = snapshot.data!;
-          final MCurrentWork? currentWork = snapshot.data!.currentWork
-              .where((MCurrentWork cur) =>
-                  cur.uuid ==
-                  GServiceWorklist.selectedCurrentWorkLastValue!.uuid)
-              .firstOrNull;
+          final MCurrentWork? currentWork = GServiceWorklist.getCurrentWork(
+            inputCurrentWork: snapshot.data!.currentWork,
+          );
+
+          // snapshot.data!.currentWork
+          //     .where((MCurrentWork cur) =>
+          //         cur.uuid ==
+          //         GServiceWorklist.selectedCurrentWorkLastValue?.uuid)
+          //     .toList()
+          //     .firstOrNull;
 
           if (currentWork == null) {
             return StreamExceptionWidgets.noData(
-                context: context, title: '작업 정보가 없습니다');
+                context: context, title: '해당 작업 정보가 없습니다');
           }
 
           print('detail : $currentWork');
@@ -62,24 +67,29 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
             if (procedures[i].date == null ||
                 procedures[i].date!.year == 1970) {
               // 기본값 날짜 체크
-              _currentProcedureIndex = i;
+              currentProcedureIndex = i;
               break;
             }
           }
+
+          procedureIndexById[currentWork.uuid] = currentProcedureIndex;
+
+          print('procedureIndexById ${procedureIndexById}');
+          int iiii = procedureIndexById[currentWork.uuid]!;
+          print('iiii $iiii');
+
           return Column(
             children: [
               buildWorkInfo(currentWork).flex(flex: 2),
-              buildCurrentWork(procedures[_currentProcedureIndex])
-                  .flex(flex: 2),
-              buildWorkHistory(procedures, _currentProcedureIndex)
-                  .flex(flex: 2),
+              buildCurrentWork(procedures[iiii]).flex(flex: 2),
+              buildWorkHistory(procedures, iiii).flex(flex: 2),
               buildWorkers(currentWork).flex(flex: 3),
               // 현재 작업 완료 버튼
               buildElevatedButton(
                 onPressed: () async {
                   await showConfirmationDialog(
                     context,
-                    procedures[_currentProcedureIndex].name,
+                    procedures[iiii].name,
                   );
                 },
                 child: const Text(
@@ -345,16 +355,13 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
   Future<void> completeProcedure() async {
     // 여기에 작업 완료 API 호출 로직 구현
     try {
-      // 현재 위치 가져오기
-      // Position position = await Geolocator.getCurrentPosition();
-
       // 작업 완료 API 호출
-
       debugPrint('완료 처리 ${DateTime.now().millisecondsSinceEpoch}');
       await GServiceWorklist.completeProcedure();
-      debugPrint(
-          'GServiceWorklist.lastValue?.currentWork == null ${GServiceWorklist.lastValue?.currentWork == null}');
-      if (GServiceWorklist.lastValue?.currentWork == null) {
+      // debugPrint(
+      //     'GServiceWorklist.lastValue?.currentWork == null ${GServiceWorklist.lastValue?.currentWork == null}');
+      MCurrentWork? getCurrentWork = GServiceWorklist.getCurrentWork();
+      if (getCurrentWork == null) {
         await Navigator.of(context).pushReplacementNamed(PATH.ROUTE_WORKLIST);
       }
 

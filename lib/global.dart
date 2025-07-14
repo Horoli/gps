@@ -19,6 +19,8 @@ const String tmpID = 'devel';
 
 final GlobalKey<NavigatorState> GNavigationKey = GlobalKey();
 
+Map<String, int> procedureIndexById = {};
+
 /**
  * 임시로 global에다 생성
  */

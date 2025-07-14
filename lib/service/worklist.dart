@@ -24,6 +24,28 @@ class ServiceWorklist extends CommonService {
     selectedCurrentWorkSubject.add(currentWork);
   }
 
+  Future<void> clearSelection() async {
+    selectedCurrentWorkSubject.add(null);
+  }
+
+  MCurrentWork? getCurrentWork({
+    List<MCurrentWork>? inputCurrentWork,
+  }) {
+    if (inputCurrentWork == null) {
+      return lastValue!.currentWork
+          .where((cur) =>
+              cur.uuid == GServiceWorklist.selectedCurrentWorkLastValue?.uuid)
+          .toList()
+          .firstOrNull;
+    }
+
+    return inputCurrentWork
+        .where((cur) =>
+            cur.uuid == GServiceWorklist.selectedCurrentWorkLastValue?.uuid)
+        .toList()
+        .firstOrNull;
+  }
+
   Future<MWorkList> get() async {
     Completer<MWorkList> completer = Completer<MWorkList>();
     final List<String> cookies = await CookieManager.load();
@@ -41,41 +63,43 @@ class ServiceWorklist extends CommonService {
     if (!completer.isCompleted) {
       final Map<String, dynamic> data = response.data as Map<String, dynamic>;
 
-      final List<dynamic> currentWorkData =
-          data['currentWork'] as List<dynamic>;
+      final MWorkList result = MWorkList.fromMap(data);
 
-      List<MCurrentWork> currentWork =
-          currentWorkData.map((cur) => MCurrentWork.fromMap(cur)).toList();
+      // final List<dynamic> currentWorkData =
+      //     data['currentWork'] as List<dynamic>;
 
-      final List<MExtraWorkData> extraWorkList =
-          (data['extraWorkList'] as List<dynamic>)
-              .map((extraWorkItem) =>
-                  MExtraWorkData.fromMap(extraWorkItem as Map<String, dynamic>))
-              .toList();
+      // List<MCurrentWork> currentWork =
+      //     currentWorkData.map((cur) => MCurrentWork.fromMap(cur)).toList();
 
-      // workList 파싱
-      final List<MWorkData> workList = (data['workList'] as List<dynamic>)
-          .map(
-              (workItem) => MWorkData.fromMap(workItem as Map<String, dynamic>))
-          .toList();
-      debugPrint('works $workList');
+      // final List<MExtraWorkData> extraWorkList =
+      //     (data['extraWorkList'] as List<dynamic>)
+      //         .map((extraWorkItem) =>
+      //             MExtraWorkData.fromMap(extraWorkItem as Map<String, dynamic>))
+      //         .toList();
 
-      // step 파싱
-      final List<String> steps = (data['step'] as List<dynamic>)
-          .map((step) => step.toString())
-          .toList();
+      // // workList 파싱
+      // final List<MWorkData> workList = (data['workList'] as List<dynamic>)
+      //     .map(
+      //         (workItem) => MWorkData.fromMap(workItem as Map<String, dynamic>))
+      //     .toList();
+      // debugPrint('works $workList');
 
-      // date 파싱
-      final String date = data['date'] as String;
+      // // step 파싱
+      // final List<String> steps = (data['step'] as List<dynamic>)
+      //     .map((step) => step.toString())
+      //     .toList();
+
+      // // date 파싱
+      // final String date = data['date'] as String;
 
       // MWorkListData 객체 생성
-      final MWorkList result = MWorkList(
-        currentWork: currentWork,
-        extraWorkList: extraWorkList,
-        workList: workList,
-        step: steps,
-        date: date,
-      );
+      // final MWorkList result = MWorkList(
+      //   currentWork: currentWork,
+      //   extraWorkList: extraWorkList,
+      //   workList: workList,
+      //   step: steps,
+      //   date: date,
+      // );
 
       print('step 4 : ${result.currentWork}');
 

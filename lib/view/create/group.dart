@@ -57,18 +57,23 @@ class ViewCreateGroupState extends ViewCreateAbstractState<ViewCreateGroup> {
   }
 
   @override
+  // TODO : replacement가 아니라, 2단계 이전의 route만 제거가 돼야함
   Widget buildNavButton() {
     return buildNavigationButton(
       context: context,
       title: '완료',
+      useReplacement: true,
       routerName: PATH.ROUTE_WORK_DETAIL,
       onPressed: () async {
         List<MMember> members = GServiceMember.selectedMember ?? [];
 
-        print('group step 1');
-        await GServiceWork.create(members: members.map((e) => e.uuid).toList());
+        MCurrentWork? result = await GServiceWork.create(
+            members: members.map((e) => e.uuid).toList());
+        if (result == null) {
+          return;
+        }
 
-        print('group step 2');
+        GServiceWorklist.select(result);
       },
     );
   }

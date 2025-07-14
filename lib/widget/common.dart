@@ -88,7 +88,7 @@ Widget buildNavigationButton({
   required String routerName,
   bool useReplacement = false,
   bool usePadding = true,
-  VoidCallback? onPressed,
+  Future<void> Function()? onPressed,
 }) {
   return Padding(
     padding: usePadding ? SIZE.BUTTON_PADDING : EdgeInsets.zero,
@@ -98,14 +98,15 @@ Widget buildNavigationButton({
       child: ElevatedButton(
         onPressed: () async {
           if (onPressed != null) {
-            onPressed();
+            await onPressed();
           }
 
           useReplacement
               ? await Navigator.pushNamedAndRemoveUntil(
-                  GNavigationKey.currentContext!,
-                  routerName,
-                  ModalRoute.withName(('/')))
+                  GNavigationKey.currentContext!, routerName, (route) {
+                  return route.settings.name == PATH.ROUTE_WORKLIST;
+                })
+              // ModalRoute.withName(('/')))
               : await Navigator.pushNamed(
                   GNavigationKey.currentContext!, routerName);
         },

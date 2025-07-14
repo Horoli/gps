@@ -89,13 +89,13 @@ class ServiceWork extends CommonService {
     _availableSubject.add(_availableSubject.valueOrNull!);
   }
 
-  Future<void> create({
+  Future<MCurrentWork?> create({
     required List<String> members,
   }) async {
     try {
       if (selectedWorks.isEmpty) {
         debugPrint('selectedWork is null');
-        return;
+        return null;
       }
       final List<String> cookies = await CookieManager.load();
       debugPrint('cookies $cookies');
@@ -135,7 +135,20 @@ class ServiceWork extends CommonService {
         data: postData,
         cookies: cookies,
       );
-      return;
+      print('GServiceWork create response : $response');
+      // List<dynamic> data = List.from(jsonDecode(response.data) ?? []);
+
+      final List<dynamic> data = response.data as List<dynamic>;
+
+      print('GServiceWork step 1');
+      List<MCurrentWork> currentWorks =
+          data.map((cur) => MCurrentWork.fromMap(cur)).toList();
+      print('GServiceWork step 2');
+
+      // String uuid = List.from(jsonDecode(response.data) ?? [])[0].uuid;
+      return currentWorks[0];
+
+      // return uuid;
     } catch (e) {
       if (e is DioException) {
         if (e.response != null) {
@@ -144,5 +157,6 @@ class ServiceWork extends CommonService {
         }
       }
     }
+    return null;
   }
 }

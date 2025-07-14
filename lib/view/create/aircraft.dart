@@ -57,10 +57,11 @@ class ViewCreateAircraftState
   @override
   Widget buildNavButton() {
     return buildNavigationButton(
-        context: context,
-        title: '완료',
-        routerName: PATH.ROUTE_CREATE_GROUP,
-        onPressed: () {});
+      context: context,
+      title: '완료',
+      routerName: PATH.ROUTE_CREATE_GROUP,
+      // onPressed: () {},
+    );
   }
 
   @override
