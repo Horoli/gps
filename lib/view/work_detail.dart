@@ -46,11 +46,16 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
               .where((MCurrentWork cur) =>
                   cur.uuid ==
                   GServiceWorklist.selectedCurrentWorkLastValue!.uuid)
-              .first;
+              .firstOrNull;
+
+          if (currentWork == null) {
+            return StreamExceptionWidgets.noData(
+                context: context, title: '작업 정보가 없습니다');
+          }
 
           print('detail : $currentWork');
           final List<MProcedureInCurrentWork> procedures =
-              currentWork!.procedures;
+              currentWork.procedures;
 
           // 현재 진행 중인 절차 찾기
           for (int i = 0; i < procedures.length; i++) {
