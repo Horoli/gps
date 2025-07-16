@@ -85,6 +85,7 @@ class ServiceSSE extends CommonService {
   final StreamTransformer _transformer =
       StreamTransformer<Uint8List, Map<String, dynamic>>.fromHandlers(
     handleData: (data, sink) {
+      print('aaaaaaaa');
       try {
         final String rawData = utf8.decode(data);
         debugPrint('rawData $rawData');
@@ -168,10 +169,14 @@ class ServiceSSE extends CommonService {
       cookies: cookies,
     );
 
+    print('stream response ${response.headers}');
+    print('stream response ${response.statusCode}');
+
     debugPrint('stream step 2');
 
     Stream tmpStream = response.data.stream as Stream;
     eventStream = tmpStream.transform(_transformer);
+
     debugPrint('stream step 3');
 
     _isConnected = true;
@@ -179,7 +184,10 @@ class ServiceSSE extends CommonService {
     debugPrint('stream step 4');
 
     await _eventSub?.cancel();
+    debugPrint('stream step 5');
     _eventSub = eventStream.listen((data) async {
+      debugPrint('stream step 6');
+      debugPrint('eventStream.data $data');
       final Stopwatch stopwatch = Stopwatch()..start();
 
       debugPrint('stopwatch start : ${DateTime.now().millisecondsSinceEpoch}');
