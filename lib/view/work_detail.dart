@@ -12,11 +12,6 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
 
   @override
   Widget build(BuildContext context) {
-    // return Scaffold(
-    //   appBar: commonAppBar(title: TITLE.WORK),
-    // );
-    // 현재 선택된 절차 인덱스
-
     return Scaffold(
       appBar: commonAppBar(title: TITLE.WORK),
       body: StreamBuilder<MWorkList?>(
@@ -37,7 +32,6 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
           }
 
           if (!snapshot.hasData) {
-            // GServiceWorklist.navigatorWithHasCurrentWork();
             return StreamExceptionWidgets.noData(
                 context: context, title: '작업 정보가 없습니다');
           }
@@ -46,61 +40,83 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
             inputCurrentWork: snapshot.data!.currentWork,
           );
 
-          // snapshot.data!.currentWork
-          //     .where((MCurrentWork cur) =>
-          //         cur.uuid ==
-          //         GServiceWorklist.selectedCurrentWorkLastValue?.uuid)
-          //     .toList()
-          //     .firstOrNull;
-
           if (currentWork == null) {
             return StreamExceptionWidgets.noData(
                 context: context, title: '해당 작업 정보가 없습니다');
           }
 
-          print('detail : $currentWork');
           final List<MProcedureInCurrentWork> procedures =
               currentWork.procedures;
 
           // 현재 진행 중인 절차 찾기
-          for (int i = 0; i < procedures.length; i++) {
-            if (procedures[i].date == null ||
-                procedures[i].date!.year == 1970) {
+          for (int index = 0; index < procedures.length; index++) {
+            if (procedures[index].date == null ||
+                procedures[index].date!.year == 1970) {
               // 기본값 날짜 체크
-              currentProcedureIndex = i;
+              currentProcedureIndex = index;
               break;
             }
           }
 
-          procedureIndexById[currentWork.uuid] = currentProcedureIndex;
+          procedureMap[currentWork.uuid] = currentProcedureIndex;
 
-          print('procedureIndexById ${procedureIndexById}');
-          int iiii = procedureIndexById[currentWork.uuid]!;
-          print('iiii $iiii');
+          int getProcedureIndexByWorkId = procedureMap[currentWork.uuid]!;
+
+          // currentWork.users에 현재 user의 id가 포함되어 있으면 true
+          bool workerHasUserId = currentWork.users.any(
+              (MUserInCurrentWork userFromWork) =>
+                  userFromWork.uuid != GServiceUser.getUuid);
+          print('workerHasUserId $workerHasUserId');
 
           return Column(
             children: [
               buildWorkInfo(currentWork).flex(flex: 2),
-              buildCurrentWork(procedures[iiii]).flex(flex: 2),
-              buildWorkHistory(procedures, iiii).flex(flex: 2),
+              buildCurrentWork(procedures[getProcedureIndexByWorkId])
+                  .flex(flex: 2),
+              buildWorkHistory(procedures, getProcedureIndexByWorkId)
+                  .flex(flex: 2),
               buildWorkers(currentWork).flex(flex: 3),
-              // 현재 작업 완료 버튼
-              buildElevatedButton(
-                onPressed: () async {
-                  await showConfirmationDialog(
-                    context,
-                    procedures[iiii].name,
-                  );
-                },
-                child: const Text(
-                  '현재 작업 완료',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
+              //
+              workerHasUserId
+                  ? buildElevatedButton(
+                      onPressed: () async {
+                        await showConfirmationDialog(
+                          context,
+                          procedures[getProcedureIndexByWorkId].name,
+                        );
+                      },
+                      child: const Text(
+                        '현재 작업 완료',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    )
+                  : buildElevatedButton(
+                      onPressed: () async {
+                        // TODO : 현재 선택된 currentWork.uuid를
+                        print(GServiceWorklist.selectedCurrentWorkLastValue);
+
+                        // TODO : createGroupView로 이동
+                        await Navigator.pushNamed(
+                          GNavigationKey.currentContext!,
+                          PATH.ROUTE_CREATE_GROUP,
+                        );
+
+                        // TODO : sse disconnect
+                        // await GServiceSSE.disconnect();
+                      },
+                      child: const Text(
+                        '교대하기',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    )
             ],
           );
         },

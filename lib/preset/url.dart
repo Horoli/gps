@@ -5,6 +5,7 @@ String CHECK_LIST = 'api/config/checklist';
 String GET_WORK_LIST = 'api/user/work';
 String POST_WORK_LIST = 'api/user/work';
 String POST_WORK_AIRCRAFT = 'api/user/work/aircraft';
+String POST_WORK_SHIFT = 'api/user/work/shift';
 String MEMBER_LIST = 'api/user/work/members/available';
 String STREAM = 'api/stream';
 String CONFIG_GPS = 'api/config/gps';

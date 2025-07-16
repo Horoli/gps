@@ -117,11 +117,11 @@ class ServiceWork extends CommonService {
           .toList();
 
       Map<String, dynamic> postData = {
-        "members": jsonEncode(members),
+        "members": members,
         "lng": position.longitude,
         "lat": position.latitude,
         "aircraft": aircraft,
-        "plateNumber": "1234".toString(),
+        "plateNumber": tmpPlateNumber,
         "timestamp": DateTime.now().toIso8601String(),
         // "aircraftName": selectedWork!.name,
         // "aircraftDepartureTime": selectedWork!.departureTime,
@@ -158,5 +158,75 @@ class ServiceWork extends CommonService {
       }
     }
     return null;
+  }
+
+//   {
+//   "members": [
+//     "string"
+//   ],
+//   "lng": 0,
+//   "lat": 0,
+//   "works": [
+//     "string"
+//   ],
+//   "plateNumber": "string",
+//   "timestamp": "string"
+// }
+  Future<void> shift({
+    required List<String> members,
+    required List<String> works,
+  }) async {
+    try {
+      print('shift step 1');
+      final List<String> cookies = await CookieManager.load();
+      debugPrint('cookies $cookies');
+      print('shift step 2');
+      // final Map<String, dynamic> headers =
+      //     HttpConnector.headersByCookie(cookies);
+      dio.options.extra['withCredentials'] = true;
+
+      Position? position = await Geolocator.getLastKnownPosition();
+      position ??= await Geolocator.getCurrentPosition();
+
+      Map<String, dynamic> postData = {
+        "members": members,
+        "lng": position.longitude,
+        "lat": position.latitude,
+        "works": works,
+        "plateNumber": tmpPlateNumber,
+        "timestamp": DateTime.now().toIso8601String(),
+      };
+
+      print('shift postData $postData');
+
+      final Response response = await HttpConnector.post(
+        dio: dio,
+        url: '${URL.BASE_URL}/${URL.POST_WORK_SHIFT}',
+        data: postData,
+        cookies: cookies,
+      );
+      print('GServiceWork shift response : $response');
+      // List<dynamic> data = List.from(jsonDecode(response.data) ?? []);
+
+      final List<dynamic> data = response.data as List<dynamic>;
+
+      print('GServiceWork step 1');
+      List<MCurrentWork> currentWorks =
+          data.map((cur) => MCurrentWork.fromMap(cur)).toList();
+      print('GServiceWork step 2');
+
+      // String uuid = List.from(jsonDecode(response.data) ?? [])[0].uuid;
+      return;
+
+      // return uuid;
+    } catch (e) {
+      if (e is DioException) {
+        if (e.response != null) {
+          debugPrint('error statusCode : ${e.response?.statusCode}');
+          debugPrint('error data : ${e.response?.data}');
+        }
+      }
+    }
+    return;
   }
 }

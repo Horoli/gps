@@ -18,7 +18,7 @@ class RouterManager {
       GServiceMember.clearSelection();
       GServiceWorklist.clearSelection();
       GServiceSSE.disconnect();
-      procedureIndexById = {};
+      procedureMap = {};
 
       print('WORKLIST 화면 활성화 - clearSelection 실행됨');
     }

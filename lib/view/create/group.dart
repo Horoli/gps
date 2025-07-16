@@ -13,6 +13,8 @@ class ViewCreateGroupState extends ViewCreateAbstractState<ViewCreateGroup> {
   // List<MMember> setFilteredMembers = [];
   // bool isLoading = true;
 
+  bool isShift = false;
+
   @override
   Widget buildContent() {
     return isLoading
@@ -59,6 +61,32 @@ class ViewCreateGroupState extends ViewCreateAbstractState<ViewCreateGroup> {
   @override
   // TODO : replacement가 아니라, 2단계 이전의 route만 제거가 돼야함
   Widget buildNavButton() {
+    if (isShift) {
+      return buildNavigationButton(
+        context: context,
+        title: '교대',
+        useReplacement: true,
+        routerName: PATH.ROUTE_WORK_DETAIL,
+        onPressed: () async {
+          List<MMember> members = GServiceMember.selectedMember ?? [];
+          List<String> works = [
+            GServiceWorklist.selectedCurrentWorkLastValue!.uuid
+          ];
+
+          await GServiceWork.shift(
+            members: members.map((e) => e.uuid).toList(),
+            works: works,
+          );
+
+          // if (result == null) {
+          //   return;
+          // }
+
+          // GServiceWorklist.select(result);
+        },
+      );
+    }
+
     return buildNavigationButton(
       context: context,
       title: '완료',
@@ -82,11 +110,10 @@ class ViewCreateGroupState extends ViewCreateAbstractState<ViewCreateGroup> {
   Future<void> loadData() async {
     setState(() {
       isLoading = true;
+      print('GServiceWork.selectedWorks ${GServiceWork.selectedWorks}');
+      isShift = GServiceWork.selectedWorks.isNotEmpty ? true : false;
+      print('isShift $isShift');
     });
-    // currentWork가 있으면 자동으로 WORK_VIEW로 이동
-    // if (GServiceWorklist.lastValue?.currentWork != null) {
-    //   await Navigator.pushReplacementNamed(context, PATH.ROUTE_WORK_DETAIL);
-    // }
 
     try {
       final List<MMember> members = await GServiceMember.get();

@@ -15,11 +15,14 @@ bool useForeground = true;
 bool nowShowingDialog = false;
 
 const String tmpNumber = "01041850688";
-const String tmpID = 'devel';
+const String tmpID = "devel";
+const String tmpPlateNumber = "1234";
 
 final GlobalKey<NavigatorState> GNavigationKey = GlobalKey();
 
-Map<String, int> procedureIndexById = {};
+// key : currentWork.uuid
+// value : procedure index
+Map<String, int> procedureMap = {};
 
 /**
  * 임시로 global에다 생성

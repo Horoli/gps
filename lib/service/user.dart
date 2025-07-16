@@ -12,6 +12,8 @@ class ServiceUser extends CommonService {
 
   MUser? get currentUser => _subject.valueOrNull;
 
+  String get getUuid => currentUser!.uuid;
+
   Future<MUser> login({
     required String phoneNumber,
     required String id,
