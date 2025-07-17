@@ -61,31 +61,31 @@ class ViewCreateGroupState extends ViewCreateAbstractState<ViewCreateGroup> {
   @override
   // TODO : replacement가 아니라, 2단계 이전의 route만 제거가 돼야함
   Widget buildNavButton() {
-    if (isShift) {
-      return buildNavigationButton(
-        context: context,
-        title: '교대',
-        useReplacement: true,
-        routerName: PATH.ROUTE_WORK_DETAIL,
-        onPressed: () async {
-          List<MMember> members = GServiceMember.selectedMember ?? [];
-          List<String> works = [
-            GServiceWorklist.selectedCurrentWorkLastValue!.uuid
-          ];
+    // if (isShift) {
+    //   return buildNavigationButton(
+    //     context: context,
+    //     title: '교대',
+    //     useReplacement: true,
+    //     routerName: PATH.ROUTE_WORK_DETAIL,
+    //     onPressed: () async {
+    //       List<MMember> members = GServiceMember.selectedMember ?? [];
+    //       List<String> works = [
+    //         GServiceWorklist.selectedCurrentWorkLastValue!.uuid
+    //       ];
 
-          await GServiceWork.shift(
-            members: members.map((e) => e.uuid).toList(),
-            works: works,
-          );
+    //       await GServiceWork.shift(
+    //         members: members.map((e) => e.uuid).toList(),
+    //         works: works,
+    //       );
 
-          // if (result == null) {
-          //   return;
-          // }
+    //       // if (result == null) {
+    //       //   return;
+    //       // }
 
-          // GServiceWorklist.select(result);
-        },
-      );
-    }
+    //       // GServiceWorklist.select(result);
+    //     },
+    //   );
+    // }
 
     return buildNavigationButton(
       context: context,
