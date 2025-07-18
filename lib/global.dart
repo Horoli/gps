@@ -137,6 +137,7 @@ class HttpConnector {
   static Future<Response> stream({
     required Dio dio,
     required String url,
+    Map<String, dynamic>? queryParameters,
     List<String>? cookies,
   }) async {
     Map<String, dynamic> headers = _defaultHeaders;
@@ -153,10 +154,11 @@ class HttpConnector {
 
     final Response response = await dio
         .get(url,
+            queryParameters: queryParameters,
             options: Options(
               responseType: ResponseType.stream,
               extra: {'withCredentials': true},
-              headers: headers,
+              headers: {...headers, "skip-encoding": true},
             ))
         .then((result) {
       debugPrint('$url stream result : $result');

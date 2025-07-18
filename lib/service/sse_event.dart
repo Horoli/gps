@@ -166,15 +166,22 @@ class ServiceSSE extends CommonService {
     final Response response = await HttpConnector.stream(
       dio: _dio!,
       url: '${URL.BASE_URL}/${URL.STREAM}',
+      queryParameters: {
+        "testmode": false,
+        "interval": 5,
+      },
       cookies: cookies,
     );
 
     print('stream response ${response.headers}');
     print('stream response ${response.statusCode}');
+    print('stream response data ${(response.data as ResponseBody).stream}');
 
     debugPrint('stream step 2');
 
     Stream tmpStream = response.data.stream as Stream;
+    debugPrint('streamType : ${tmpStream.runtimeType}');
+
     eventStream = tmpStream.transform(_transformer);
 
     debugPrint('stream step 3');

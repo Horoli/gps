@@ -309,8 +309,8 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
   }
 
   Future<void> getData() async {
-    await GServiceWorklist.get();
     await GServiceSSE.connect();
+    await GServiceWorklist.get();
   }
 
   Future<void> showConfirmationDialog(
