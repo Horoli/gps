@@ -63,10 +63,13 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
           int getProcedureIndexByWorkId = procedureMap[currentWork.uuid]!;
 
           // currentWork.users에 현재 user의 id가 포함되어 있으면 true
-          bool workerHasUserId = currentWork.users.any(
-              (MUserInCurrentWork userFromWork) =>
-                  userFromWork.uuid != GServiceUser.getUuid);
-          print('workerHasUserId $workerHasUserId');
+          bool workerHasUserId =
+              currentWork.users.any((MUserInCurrentWork userFromWork) {
+            print('userFromWork $userFromWork');
+            print('userFromWork.getUuid ${GServiceUser.getUuid}');
+            return userFromWork.uuid == GServiceUser.currentUser?.uuid;
+          });
+          print('userFromWork workerHasUserId $workerHasUserId');
 
           return Column(
             children: [
@@ -77,47 +80,46 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
                   .flex(flex: 2),
               buildWorkers(currentWork).flex(flex: 3),
               //
-              // workerHasUserId
-              // ?
-              buildElevatedButton(
-                onPressed: () async {
-                  await showConfirmationDialog(
-                    context,
-                    procedures[getProcedureIndexByWorkId].name,
-                  );
-                },
-                child: const Text(
-                  '현재 작업 완료',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-              // : buildElevatedButton(
-              //     onPressed: () async {
-              //       // TODO : 현재 선택된 currentWork.uuid를
-              //       print(GServiceWorklist.selectedCurrentWorkLastValue);
+              workerHasUserId
+                  ? buildElevatedButton(
+                      onPressed: () async {
+                        await showConfirmationDialog(
+                          context,
+                          procedures[getProcedureIndexByWorkId].name,
+                        );
+                      },
+                      child: const Text(
+                        '현재 작업 완료',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    )
+                  : buildElevatedButton(
+                      onPressed: () async {
+                        // TODO : 현재 선택된 currentWork.uuid를
+                        print(GServiceWorklist.selectedCurrentWorkLastValue);
 
-              //       // TODO : createGroupView로 이동
-              //       await Navigator.pushNamed(
-              //         GNavigationKey.currentContext!,
-              //         PATH.ROUTE_CREATE_GROUP,
-              //       );
+                        // TODO : createGroupView로 이동
+                        await Navigator.pushNamed(
+                          GNavigationKey.currentContext!,
+                          PATH.ROUTE_CREATE_GROUP,
+                        );
 
-              //       // TODO : sse disconnect
-              //       // await GServiceSSE.disconnect();
-              //     },
-              //     child: const Text(
-              //       '교대하기',
-              //       style: TextStyle(
-              //         fontSize: 16,
-              //         fontWeight: FontWeight.bold,
-              //         color: Colors.white,
-              //       ),
-              //     ),
-              //   )
+                        // TODO : sse disconnect
+                        // await GServiceSSE.disconnect();
+                      },
+                      child: const Text(
+                        '교대하기',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    )
             ],
           );
         },
