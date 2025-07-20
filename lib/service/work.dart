@@ -89,13 +89,13 @@ class ServiceWork extends CommonService {
     _availableSubject.add(_availableSubject.valueOrNull!);
   }
 
-  Future<MCurrentWork?> create({
+  Future<List<MCurrentWork?>> create({
     required List<String> members,
   }) async {
     try {
       if (selectedWorks.isEmpty) {
         debugPrint('selectedWork is null');
-        return null;
+        return [];
       }
       final List<String> cookies = await CookieManager.load();
       debugPrint('cookies $cookies');
@@ -143,10 +143,10 @@ class ServiceWork extends CommonService {
       print('GServiceWork step 1');
       List<MCurrentWork> currentWorks =
           data.map((cur) => MCurrentWork.fromMap(cur)).toList();
-      print('GServiceWork step 2');
+      print('GServiceWork step 2 ${currentWorks}');
 
       // String uuid = List.from(jsonDecode(response.data) ?? [])[0].uuid;
-      return currentWorks[0];
+      return currentWorks;
 
       // return uuid;
     } catch (e) {
@@ -157,7 +157,7 @@ class ServiceWork extends CommonService {
         }
       }
     }
-    return null;
+    return [];
   }
 
 //   {
@@ -172,6 +172,10 @@ class ServiceWork extends CommonService {
 //   "plateNumber": "string",
 //   "timestamp": "string"
 // }
+
+// response
+// {"insertedCount":0,"matchedCount":1,"modifiedCount":1,"deletedCount":0,"upsertedCount":0,"upsertedIds":{},"insertedIds":{}}
+
   Future<void> shift({
     required List<String> members,
     required List<String> works,
@@ -210,10 +214,10 @@ class ServiceWork extends CommonService {
 
       final List<dynamic> data = response.data as List<dynamic>;
 
-      print('GServiceWork step 1');
-      List<MCurrentWork> currentWorks =
-          data.map((cur) => MCurrentWork.fromMap(cur)).toList();
-      print('GServiceWork step 2');
+      // print('GServiceWork step 1');
+      // List<MCurrentWork> currentWorks =
+      //     data.map((cur) => MCurrentWork.fromMap(cur)).toList();
+      // print('GServiceWork step 2');
 
       // String uuid = List.from(jsonDecode(response.data) ?? [])[0].uuid;
       return;

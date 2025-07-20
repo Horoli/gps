@@ -12,39 +12,72 @@ class ServiceWorklist extends CommonService {
   Stream<MWorkList?> get stream => subject.stream;
   MWorkList? get lastValue => subject.valueOrNull;
 
-  final BehaviorSubject<MCurrentWork?> selectedCurrentWorkSubject =
-      BehaviorSubject<MCurrentWork?>.seeded(null);
+  // final BehaviorSubject<MCurrentWork?> selectedCurrentWorkSubject =
+  //     BehaviorSubject<MCurrentWork?>.seeded(null);
 
-  Stream<MCurrentWork?> get selectedCurrentWorkStream =>
-      selectedCurrentWorkSubject.stream;
-  MCurrentWork? get selectedCurrentWorkLastValue =>
-      selectedCurrentWorkSubject.valueOrNull;
+  // Stream<MCurrentWork?> get selectedCurrentWorkStream =>
+  //     selectedCurrentWorkSubject.stream;
+  // MCurrentWork? get selectedCurrentWorkLastValue =>
+  //     selectedCurrentWorkSubject.valueOrNull;
 
-  Future<void> select(MCurrentWork currentWork) async {
-    selectedCurrentWorkSubject.add(currentWork);
+  // Future<void> select(MCurrentWork currentWork) async {
+  //   selectedCurrentWorkSubject.add(currentWork);
+  // }
+
+  final BehaviorSubject<String> selectedUuidSubject =
+      BehaviorSubject<String>.seeded('');
+  String get selectedUuidLastValue => selectedUuidSubject.value;
+
+  MCurrentWork get getCurrentWork =>
+      getWorkByDivision(uuid: selectedUuidLastValue);
+
+  Future<void> selectWorkId(String uuid) async {
+    selectedUuidSubject.add(uuid);
+  }
+
+  dynamic getWorkByDivision({required String uuid}) {
+    dynamic value;
+
+    MCurrentWork? inCurrentWork = lastValue!.currentWork
+        .where((cur) => cur.uuid == uuid)
+        .toList()
+        .firstOrNull;
+    value = inCurrentWork;
+
+    if (inCurrentWork == null) {
+      MWorkData? inWorkList = lastValue!.workList
+          .where((MWorkData work) => work.uuid == uuid)
+          .toList()
+          .firstOrNull;
+      value = inWorkList;
+    }
+    return value;
   }
 
   Future<void> clearSelection() async {
-    selectedCurrentWorkSubject.add(null);
+    // selectedCurrentWorkSubject.add(null);
+    selectedUuidSubject.add('');
   }
 
-  MCurrentWork? getCurrentWork({
-    List<MCurrentWork>? inputCurrentWork,
-  }) {
-    if (inputCurrentWork == null) {
-      return lastValue!.currentWork
-          .where((cur) =>
-              cur.uuid == GServiceWorklist.selectedCurrentWorkLastValue?.uuid)
-          .toList()
-          .firstOrNull;
-    }
+  // MCurrentWork? getCurrentWork({
+  //   List<MCurrentWork>? inputCurrentWork,
+  // }) {
+  //   if (inputCurrentWork == null) {
+  //     return lastValue!.currentWork
+  //         .where((cur) =>
+  //             // cur.uuid == GServiceWorklist.selectedCurrentWorkLastValue?.uuid)
+  //             cur.uuid == GServiceWorklist.selectedUuidLastValue)
+  //         .toList()
+  //         .firstOrNull;
+  //   }
 
-    return inputCurrentWork
-        .where((cur) =>
-            cur.uuid == GServiceWorklist.selectedCurrentWorkLastValue?.uuid)
-        .toList()
-        .firstOrNull;
-  }
+  //   return inputCurrentWork
+  //       .where((cur) =>
+  //           // cur.uuid == GServiceWorklist.selectedCurrentWorkLastValue?.uuid)
+  //           cur.uuid == GServiceWorklist.selectedUuidLastValue)
+  //       .toList()
+  //       .firstOrNull;
+  // }
 
   Future<MWorkList> get() async {
     Completer<MWorkList> completer = Completer<MWorkList>();
@@ -111,7 +144,7 @@ class ServiceWorklist extends CommonService {
   }
 
   // 현재 작업 완료 함수
-  Future<void> completeProcedure() async {
+  Future<void> completeProcedure(String uuid) async {
     try {
       final List<String> cookies = await CookieManager.load();
       // final Map<String, dynamic> headers =
@@ -120,7 +153,9 @@ class ServiceWorklist extends CommonService {
       debugPrint('cookies $cookies');
 
       // 현재 시간을 ISO 8601 형식의 문자열로 변환
-      String uuid = selectedCurrentWorkLastValue!.uuid;
+      // String uuid = selectedCurrentWorkLastValue!.uuid;
+      // String uuid = selectedUuidLastValue;
+      // print('completeProcedure $uuid');
       // Position? position = await Geolocator.getLastKnownPosition();
       Position? position = GServiceLocation._subject.valueOrNull;
       if (position == null) {

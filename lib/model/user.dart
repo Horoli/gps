@@ -28,7 +28,7 @@ class MUser extends CommonModel<MUser> {
 
   // User 객체를 JSON으로 변환하는 메서드
   @override
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toMap() {
     return {
       'uuid': uuid,
       'username': username,

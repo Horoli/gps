@@ -61,31 +61,36 @@ class ViewCreateGroupState extends ViewCreateAbstractState<ViewCreateGroup> {
   @override
   // TODO : replacement가 아니라, 2단계 이전의 route만 제거가 돼야함
   Widget buildNavButton() {
-    // if (isShift) {
-    //   return buildNavigationButton(
-    //     context: context,
-    //     title: '교대',
-    //     useReplacement: true,
-    //     routerName: PATH.ROUTE_WORK_DETAIL,
-    //     onPressed: () async {
-    //       List<MMember> members = GServiceMember.selectedMember ?? [];
-    //       List<String> works = [
-    //         GServiceWorklist.selectedCurrentWorkLastValue!.uuid
-    //       ];
+    if (isShift) {
+      return buildNavigationButton(
+        context: context,
+        title: '교대',
+        useReplacement: true,
+        routerName: PATH.ROUTE_WORK_DETAIL,
+        onPressed: () async {
+          List<MMember> members = GServiceMember.selectedMember ?? [];
 
-    //       await GServiceWork.shift(
-    //         members: members.map((e) => e.uuid).toList(),
-    //         works: works,
-    //       );
+          print('shift button step 1');
+          await GServiceWork.shift(
+            members: members.map((e) => e.uuid).toList(),
+            works: [GServiceWorklist.selectedUuidLastValue],
+          );
+          print('shift button step 2');
 
-    //       // if (result == null) {
-    //       //   return;
-    //       // }
+          // await GServiceWorklist.get();
 
-    //       // GServiceWorklist.select(result);
-    //     },
-    //   );
-    // }
+          print('shift button step 3');
+          dynamic getWork = GServiceWorklist.getWorkByDivision(
+              uuid: GServiceWorklist.selectedUuidLastValue);
+
+          print('shift button step 4 $getWork');
+          if (getWork == null) return;
+
+          // GServiceWorklist.select(getWork);
+          GServiceWorklist.selectWorkId(GServiceWorklist.selectedUuidLastValue);
+        },
+      );
+    }
 
     return buildNavigationButton(
       context: context,
@@ -95,13 +100,14 @@ class ViewCreateGroupState extends ViewCreateAbstractState<ViewCreateGroup> {
       onPressed: () async {
         List<MMember> members = GServiceMember.selectedMember ?? [];
 
-        MCurrentWork? result = await GServiceWork.create(
+        List<MCurrentWork?> results = await GServiceWork.create(
             members: members.map((e) => e.uuid).toList());
-        if (result == null) {
-          return;
-        }
+        print('GServiceWork step 3 $results');
 
-        GServiceWorklist.select(result);
+        if (results.isEmpty) return;
+
+        // GServiceWorklist.select(results[0]!);
+        GServiceWorklist.selectWorkId(results[0]!.uuid);
       },
     );
   }
@@ -111,7 +117,7 @@ class ViewCreateGroupState extends ViewCreateAbstractState<ViewCreateGroup> {
     setState(() {
       isLoading = true;
       print('GServiceWork.selectedWorks ${GServiceWork.selectedWorks}');
-      isShift = GServiceWork.selectedWorks.isNotEmpty ? true : false;
+      isShift = GServiceWork.selectedWorks.isEmpty ? true : false;
       print('isShift $isShift');
     });
 

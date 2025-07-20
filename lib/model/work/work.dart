@@ -1,6 +1,7 @@
 part of FlightSteps;
 
 class MWorkData extends CommonModel<MWorkData> {
+  final String? uuid;
   final String name; // 항공편 번호 (예: LJ221)
   final List<MUser>? users;
   final String? type; // 항공기 타입 (예: 738)
@@ -8,6 +9,7 @@ class MWorkData extends CommonModel<MWorkData> {
   final String departureTime; // 출발 시간 (예: 0715)
 
   MWorkData({
+    this.uuid,
     required this.name,
     this.users,
     this.type,
@@ -18,6 +20,7 @@ class MWorkData extends CommonModel<MWorkData> {
   // JSON에서 Work 객체로 변환하는 팩토리 생성자
   factory MWorkData.fromMap(Map<String, dynamic> item) {
     return MWorkData(
+      uuid: item['uuid'] ?? '',
       name: item['name'] as String,
       users:
           List.from(item['users'] ?? []).map((u) => MUser.fromMap(u)).toList(),
@@ -29,8 +32,9 @@ class MWorkData extends CommonModel<MWorkData> {
 
   // Work 객체를 JSON으로 변환하는 메서드
   @override
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toMap() {
     return {
+      'uuid': uuid,
       'name': name,
       'users': users,
       'type': type,
@@ -42,6 +46,7 @@ class MWorkData extends CommonModel<MWorkData> {
   // 객체 복사 및 일부 필드 변경을 위한 copyWith 메서드
   @override
   MWorkData copyWith({
+    String? uuid,
     String? name,
     String? type,
     List<MUser>? users,
@@ -49,6 +54,7 @@ class MWorkData extends CommonModel<MWorkData> {
     String? departureTime,
   }) {
     return MWorkData(
+      uuid: uuid ?? this.uuid,
       name: name ?? this.name,
       type: type ?? this.type,
       users: users ?? this.users,
@@ -59,6 +65,6 @@ class MWorkData extends CommonModel<MWorkData> {
 
   @override
   String toString() {
-    return 'Work(name: $name, type: $type, users: $users, state: $state, departureTime: $departureTime)';
+    return 'Work(uuid: $uuid, name: $name, type: $type, users: $users, state: $state, departureTime: $departureTime)';
   }
 }

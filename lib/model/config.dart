@@ -24,7 +24,7 @@ class MConfig extends CommonModel<MConfig> {
 
   // Agreement 객체를 JSON으로 변환하는 메서드
   @override
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toMap() {
     return {
       'name': name,
       'description': description,

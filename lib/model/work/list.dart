@@ -31,10 +31,20 @@ class MWorkList extends CommonModel<MWorkList> {
           .map((extraworkJson) =>
               MExtraWorkData.fromMap(extraworkJson as Map<String, dynamic>))
           .toList(),
-      workList: (item['workList'] as List<dynamic>)
-          .map(
-              (workJson) => MWorkData.fromMap(workJson as Map<String, dynamic>))
-          .toList(),
+      workList: (item['workList'] as List<dynamic>).map((workJson) {
+        final workMap = workJson as Map<String, dynamic>;
+        final state = workMap['state'] as String?;
+
+        // state가 'working'인 경우 MWorkingData로 파싱
+        if (state == 'working') {
+          return MWorkingData.fromMap(workMap);
+        } else {
+          // 그 외의 경우 (normal, null 등) MWorkData로 파싱
+          return MWorkData.fromMap(workMap);
+        }
+      }).toList(),
+      // (workJson) => MWorkData.fromMap(workJson as Map<String, dynamic>))
+      // .toList(),
       step: (item['step'] as List<dynamic>).map((e) => e as String).toList(),
       date: item['date'] as String,
     );
@@ -42,11 +52,11 @@ class MWorkList extends CommonModel<MWorkList> {
 
   // MWorkList 객체를 JSON으로 변환하는 메서드
   @override
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toMap() {
     final Map<String, dynamic> result = {
-      'currentWork': currentWork.map((cur) => cur.toJson()).toList(),
-      'extraWorkList': extraWorkList.map((extra) => extra.toJson()).toList(),
-      'workList': workList.map((work) => work.toJson()).toList(),
+      'currentWork': currentWork.map((cur) => cur.toMap()).toList(),
+      'extraWorkList': extraWorkList.map((extra) => extra.toMap()).toList(),
+      'workList': workList.map((work) => work.toMap()).toList(),
       'step': step,
       'date': date,
     };

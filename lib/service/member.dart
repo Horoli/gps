@@ -48,7 +48,7 @@ class ServiceMember extends CommonService {
         _selectedSubject.valueOrNull!.isEmpty) {
       // 선택된 항공편이 비어있다면 새로운 리스트로 초기화
       _selectedSubject.add([member]);
-      debugPrint('Work selected: ${member.uuid}');
+      debugPrint('member selected: ${member.uuid}');
       return;
     }
 

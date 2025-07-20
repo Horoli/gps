@@ -63,14 +63,23 @@ class TileWork extends StatelessWidget {
           });
     }
 
-    if (workData.state == STATE.WORKSTATE_WORKING && currentWork != null) {
+    if (workData.state == STATE.WORKSTATE_WORKING
+        //  && currentWork != null
+        ) {
       return buildNavigationButton(
         context: context,
         title: '작업 진행 중',
         usePadding: false,
         routerName: PATH.ROUTE_WORK_DETAIL,
         onPressed: () async {
-          GServiceWorklist.select(currentWork!);
+          // print('currentWork $currentWork');
+          // print('workData ${workData}');
+          if (currentWork != null) {
+            // GServiceWorklist.select(currentWork!);
+            GServiceWorklist.selectWorkId(currentWork!.uuid);
+          }
+          // dynamic asd = GServiceWorklist.getWork(uuid: workData.uuid!);
+          GServiceWorklist.selectWorkId(workData.uuid!);
         },
       );
     }

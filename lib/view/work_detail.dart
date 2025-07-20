@@ -36,17 +36,16 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
                 context: context, title: '작업 정보가 없습니다');
           }
 
-          final MCurrentWork? currentWork = GServiceWorklist.getCurrentWork(
-            inputCurrentWork: snapshot.data!.currentWork,
-          );
+          dynamic selectedWork = GServiceWorklist.getWorkByDivision(
+              uuid: GServiceWorklist.selectedUuidLastValue);
+          bool isMyWork = selectedWork.runtimeType == MCurrentWork;
 
-          if (currentWork == null) {
+          if (selectedWork == null) {
             return StreamExceptionWidgets.noData(
                 context: context, title: '해당 작업 정보가 없습니다');
           }
 
-          final List<MProcedureInCurrentWork> procedures =
-              currentWork.procedures;
+          final List<MProcedure> procedures = selectedWork.procedures ?? [];
 
           // 현재 진행 중인 절차 찾기
           for (int index = 0; index < procedures.length; index++) {
@@ -58,29 +57,41 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
             }
           }
 
-          procedureMap[currentWork.uuid] = currentProcedureIndex;
+          procedureMap[selectedWork.uuid] = currentProcedureIndex;
 
-          int getProcedureIndexByWorkId = procedureMap[currentWork.uuid]!;
+          int getProcedureIndexByWorkId = procedureMap[selectedWork.uuid]!;
 
-          // currentWork.users에 현재 user의 id가 포함되어 있으면 true
-          bool workerHasUserId =
-              currentWork.users.any((MUserInCurrentWork userFromWork) {
-            print('userFromWork $userFromWork');
-            print('userFromWork.getUuid ${GServiceUser.getUuid}');
-            return userFromWork.uuid == GServiceUser.currentUser?.uuid;
-          });
-          print('userFromWork workerHasUserId $workerHasUserId');
+          String departureTime = '';
+          String name = '';
+          List<MUser> users = [];
+
+          if (isMyWork) {
+            selectedWork as MCurrentWork;
+            name = selectedWork.aircraft.name;
+            departureTime = selectedWork.aircraft.departureTime;
+            users = selectedWork.users;
+          }
+          if (selectedWork.runtimeType == MWorkingData) {
+            selectedWork as MWorkingData;
+            name = selectedWork.name;
+            departureTime = selectedWork.departureTime;
+            users = selectedWork.users!;
+          }
+
+          print('selectedWork $selectedWork');
+          print('selectedWork ${snapshot.data?.currentWork}');
 
           return Column(
             children: [
-              buildWorkInfo(currentWork).flex(flex: 2),
+              buildWorkInfo(name: name, departureTime: departureTime)
+                  .flex(flex: 2),
               buildCurrentWork(procedures[getProcedureIndexByWorkId])
                   .flex(flex: 2),
               buildWorkHistory(procedures, getProcedureIndexByWorkId)
                   .flex(flex: 2),
-              buildWorkers(currentWork).flex(flex: 3),
+              buildWorkers(users).flex(flex: 3),
               //
-              workerHasUserId
+              isMyWork
                   ? buildElevatedButton(
                       onPressed: () async {
                         await showConfirmationDialog(
@@ -100,7 +111,7 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
                   : buildElevatedButton(
                       onPressed: () async {
                         // TODO : 현재 선택된 currentWork.uuid를
-                        print(GServiceWorklist.selectedCurrentWorkLastValue);
+                        // print(GServiceWorklist.selectedCurrentWorkLastValue);
 
                         // TODO : createGroupView로 이동
                         await Navigator.pushNamed(
@@ -127,7 +138,7 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
     );
   }
 
-  Widget buildWorkInfo(MCurrentWork currentWork) {
+  Widget buildWorkInfo({required String name, required String departureTime}) {
     return Padding(
       padding: SIZE.WORK_DETAIL_PADDING,
       child: Container(
@@ -157,7 +168,7 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
                       color: COLOR.GREY,
                     ).expand(),
                     buildFittedText(
-                      text: currentWork.aircraft.name,
+                      text: name,
                       fontSize: SIZE.WORK_DETAIL_CHILD,
                       color: COLOR.GREY,
                     ).expand(),
@@ -171,7 +182,7 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
                       color: COLOR.GREY,
                     ).expand(),
                     buildFittedText(
-                      text: currentWork.aircraft.departureTime,
+                      text: departureTime,
                       fontSize: SIZE.WORK_DETAIL_CHILD,
                       color: COLOR.GREY,
                     ).expand(),
@@ -185,7 +196,7 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
     );
   }
 
-  Widget buildCurrentWork(MProcedureInCurrentWork currentProcedure) {
+  Widget buildCurrentWork(MProcedure currentProcedure) {
     // 현재 작업명
     return Padding(
       padding: SIZE.WORK_DETAIL_PADDING,
@@ -211,7 +222,7 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
   }
 
   Widget buildWorkHistory(
-    List<MProcedureInCurrentWork> procedures,
+    List<MProcedure> procedures,
     int currentProcedureIndex,
   ) {
     return Padding(
@@ -270,7 +281,7 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
     );
   }
 
-  Widget buildWorkers(MCurrentWork currentWork) {
+  Widget buildWorkers(List<MUser> users) {
     return Padding(
       padding: SIZE.WORK_DETAIL_PADDING,
       child: Container(
@@ -288,12 +299,12 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
               separatorBuilder: (context, index) => SIZE.DIVIDER,
               shrinkWrap: true,
               // physics: const NeverScrollableScrollPhysics(),
-              itemCount: currentWork.users.length,
+              itemCount: users.length,
               itemBuilder: (context, index) {
                 return ListTile(
-                  title: Text(currentWork.users[index].username),
+                  title: Text(users[index].username),
                   subtitle: Text(
-                    currentWork.users[index].phoneNumber,
+                    users[index].phoneNumber,
                   ),
                 );
               },
@@ -376,13 +387,14 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
     try {
       // 작업 완료 API 호출
       debugPrint('완료 처리 ${DateTime.now().millisecondsSinceEpoch}');
-      await GServiceWorklist.completeProcedure();
-      // debugPrint(
-      //     'GServiceWorklist.lastValue?.currentWork == null ${GServiceWorklist.lastValue?.currentWork == null}');
-      MCurrentWork? getCurrentWork = GServiceWorklist.getCurrentWork();
-      if (getCurrentWork == null) {
-        await Navigator.of(context).pushReplacementNamed(PATH.ROUTE_WORKLIST);
-      }
+      String selectedWorkId = GServiceWorklist.selectedUuidLastValue;
+      await GServiceWorklist.completeProcedure(selectedWorkId);
+      debugPrint(
+          'GServiceWorklist.lastValue?.currentWork == null ${GServiceWorklist.lastValue?.currentWork == null}');
+      // MCurrentWork? getCurrentWork = GServiceWorklist.getCurrentWork;
+      // if (getCurrentWork == null) {
+      //   await Navigator.of(context).pushReplacementNamed(PATH.ROUTE_WORKLIST);
+      // }
 
       // 성공 메시지
       if (mounted) {

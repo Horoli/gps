@@ -22,7 +22,7 @@ class MMember extends CommonModel<MMember> {
   }
 
   @override
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toMap() {
     return {
       'uuid': uuid,
       'username': username,

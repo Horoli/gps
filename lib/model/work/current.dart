@@ -4,10 +4,11 @@ part of FlightSteps;
 // 현재 작업 모델 (메인 모델)
 class MCurrentWork extends CommonModel<MCurrentWork> {
   final String uuid;
-  final List<MUserInCurrentWork> users;
+  final List<MUser> users;
   final MAircraftInCurrentWork aircraft;
   final String type;
-  final List<MProcedureInCurrentWork> procedures;
+  final String plateNumber;
+  final List<MProcedure> procedures;
   final String description;
   final DateTime date;
 
@@ -17,6 +18,7 @@ class MCurrentWork extends CommonModel<MCurrentWork> {
     required this.aircraft,
     required this.type,
     required this.procedures,
+    required this.plateNumber,
     required this.description,
     required this.date,
   });
@@ -28,14 +30,14 @@ class MCurrentWork extends CommonModel<MCurrentWork> {
     return MCurrentWork(
       uuid: item['uuid'] as String,
       users: (item['users'] as List<dynamic>)
-          .map((e) => MUserInCurrentWork.fromMap(e as Map<String, dynamic>))
+          .map((e) => MUser.fromMap(e as Map<String, dynamic>))
           .toList(),
       aircraft: MAircraftInCurrentWork.fromMap(
           item['aircraft'] as Map<String, dynamic>),
       type: item['type'] as String,
+      plateNumber: item['plateNumber'] as String,
       procedures: (item['procedures'] as List<dynamic>)
-          .map(
-              (e) => MProcedureInCurrentWork.fromMap(e as Map<String, dynamic>))
+          .map((e) => MProcedure.fromMap(e as Map<String, dynamic>))
           .toList(),
       description: item['description'] as String,
       date: DateTime.parse(item['date'] as String),
@@ -43,13 +45,14 @@ class MCurrentWork extends CommonModel<MCurrentWork> {
   }
 
   @override
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toMap() {
     return {
       'uuid': uuid,
-      'users': users.map((e) => e.toJson()).toList(),
-      'aircraft': aircraft.toJson(),
+      'users': users.map((e) => e.toMap()).toList(),
+      'aircraft': aircraft.toMap(),
       'type': type,
-      'procedures': procedures.map((e) => e.toJson()).toList(),
+      'plateNumber': plateNumber,
+      'procedures': procedures.map((e) => e.toMap()).toList(),
       'description': description,
       'date': date.toIso8601String(),
     };
@@ -58,10 +61,11 @@ class MCurrentWork extends CommonModel<MCurrentWork> {
   @override
   MCurrentWork copyWith({
     String? uuid,
-    List<MUserInCurrentWork>? users,
+    List<MUser>? users,
     MAircraftInCurrentWork? aircraft,
     String? type,
-    List<MProcedureInCurrentWork>? procedures,
+    String? plateNumber,
+    List<MProcedure>? procedures,
     String? description,
     DateTime? date,
   }) {
@@ -70,6 +74,7 @@ class MCurrentWork extends CommonModel<MCurrentWork> {
       users: users ?? this.users,
       aircraft: aircraft ?? this.aircraft,
       type: type ?? this.type,
+      plateNumber: plateNumber ?? this.plateNumber,
       procedures: procedures ?? this.procedures,
       description: description ?? this.description,
       date: date ?? this.date,
@@ -78,7 +83,7 @@ class MCurrentWork extends CommonModel<MCurrentWork> {
 
   @override
   String toString() {
-    return 'CurrentWork(uuid: $uuid, users: $users, aircraft: $aircraft, type: $type, procedures: $procedures, description: $description, date: $date)';
+    return 'CurrentWork(uuid: $uuid, users: $users, aircraft: $aircraft, type: $type, procedures: $procedures, description: $description, date: $date, plateNumber :$plateNumber)';
   }
 }
 
@@ -108,7 +113,7 @@ class MUserInCurrentWork extends CommonModel<MUserInCurrentWork> {
   }
 
   @override
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toMap() {
     return {
       'uuid': uuid,
       'username': username,
@@ -162,7 +167,7 @@ class MAircraftInCurrentWork extends CommonModel<MAircraftInCurrentWork> {
   }
 
   @override
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toMap() {
     return {
       'name': name,
       'departureTime': departureTime,
@@ -190,18 +195,18 @@ class MAircraftInCurrentWork extends CommonModel<MAircraftInCurrentWork> {
 }
 
 // 절차 모델
-class MProcedureInCurrentWork extends CommonModel<MProcedureInCurrentWork> {
+class MProcedure extends CommonModel<MProcedure> {
   final String name;
   final DateTime? date;
   final List<double>? location;
 
-  MProcedureInCurrentWork({
+  MProcedure({
     required this.name,
     this.date,
     this.location,
   });
 
-  factory MProcedureInCurrentWork.fromMap(Map<String, dynamic> item) {
+  factory MProcedure.fromMap(Map<String, dynamic> item) {
     List<double>? locationList;
 
     if (item['location'] != null) {
@@ -226,7 +231,7 @@ class MProcedureInCurrentWork extends CommonModel<MProcedureInCurrentWork> {
       }
     }
 
-    return MProcedureInCurrentWork(
+    return MProcedure(
       name: item['name'] as String,
       date:
           item['date'] != null ? DateTime.parse(item['date'] as String) : null,
@@ -235,12 +240,12 @@ class MProcedureInCurrentWork extends CommonModel<MProcedureInCurrentWork> {
   }
 
   @override
-  MProcedureInCurrentWork copyWith({
+  MProcedure copyWith({
     String? name,
     DateTime? date,
     List<double>? location,
   }) {
-    return MProcedureInCurrentWork(
+    return MProcedure(
       name: name ?? this.name,
       date: date ?? this.date,
       location: location ?? this.location,
@@ -248,7 +253,7 @@ class MProcedureInCurrentWork extends CommonModel<MProcedureInCurrentWork> {
   }
 
   @override
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toMap() {
     final Map<String, dynamic> data = {
       'name': name,
     };

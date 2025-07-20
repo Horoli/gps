@@ -207,18 +207,17 @@ class ServiceSSE extends CommonService {
 
         _lastEventTime = DateTime.now();
         // await GServiceWorklist.get();
-        MCurrentWork? getCurrentWork =
-            GServiceWorklist.selectedCurrentWorkLastValue;
+        MCurrentWork? getCurrentWork = GServiceWorklist.getCurrentWork;
 
         // stream을 구독하고 있으면서
         // currentWork를 갖고 있지만 WORK_DETAIL 화면이 아닌 user는
         // WORK_DETAIL 화면으로 이동
-        if (getCurrentWork != null && getCurrentWork.uuid == data['uuid']) {
-          if (!RouterManager().isWorkDetail()) {
-            Navigator.of(GNavigationKey.currentState!.context)
-                .pushReplacementNamed(PATH.ROUTE_WORK_DETAIL);
-          }
-        }
+        // if (getCurrentWork != null && getCurrentWork.uuid == data['uuid']) {
+        //   if (!RouterManager().isWorkDetail()) {
+        //     Navigator.of(GNavigationKey.currentState!.context)
+        //         .pushReplacementNamed(PATH.ROUTE_WORK_DETAIL);
+        //   }
+        // }
 
         _processWorkUpdate(data, getCurrentWork!);
       } finally {
@@ -296,7 +295,7 @@ class ServiceSSE extends CommonService {
   void _updateProcedureData(
       MCurrentWork currentWork, List updatedProcedures, int index) {
     // 현재 작업의 procedures 가져오기
-    List<MProcedureInCurrentWork> currentProcedures = currentWork.procedures;
+    List<MProcedure> currentProcedures = currentWork.procedures;
 
     // 인덱스 유효성 검사
     if (index >= currentProcedures.length) return;
@@ -313,7 +312,7 @@ class ServiceSSE extends CommonService {
     }
 
     // 기존 procedure 가져오기
-    MProcedureInCurrentWork existingProcedure = currentProcedures[index];
+    MProcedure existingProcedure = currentProcedures[index];
 
     // 날짜 처리 최적화
     DateTime? updatedDate = existingProcedure.date;
@@ -347,7 +346,7 @@ class ServiceSSE extends CommonService {
     }
 
     // 업데이트된 procedure 생성
-    MProcedureInCurrentWork updatedProcedure = existingProcedure.copyWith(
+    MProcedure updatedProcedure = existingProcedure.copyWith(
       date: updatedDate,
       location: updatedLocation,
     );
@@ -376,7 +375,8 @@ class ServiceSSE extends CommonService {
 
     // 상태 업데이트
     GServiceWorklist.subject.add(updatedWorkList);
-    GServiceWorklist.selectedCurrentWorkSubject.add(updatedCurrentWork);
+    // GServiceWorklist.selectedCurrentWorkSubject.add(updatedCurrentWork);
+    GServiceWorklist.selectWorkId(updatedCurrentWork.uuid);
 
     debugPrint('SSE stream completed');
   }

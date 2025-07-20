@@ -23,7 +23,7 @@ class MExtraWorkData extends CommonModel<MExtraWorkData> {
   }
 
   @override
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toMap() {
     final Map<String, dynamic> result = {
       'uuid': uuid,
       'name': name,
