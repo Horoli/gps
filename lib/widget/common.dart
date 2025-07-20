@@ -38,6 +38,7 @@ Widget buildFittedText({
 PreferredSizeWidget commonAppBar({
   required String title,
   bool useTrailing = true,
+  bool automaticallyImplyLeading = true,
 }) {
   List<Widget> actions = useTrailing
       ? [
@@ -51,6 +52,7 @@ PreferredSizeWidget commonAppBar({
         ]
       : [];
   return AppBar(
+    automaticallyImplyLeading: automaticallyImplyLeading,
     backgroundColor: COLOR.BASE,
     title: Text(title),
     centerTitle: true,

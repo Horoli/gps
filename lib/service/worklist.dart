@@ -28,7 +28,7 @@ class ServiceWorklist extends CommonService {
       BehaviorSubject<String>.seeded('');
   String get selectedUuidLastValue => selectedUuidSubject.value;
 
-  MCurrentWork get getCurrentWork =>
+  MCurrentWork? get getCurrentWork =>
       getWorkByDivision(uuid: selectedUuidLastValue);
 
   Future<void> selectWorkId(String uuid) async {

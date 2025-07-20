@@ -66,6 +66,7 @@ class ServiceSSE extends CommonService {
   }
 
 // 연결 상태를 추적하기 위한 변수들 추가
+  bool _ignoreNavigationEvents = false;
   bool _isConnected = false;
   DateTime? _lastEventTime;
   Timer? _healthCheckTimer;
@@ -278,9 +279,15 @@ class ServiceSSE extends CommonService {
 
     // 마지막 작업 완료 처리 (이동 로직)
     if (getIndex == 4) {
+      getIndex = -1;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.of(GNavigationKey.currentState!.context)
-            .pushReplacementNamed(PATH.ROUTE_WORKLIST);
+            .pushNamedAndRemoveUntil(
+          PATH.ROUTE_WORKLIST,
+          (route) {
+            return route.settings.name == PATH.ROUTE_WORKLIST;
+          },
+        );
       });
       return;
     }
@@ -358,7 +365,8 @@ class ServiceSSE extends CommonService {
     MCurrentWork updatedCurrentWork =
         currentWork.copyWith(procedures: currentProcedures);
 
-    List<MCurrentWork> aaa = GServiceWorklist.lastValue!.currentWork.map((cur) {
+    List<MCurrentWork> tmpCurrentWorks =
+        GServiceWorklist.lastValue!.currentWork.map((cur) {
       if (cur.uuid == updatedCurrentWork.uuid) {
         return updatedCurrentWork;
       }
@@ -367,7 +375,7 @@ class ServiceSSE extends CommonService {
 
     // 작업리스트를 업데이트
     MWorkList updatedWorkList =
-        GServiceWorklist.lastValue!.copyWith(currentWork: aaa);
+        GServiceWorklist.lastValue!.copyWith(currentWork: tmpCurrentWorks);
 
     // print('sssssssssssstep 1');
     // print('sssssssssssstep 2');

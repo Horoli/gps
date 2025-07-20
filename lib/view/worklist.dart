@@ -13,6 +13,10 @@ class ViewWorklistState extends State<ViewWorklist> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        appBar: commonAppBar(
+          title: TITLE.WORKLIST,
+          automaticallyImplyLeading: false,
+        ),
         bottomNavigationBar: BottomNavigationBar(
           currentIndex: _currentIndex,
           onTap: (index) {
@@ -36,7 +40,6 @@ class ViewWorklistState extends State<ViewWorklist> {
             ),
           ],
         ),
-        appBar: commonAppBar(title: TITLE.WORKLIST),
         body: PageView(
           physics: const NeverScrollableScrollPhysics(),
           controller: _pageController,
@@ -191,8 +194,8 @@ class ViewWorklistState extends State<ViewWorklist> {
   }
 
   Future<void> getData() async {
-    await GServiceWorklist.get();
-    await GServiceWork.getAvailableWorks();
+    // await GServiceWorklist.get();
+    // await GServiceWork.getAvailableWorks();
     // currentWork가 있으면 자동으로 WORK_VIEW로 이동
     // await GServiceWorklist.navigatorWithHasCurrentWork();
 

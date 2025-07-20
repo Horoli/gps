@@ -2,11 +2,11 @@ part of FlightSteps;
 
 class MWorkingData extends MWorkData {
   final String plateNumber;
-  final List<MProcedure> procedures;
+  final List<MProcedure>? procedures;
 
   MWorkingData({
     required this.plateNumber,
-    required this.procedures,
+    this.procedures,
     required super.name,
     super.uuid,
     super.users,
@@ -39,7 +39,7 @@ class MWorkingData extends MWorkData {
     final baseJson = super.toMap();
     baseJson.addAll({
       'plateNumber': plateNumber,
-      'procedures': procedures.map((p) => p.toMap()).toList(),
+      'procedures': procedures?.map((p) => p.toMap()).toList(),
     });
     return baseJson;
   }

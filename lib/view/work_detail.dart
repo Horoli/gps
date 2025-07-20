@@ -38,14 +38,35 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
 
           dynamic selectedWork = GServiceWorklist.getWorkByDivision(
               uuid: GServiceWorklist.selectedUuidLastValue);
-          bool isMyWork = selectedWork.runtimeType == MCurrentWork;
 
           if (selectedWork == null) {
             return StreamExceptionWidgets.noData(
                 context: context, title: '해당 작업 정보가 없습니다');
           }
 
+          String departureTime = '';
+          String name = '';
+          List<MUser> users = [];
+
+          bool isMyWork = selectedWork.runtimeType == MCurrentWork;
+          if (isMyWork) {
+            selectedWork as MCurrentWork;
+            name = selectedWork.aircraft.name;
+            departureTime = selectedWork.aircraft.departureTime;
+            users = selectedWork.users;
+          }
+          if (selectedWork.runtimeType == MWorkingData) {
+            selectedWork as MWorkingData;
+            name = selectedWork.name;
+            departureTime = selectedWork.departureTime;
+            users = selectedWork.users!;
+          }
+
           final List<MProcedure> procedures = selectedWork.procedures ?? [];
+
+          if (procedures.isEmpty) {
+            return Container();
+          }
 
           // 현재 진행 중인 절차 찾기
           for (int index = 0; index < procedures.length; index++) {
@@ -60,23 +81,6 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
           procedureMap[selectedWork.uuid] = currentProcedureIndex;
 
           int getProcedureIndexByWorkId = procedureMap[selectedWork.uuid]!;
-
-          String departureTime = '';
-          String name = '';
-          List<MUser> users = [];
-
-          if (isMyWork) {
-            selectedWork as MCurrentWork;
-            name = selectedWork.aircraft.name;
-            departureTime = selectedWork.aircraft.departureTime;
-            users = selectedWork.users;
-          }
-          if (selectedWork.runtimeType == MWorkingData) {
-            selectedWork as MWorkingData;
-            name = selectedWork.name;
-            departureTime = selectedWork.departureTime;
-            users = selectedWork.users!;
-          }
 
           print('selectedWork $selectedWork');
           print('selectedWork ${snapshot.data?.currentWork}');
@@ -321,9 +325,19 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
     getData();
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+    sseDisconnect();
+  }
+
   Future<void> getData() async {
     await GServiceSSE.connect();
     await GServiceWorklist.get();
+  }
+
+  Future<void> sseDisconnect() async {
+    await GServiceSSE.disconnect();
   }
 
   Future<void> showConfirmationDialog(
@@ -385,6 +399,7 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
   Future<void> completeProcedure() async {
     // 여기에 작업 완료 API 호출 로직 구현
     try {
+      GServiceSSE._ignoreNavigationEvents = true;
       // 작업 완료 API 호출
       debugPrint('완료 처리 ${DateTime.now().millisecondsSinceEpoch}');
       String selectedWorkId = GServiceWorklist.selectedUuidLastValue;
@@ -393,7 +408,14 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
           'GServiceWorklist.lastValue?.currentWork == null ${GServiceWorklist.lastValue?.currentWork == null}');
       // MCurrentWork? getCurrentWork = GServiceWorklist.getCurrentWork;
       // if (getCurrentWork == null) {
-      //   await Navigator.of(context).pushReplacementNamed(PATH.ROUTE_WORKLIST);
+      //   if (mounted && Navigator.canPop(context)) {
+      //     await Navigator.pushNamedAndRemoveUntil(
+      //         context, PATH.ROUTE_WORKLIST, (route) => false);
+      //   }
+
+      // Future.delayed(const Duration(seconds: 2), () {
+      //   GServiceSSE._ignoreNavigationEvents = false;
+      // });
       // }
 
       // 성공 메시지
@@ -405,6 +427,7 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
     } catch (e) {
       if (mounted) {
         ShowInformationWidgets.snackbar(context, '작업 완료 처리 중 오류가 발생했습니다: $e');
+        GServiceSSE._ignoreNavigationEvents = false;
       }
     }
   }

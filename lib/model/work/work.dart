@@ -3,6 +3,7 @@ part of FlightSteps;
 class MWorkData extends CommonModel<MWorkData> {
   final String? uuid;
   final String name; // 항공편 번호 (예: LJ221)
+  final List<MProcedure>? procedures;
   final List<MUser>? users;
   final String? type; // 항공기 타입 (예: 738)
   final String? state; // 상태 (예: normal)
@@ -11,6 +12,7 @@ class MWorkData extends CommonModel<MWorkData> {
   MWorkData({
     this.uuid,
     required this.name,
+    this.procedures,
     this.users,
     this.type,
     this.state,
@@ -22,6 +24,9 @@ class MWorkData extends CommonModel<MWorkData> {
     return MWorkData(
       uuid: item['uuid'] ?? '',
       name: item['name'] as String,
+      procedures: List.from(item['procedures'] ?? [])
+          .map((p) => MProcedure.fromMap(p))
+          .toList(),
       users:
           List.from(item['users'] ?? []).map((u) => MUser.fromMap(u)).toList(),
       type: item['type'] ?? '',
@@ -36,6 +41,7 @@ class MWorkData extends CommonModel<MWorkData> {
     return {
       'uuid': uuid,
       'name': name,
+      'procedures': procedures?.map((p) => p.toMap()).toList(),
       'users': users,
       'type': type,
       'state': state,
@@ -49,12 +55,14 @@ class MWorkData extends CommonModel<MWorkData> {
     String? uuid,
     String? name,
     String? type,
+    List<MProcedure>? procedures,
     List<MUser>? users,
     String? state,
     String? departureTime,
   }) {
     return MWorkData(
       uuid: uuid ?? this.uuid,
+      procedures: procedures ?? this.procedures,
       name: name ?? this.name,
       type: type ?? this.type,
       users: users ?? this.users,
@@ -65,6 +73,6 @@ class MWorkData extends CommonModel<MWorkData> {
 
   @override
   String toString() {
-    return 'Work(uuid: $uuid, name: $name, type: $type, users: $users, state: $state, departureTime: $departureTime)';
+    return 'Work(uuid: $uuid, name: $name, type: $type, users: $users, state: $state, departureTime: $departureTime, procedures: $procedures)';
   }
 }
