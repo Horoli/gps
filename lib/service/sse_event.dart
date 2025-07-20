@@ -1,16 +1,5 @@
 part of FlightSteps;
 
-class SSEEvent {
-  final String id;
-  final String event;
-  final Map<String, dynamic> data;
-
-  SSEEvent({required this.id, required this.event, required this.data});
-
-  @override
-  String toString() => 'SSEEvent(id: $id, event: $event, data: $data)';
-}
-
 class ServiceSSE extends CommonService {
   static ServiceSSE? _instance;
   factory ServiceSSE.getInstance() => _instance ??= ServiceSSE._internal();
@@ -66,7 +55,6 @@ class ServiceSSE extends CommonService {
   }
 
 // 연결 상태를 추적하기 위한 변수들 추가
-  bool _ignoreNavigationEvents = false;
   bool _isConnected = false;
   DateTime? _lastEventTime;
   Timer? _healthCheckTimer;
@@ -86,7 +74,6 @@ class ServiceSSE extends CommonService {
   final StreamTransformer _transformer =
       StreamTransformer<Uint8List, Map<String, dynamic>>.fromHandlers(
     handleData: (data, sink) {
-      print('aaaaaaaa');
       try {
         final String rawData = utf8.decode(data);
         debugPrint('rawData $rawData');
@@ -280,10 +267,9 @@ class ServiceSSE extends CommonService {
     // 마지막 작업 완료 처리 (이동 로직)
     if (getIndex == 4) {
       getIndex = -1;
+
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        Navigator.of(GNavigationKey.currentState!.context)
-            .pushNamedAndRemoveUntil(
-          PATH.ROUTE_WORKLIST,
+        Navigator.of(GNavigationKey.currentState!.context).popUntil(
           (route) {
             return route.settings.name == PATH.ROUTE_WORKLIST;
           },

@@ -190,12 +190,13 @@ class ViewWorklistState extends State<ViewWorklist> {
     _pageController = PageController();
 
     // GServiceLocation.checkAndRequestLocationPermission();
+    // print('view/worklist.dart initState');
     getData();
   }
 
   Future<void> getData() async {
-    // await GServiceWorklist.get();
-    // await GServiceWork.getAvailableWorks();
+    await GServiceWorklist.get();
+    await GServiceWork.getAvailableWorks();
     // currentWork가 있으면 자동으로 WORK_VIEW로 이동
     // await GServiceWorklist.navigatorWithHasCurrentWork();
 

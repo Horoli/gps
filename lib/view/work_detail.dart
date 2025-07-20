@@ -399,7 +399,6 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
   Future<void> completeProcedure() async {
     // 여기에 작업 완료 API 호출 로직 구현
     try {
-      GServiceSSE._ignoreNavigationEvents = true;
       // 작업 완료 API 호출
       debugPrint('완료 처리 ${DateTime.now().millisecondsSinceEpoch}');
       String selectedWorkId = GServiceWorklist.selectedUuidLastValue;
@@ -427,7 +426,6 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
     } catch (e) {
       if (mounted) {
         ShowInformationWidgets.snackbar(context, '작업 완료 처리 중 오류가 발생했습니다: $e');
-        GServiceSSE._ignoreNavigationEvents = false;
       }
     }
   }
