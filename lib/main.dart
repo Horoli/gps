@@ -124,6 +124,7 @@ Future<void> initService() async {
   GServiceSSE = ServiceSSE.getInstance();
   // GServiceGPSInterval = ServiceGPSInterval.getInstance();
   GServiceLocation = ServiceLocation.getInstance();
+  GServiceExtraWork = ServiceExtraWork.getInstance();
 }
 
 Future<LocationPermission> checkAndRequestLocationPermission() async {

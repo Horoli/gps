@@ -9,10 +9,10 @@ class ServiceWork extends CommonService {
 
   ServiceWork._internal();
 
-  final BehaviorSubject<List<MWorkData>> _availableSubject =
-      BehaviorSubject<List<MWorkData>>.seeded([]);
-  Stream<List<MWorkData>> get availableStream => _availableSubject.stream;
+  final CustomStream<List<MWorkData>> availableSubject =
+      CustomStream<List<MWorkData>>();
 
+  // 작업을 선택하는 시점에서의 workData는 uuid가 없음
   final BehaviorSubject<List<MWorkData>> _selectedSubject =
       BehaviorSubject<List<MWorkData>>.seeded([]);
   Stream<List<MWorkData>> get selectedStream => _selectedSubject.stream;
@@ -76,7 +76,8 @@ class ServiceWork extends CommonService {
           .map((item) => MWorkData.fromMap(item as Map<String, dynamic>))
           .toList();
 
-      _availableSubject.add(availableWorks);
+      // _availableSubject.add(availableWorks);
+      availableSubject.sink(availableWorks);
       print('availableWorks $availableWorks');
       completer.complete(availableWorks);
     }
@@ -86,7 +87,9 @@ class ServiceWork extends CommonService {
 
   // 화면을 갱신하기 위한 함수
   Future refreshAvailableWorks() async {
-    _availableSubject.add(_availableSubject.valueOrNull!);
+    // _availableSubject.add(_availableSubject.valueOrNull!);
+
+    availableSubject.refresh();
   }
 
   Future<List<MCurrentWork?>> create({

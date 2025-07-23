@@ -4,6 +4,7 @@ class MExtraWorkData extends CommonModel<MExtraWorkData> {
   final String uuid;
   final String name;
   final String description; // 기본값으로 '추가 작업' 설정
+  String? state;
   final List<String> step;
 
   MExtraWorkData({
@@ -11,6 +12,7 @@ class MExtraWorkData extends CommonModel<MExtraWorkData> {
     required this.name,
     required this.description,
     required this.step,
+    this.state,
   });
 
   factory MExtraWorkData.fromMap(Map<String, dynamic> item) {
@@ -19,6 +21,7 @@ class MExtraWorkData extends CommonModel<MExtraWorkData> {
       name: item['name'] as String,
       description: item['description'] as String,
       step: (item['step'] as List<dynamic>).map((e) => e as String).toList(),
+      state: item['state'] ?? '',
     );
   }
 
@@ -29,6 +32,7 @@ class MExtraWorkData extends CommonModel<MExtraWorkData> {
       'name': name,
       'description': description,
       'step': step,
+      'state': state,
     };
     return result;
   }
@@ -39,17 +43,19 @@ class MExtraWorkData extends CommonModel<MExtraWorkData> {
     String? name,
     String? description,
     List<String>? step,
+    String? state,
   }) {
     return MExtraWorkData(
       uuid: uuid ?? this.uuid,
       name: name ?? this.name,
       description: description ?? this.description,
       step: step ?? this.step,
+      state: state ?? this.state,
     );
   }
 
   @override
   String toString() {
-    return 'MExtraWork(uuid: $uuid, name: $name, description: $description, step: $step)';
+    return 'MExtraWork(uuid: $uuid, name: $name, description: $description, step: $step, state: $state)';
   }
 }

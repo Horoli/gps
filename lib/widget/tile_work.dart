@@ -14,6 +14,10 @@ class TileWork extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool isExtraWork = workData.type == '';
+    String label = isExtraWork
+        ? '${workData.name} ${workData.description}'
+        : '${workData.name} (${workData.type})';
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       decoration: commonDecoration,
@@ -28,18 +32,19 @@ class TileWork extends StatelessWidget {
               children: [
                 // 항공편 정보 행
                 buildFittedText(
-                  text: '${workData.name} (${workData.type})',
+                  text: label,
                   fontSize: 24,
                   fontWeight: FontWeight.w500,
                 ),
                 const SizedBox(height: 8),
                 // 출발 시간 행
-                buildFittedText(
-                  text: '출발시간: ${workData.departureTime}',
-                  color: Colors.grey,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500,
-                ),
+                if (!isExtraWork)
+                  buildFittedText(
+                    text: '출발시간: ${workData.departureTime}',
+                    color: Colors.grey,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                  ),
                 const SizedBox(height: 12),
                 // 상태 버튼
                 buildStartButton(context),

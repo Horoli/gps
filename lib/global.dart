@@ -8,6 +8,8 @@ late ServiceMember GServiceMember;
 late ServiceSSE GServiceSSE;
 // late ServiceGPSInterval GServiceGPSInterval;
 late ServiceLocation GServiceLocation;
+late ServiceExtraWork GServiceExtraWork;
+
 late RouterManager GServiceRouterManager;
 
 bool useForeground = true;

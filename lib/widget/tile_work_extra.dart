@@ -45,16 +45,20 @@ class TileExtraWork extends StatelessWidget {
   }
 
   Widget buildStartButton(BuildContext context) {
-    // if (extraWorkItem. == STATE.WORKSTATE_NORMAL) {
-    //   return buildNavigationButton(
-    //       context: context,
-    //       title: '작업시작',
-    //       usePadding: false,
-    //       routerName: PATH.ROUTE_CREATE_GROUP,
-    //       onPressed: () async {
-    //         await GServiceWork.select(workData: extraWorkItem);
-    //       });
-    // }
+    // if (extraWorkItem.state == STATE.WORKSTATE_NORMAL) {
+    if (extraWorkItem.state == '') {
+      return buildNavigationButton(
+        context: context,
+        title: '작업시작',
+        usePadding: false,
+        routerName: PATH.ROUTE_CREATE_GROUP,
+        onPressed: () async {
+          print('extraWorkItem $extraWorkItem');
+          GServiceExtraWork.selectedStream.sink([extraWorkItem.uuid]);
+        },
+      );
+    }
+
     return buildElevatedButton(
       onPressed: null,
       usePadding: false,

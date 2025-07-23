@@ -8,6 +8,7 @@ class MWorkData extends CommonModel<MWorkData> {
   final String? type; // 항공기 타입 (예: 738)
   final String? state; // 상태 (예: normal)
   final String departureTime; // 출발 시간 (예: 0715)
+  final String? description;
 
   MWorkData({
     this.uuid,
@@ -17,22 +18,24 @@ class MWorkData extends CommonModel<MWorkData> {
     this.type,
     this.state,
     required this.departureTime,
+    this.description,
   });
 
   // JSON에서 Work 객체로 변환하는 팩토리 생성자
   factory MWorkData.fromMap(Map<String, dynamic> item) {
     return MWorkData(
-      uuid: item['uuid'] ?? '',
-      name: item['name'] as String,
-      procedures: List.from(item['procedures'] ?? [])
-          .map((p) => MProcedure.fromMap(p))
-          .toList(),
-      users:
-          List.from(item['users'] ?? []).map((u) => MUser.fromMap(u)).toList(),
-      type: item['type'] ?? '',
-      state: item['state'] ?? '',
-      departureTime: item['departureTime'] as String,
-    );
+        uuid: item['uuid'] ?? '',
+        name: item['name'] as String,
+        procedures: List.from(item['procedures'] ?? [])
+            .map((p) => MProcedure.fromMap(p))
+            .toList(),
+        users: List.from(item['users'] ?? [])
+            .map((u) => MUser.fromMap(u))
+            .toList(),
+        type: item['type'] ?? '',
+        state: item['state'] ?? '',
+        departureTime: item['departureTime'] ?? '',
+        description: item['description'] ?? '');
   }
 
   // Work 객체를 JSON으로 변환하는 메서드
@@ -46,6 +49,7 @@ class MWorkData extends CommonModel<MWorkData> {
       'type': type,
       'state': state,
       'departureTime': departureTime,
+      'description': description,
     };
   }
 
@@ -59,6 +63,7 @@ class MWorkData extends CommonModel<MWorkData> {
     List<MUser>? users,
     String? state,
     String? departureTime,
+    String? description,
   }) {
     return MWorkData(
       uuid: uuid ?? this.uuid,
@@ -68,11 +73,12 @@ class MWorkData extends CommonModel<MWorkData> {
       users: users ?? this.users,
       state: state ?? this.state,
       departureTime: departureTime ?? this.departureTime,
+      description: description ?? this.description,
     );
   }
 
   @override
   String toString() {
-    return 'Work(uuid: $uuid, name: $name, type: $type, users: $users, state: $state, departureTime: $departureTime, procedures: $procedures)';
+    return 'Work(uuid: $uuid, name: $name, type: $type, users: $users, state: $state, departureTime: $departureTime, procedures: $procedures, description: $description)';
   }
 }

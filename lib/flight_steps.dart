@@ -38,11 +38,13 @@ part 'model/member.dart';
 part 'model/config.dart';
 // part 'model/work/work_available.dart';
 
+part 'service/work/worklist.dart';
+part 'service/work/work.dart';
+part 'service/work/extra.dart';
+
 part 'service/abstract/common.dart';
 part 'service/user.dart';
 part 'service/checklist.dart';
-part 'service/worklist.dart';
-part 'service/work.dart';
 part 'service/member.dart';
 part 'service/sse_event.dart';
 part 'service/route_manager.dart';
@@ -66,6 +68,8 @@ part 'view/work_detail.dart';
 part 'view/create/abstract.dart';
 part 'view/create/aircraft.dart';
 part 'view/create/group.dart';
+part 'view/create/group_extra.dart';
+part 'view/create/group_shift.dart';
 
 part 'global.dart';
 
@@ -75,3 +79,5 @@ part 'widget/tile_work.dart';
 part 'widget/tile_work_extra.dart';
 part 'widget/tile_member.dart';
 part 'widget/stream_exception.dart';
+
+part 'utils/custom_stream.dart';

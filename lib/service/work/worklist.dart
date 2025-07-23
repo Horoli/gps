@@ -12,72 +12,42 @@ class ServiceWorklist extends CommonService {
   Stream<MWorkList?> get stream => subject.stream;
   MWorkList? get lastValue => subject.valueOrNull;
 
-  // final BehaviorSubject<MCurrentWork?> selectedCurrentWorkSubject =
-  //     BehaviorSubject<MCurrentWork?>.seeded(null);
-
-  // Stream<MCurrentWork?> get selectedCurrentWorkStream =>
-  //     selectedCurrentWorkSubject.stream;
-  // MCurrentWork? get selectedCurrentWorkLastValue =>
-  //     selectedCurrentWorkSubject.valueOrNull;
-
-  // Future<void> select(MCurrentWork currentWork) async {
-  //   selectedCurrentWorkSubject.add(currentWork);
-  // }
-
   final BehaviorSubject<String> selectedUuidSubject =
       BehaviorSubject<String>.seeded('');
   String get selectedUuidLastValue => selectedUuidSubject.value;
-
-  MCurrentWork? get getCurrentWork =>
-      getWorkByDivision(uuid: selectedUuidLastValue);
 
   Future<void> selectWorkId(String uuid) async {
     selectedUuidSubject.add(uuid);
   }
 
-  dynamic getWorkByDivision({required String uuid}) {
-    dynamic value;
+  //   MCurrentWork? getCurrentWorkInProgress() {
+  //   return getWorkByDivision(uuid: selectedUuidLastValue) as MCurrentWork?;
+  // }
+  //   MWorkData? getCompletedWork() {
+  //   final work = getWorkByDivision(uuid: selectedUuidLastValue);
+  //   return work is MWorkData ? work : null;
+  // }
+  dynamic get getWork => getWorkByDivision(uuid: selectedUuidLastValue);
 
+  dynamic getWorkByDivision({required String uuid}) {
     MCurrentWork? inCurrentWork = lastValue!.currentWork
         .where((cur) => cur.uuid == uuid)
         .toList()
         .firstOrNull;
-    value = inCurrentWork;
 
-    if (inCurrentWork == null) {
-      MWorkData? inWorkList = lastValue!.workList
-          .where((MWorkData work) => work.uuid == uuid)
-          .toList()
-          .firstOrNull;
-      value = inWorkList;
-    }
-    return value;
+    if (inCurrentWork != null) return inCurrentWork;
+
+    MWorkData? inWorkList = lastValue!.workList
+        .where((MWorkData work) => work.uuid == uuid)
+        .toList()
+        .firstOrNull;
+
+    return inWorkList;
   }
 
   Future<void> clearSelection() async {
-    // selectedCurrentWorkSubject.add(null);
     selectedUuidSubject.add('');
   }
-
-  // MCurrentWork? getCurrentWork({
-  //   List<MCurrentWork>? inputCurrentWork,
-  // }) {
-  //   if (inputCurrentWork == null) {
-  //     return lastValue!.currentWork
-  //         .where((cur) =>
-  //             // cur.uuid == GServiceWorklist.selectedCurrentWorkLastValue?.uuid)
-  //             cur.uuid == GServiceWorklist.selectedUuidLastValue)
-  //         .toList()
-  //         .firstOrNull;
-  //   }
-
-  //   return inputCurrentWork
-  //       .where((cur) =>
-  //           // cur.uuid == GServiceWorklist.selectedCurrentWorkLastValue?.uuid)
-  //           cur.uuid == GServiceWorklist.selectedUuidLastValue)
-  //       .toList()
-  //       .firstOrNull;
-  // }
 
   Future<MWorkList> get() async {
     Completer<MWorkList> completer = Completer<MWorkList>();
@@ -97,42 +67,6 @@ class ServiceWorklist extends CommonService {
       final Map<String, dynamic> data = response.data as Map<String, dynamic>;
 
       final MWorkList result = MWorkList.fromMap(data);
-
-      // final List<dynamic> currentWorkData =
-      //     data['currentWork'] as List<dynamic>;
-
-      // List<MCurrentWork> currentWork =
-      //     currentWorkData.map((cur) => MCurrentWork.fromMap(cur)).toList();
-
-      // final List<MExtraWorkData> extraWorkList =
-      //     (data['extraWorkList'] as List<dynamic>)
-      //         .map((extraWorkItem) =>
-      //             MExtraWorkData.fromMap(extraWorkItem as Map<String, dynamic>))
-      //         .toList();
-
-      // // workList 파싱
-      // final List<MWorkData> workList = (data['workList'] as List<dynamic>)
-      //     .map(
-      //         (workItem) => MWorkData.fromMap(workItem as Map<String, dynamic>))
-      //     .toList();
-      // debugPrint('works $workList');
-
-      // // step 파싱
-      // final List<String> steps = (data['step'] as List<dynamic>)
-      //     .map((step) => step.toString())
-      //     .toList();
-
-      // // date 파싱
-      // final String date = data['date'] as String;
-
-      // MWorkListData 객체 생성
-      // final MWorkList result = MWorkList(
-      //   currentWork: currentWork,
-      //   extraWorkList: extraWorkList,
-      //   workList: workList,
-      //   step: steps,
-      //   date: date,
-      // );
 
       print('step 4 : ${result.currentWork}');
 

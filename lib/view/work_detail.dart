@@ -116,11 +116,10 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
                       onPressed: () async {
                         // TODO : 현재 선택된 currentWork.uuid를
                         // print(GServiceWorklist.selectedCurrentWorkLastValue);
-
                         // TODO : createGroupView로 이동
                         await Navigator.pushNamed(
                           GNavigationKey.currentContext!,
-                          PATH.ROUTE_CREATE_GROUP,
+                          PATH.ROUTE_CREATE_GROUP_SHIFT,
                         );
 
                         // TODO : sse disconnect

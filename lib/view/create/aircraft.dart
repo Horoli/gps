@@ -12,7 +12,7 @@ class ViewCreateAircraftState
   @override
   Widget buildContent() {
     return StreamBuilder<List<MWorkData>>(
-      stream: GServiceWork.availableStream,
+      stream: GServiceWork.availableSubject.browse,
       builder: (context, snapshot) {
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return StreamExceptionWidgets.noData(

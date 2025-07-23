@@ -1,13 +1,14 @@
 part of FlightSteps;
 
-class ViewCreateGroup extends ViewCreateAbstract {
-  const ViewCreateGroup({super.key});
+class ViewCreateGroupShift extends ViewCreateAbstract {
+  const ViewCreateGroupShift({super.key});
 
   @override
-  State<ViewCreateGroup> createState() => ViewCreateGroupState();
+  State<ViewCreateGroupShift> createState() => ViewCreateGroupShiftState();
 }
 
-class ViewCreateGroupState extends ViewCreateAbstractState<ViewCreateGroup> {
+class ViewCreateGroupShiftState
+    extends ViewCreateAbstractState<ViewCreateGroupShift> {
   @override
   Widget buildContent() {
     return isLoading
@@ -54,72 +55,32 @@ class ViewCreateGroupState extends ViewCreateAbstractState<ViewCreateGroup> {
   @override
   // TODO : replacement가 아니라, 2단계 이전의 route만 제거가 돼야함
   Widget buildNavButton() {
-    // if (isExtraWork) {
-    //   return buildElevatedButton(
-    //     child: Text('test'),
-    //     onPressed: () async {
-    //       List<MMember> members = GServiceMember.selectedMember ?? [];
-
-    //       await GServiceExtraWork.create(
-    //           members: members.map((e) => e.uuid).toList());
-    //       // 무조건 빈값을 set해줘야 함
-    //       GServiceExtraWork.selectedStream.sink([]);
-    //     },
-    //   );
-    //   return buildNavigationButton(
-    //       context: context,
-    //       title: '비 연계작업 생성',
-    //       useReplacement: true,
-    //       routerName: PATH.ROUTE_WORK_DETAIL,
-    //       onPressed: () async {});
-    // }
-    // if (isShift) {
-    //   return buildNavigationButton(
-    //     context: context,
-    //     title: '교대',
-    //     useReplacement: true,
-    //     routerName: PATH.ROUTE_WORK_DETAIL,
-    //     onPressed: () async {
-    //       List<MMember> members = GServiceMember.selectedMember ?? [];
-
-    //       print('shift button step 1');
-    //       await GServiceWork.shift(
-    //         members: members.map((e) => e.uuid).toList(),
-    //         works: [GServiceWorklist.selectedUuidLastValue],
-    //       );
-    //       print('shift button step 2');
-
-    //       // await GServiceWorklist.get();
-
-    //       print('shift button step 3');
-    //       dynamic getWork = GServiceWorklist.getWorkByDivision(
-    //           uuid: GServiceWorklist.selectedUuidLastValue);
-
-    //       print('shift button step 4 $getWork');
-    //       if (getWork == null) return;
-
-    //       // GServiceWorklist.select(getWork);
-    //       GServiceWorklist.selectWorkId(GServiceWorklist.selectedUuidLastValue);
-    //     },
-    //   );
-    // }
-
     return buildNavigationButton(
       context: context,
-      title: '완료',
+      title: '교대',
       useReplacement: true,
       routerName: PATH.ROUTE_WORK_DETAIL,
       onPressed: () async {
         List<MMember> members = GServiceMember.selectedMember ?? [];
 
-        List<MCurrentWork?> results = await GServiceWork.create(
-            members: members.map((e) => e.uuid).toList());
-        print('GServiceWork step 3 $results');
+        print('shift button step 1');
+        await GServiceWork.shift(
+          members: members.map((e) => e.uuid).toList(),
+          works: [GServiceWorklist.selectedUuidLastValue],
+        );
+        print('shift button step 2');
 
-        if (results.isEmpty) return;
+        // await GServiceWorklist.get();
 
-        // GServiceWorklist.select(results[0]!);
-        GServiceWorklist.selectWorkId(results[0]!.uuid);
+        print('shift button step 3');
+        dynamic getWork = GServiceWorklist.getWorkByDivision(
+            uuid: GServiceWorklist.selectedUuidLastValue);
+
+        print('shift button step 4 $getWork');
+        if (getWork == null) return;
+
+        // GServiceWorklist.select(getWork);
+        GServiceWorklist.selectWorkId(GServiceWorklist.selectedUuidLastValue);
       },
     );
   }
@@ -129,10 +90,6 @@ class ViewCreateGroupState extends ViewCreateAbstractState<ViewCreateGroup> {
     setState(() {
       isLoading = true;
       print('GServiceWork.selectedWorks ${GServiceWork.selectedWorks}');
-      // isShift = GServiceWork.selectedWorks.isEmpty ? true : false;
-      // isExtraWork = GServiceExtraWork.selectedStream.hasValue;
-      // print('isExtraWork $isExtraWork');
-      // print(GServiceExtraWork.selectedStream.lastValue);
     });
 
     try {
