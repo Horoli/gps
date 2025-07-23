@@ -45,6 +45,7 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
 
           bool isExtra = false;
 
+          // TODO : 분기코드 전체적으로 손 봐야함
           String type = '';
           String aircraftDepartureTime = '';
           String aircraftName = '';

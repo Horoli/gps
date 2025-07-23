@@ -54,56 +54,6 @@ class ViewCreateGroupState extends ViewCreateAbstractState<ViewCreateGroup> {
   @override
   // TODO : replacement가 아니라, 2단계 이전의 route만 제거가 돼야함
   Widget buildNavButton() {
-    // if (isExtraWork) {
-    //   return buildElevatedButton(
-    //     child: Text('test'),
-    //     onPressed: () async {
-    //       List<MMember> members = GServiceMember.selectedMember ?? [];
-
-    //       await GServiceExtraWork.create(
-    //           members: members.map((e) => e.uuid).toList());
-    //       // 무조건 빈값을 set해줘야 함
-    //       GServiceExtraWork.selectedStream.sink([]);
-    //     },
-    //   );
-    //   return buildNavigationButton(
-    //       context: context,
-    //       title: '비 연계작업 생성',
-    //       useReplacement: true,
-    //       routerName: PATH.ROUTE_WORK_DETAIL,
-    //       onPressed: () async {});
-    // }
-    // if (isShift) {
-    //   return buildNavigationButton(
-    //     context: context,
-    //     title: '교대',
-    //     useReplacement: true,
-    //     routerName: PATH.ROUTE_WORK_DETAIL,
-    //     onPressed: () async {
-    //       List<MMember> members = GServiceMember.selectedMember ?? [];
-
-    //       print('shift button step 1');
-    //       await GServiceWork.shift(
-    //         members: members.map((e) => e.uuid).toList(),
-    //         works: [GServiceWorklist.selectedUuidLastValue],
-    //       );
-    //       print('shift button step 2');
-
-    //       // await GServiceWorklist.get();
-
-    //       print('shift button step 3');
-    //       dynamic getWork = GServiceWorklist.getWorkByDivision(
-    //           uuid: GServiceWorklist.selectedUuidLastValue);
-
-    //       print('shift button step 4 $getWork');
-    //       if (getWork == null) return;
-
-    //       // GServiceWorklist.select(getWork);
-    //       GServiceWorklist.selectWorkId(GServiceWorklist.selectedUuidLastValue);
-    //     },
-    //   );
-    // }
-
     return buildNavigationButton(
       context: context,
       title: '완료',
