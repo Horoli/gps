@@ -363,7 +363,7 @@ class ServiceSSE extends CommonService {
         currentWork.copyWith(procedures: currentProcedures);
 
     List<MCurrentWork> tmpCurrentWorks =
-        GServiceWorklist.lastValue!.currentWork.map((cur) {
+        GServiceWorklist.workListLastValue!.currentWork.map((cur) {
       if (cur.uuid == updatedCurrentWork.uuid) {
         return updatedCurrentWork;
       }
@@ -371,8 +371,8 @@ class ServiceSSE extends CommonService {
     }).toList();
 
     // 작업리스트를 업데이트
-    MWorkList updatedWorkList =
-        GServiceWorklist.lastValue!.copyWith(currentWork: tmpCurrentWorks);
+    MWorkList updatedWorkList = GServiceWorklist.workListLastValue!
+        .copyWith(currentWork: tmpCurrentWorks);
 
     // print('sssssssssssstep 1');
     // print('sssssssssssstep 2');

@@ -10,7 +10,7 @@ class ServiceWorklist extends CommonService {
   final BehaviorSubject<MWorkList?> subject =
       BehaviorSubject<MWorkList?>.seeded(null);
   Stream<MWorkList?> get stream => subject.stream;
-  MWorkList? get lastValue => subject.valueOrNull;
+  MWorkList? get workListLastValue => subject.valueOrNull;
 
   final BehaviorSubject<String> selectedUuidSubject =
       BehaviorSubject<String>.seeded('');
@@ -30,17 +30,23 @@ class ServiceWorklist extends CommonService {
   dynamic get getWork => getWorkByDivision(uuid: selectedUuidLastValue);
 
   dynamic getWorkByDivision({required String uuid}) {
-    MCurrentWork? inCurrentWork = lastValue!.currentWork
+    print('getWorkByDivision step 0 : $uuid');
+    print('getWorkByDivision step 1 : ${workListLastValue?.currentWork}');
+
+    MCurrentWork? inCurrentWork = workListLastValue!.currentWork
         .where((cur) => cur.uuid == uuid)
         .toList()
         .firstOrNull;
+    print('getWorkByDivision step 2 : $inCurrentWork');
 
     if (inCurrentWork != null) return inCurrentWork;
 
-    MWorkData? inWorkList = lastValue!.workList
+    MWorkData? inWorkList = workListLastValue!.workList
         .where((MWorkData work) => work.uuid == uuid)
         .toList()
         .firstOrNull;
+
+    print('getWorkByDivision step 3 : $inWorkList');
 
     return inWorkList;
   }

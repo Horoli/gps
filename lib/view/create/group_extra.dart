@@ -55,17 +55,33 @@ class ViewCreateGroupExtraState
   @override
   // TODO : replacement가 아니라, 2단계 이전의 route만 제거가 돼야함
   Widget buildNavButton() {
-    return buildElevatedButton(
-      child: Text('test'),
+    return buildNavigationButton(
+      context: context,
+      title: '작업시작',
+      useReplacement: true,
+      routerName: PATH.ROUTE_WORK_DETAIL,
       onPressed: () async {
         List<MMember> members = GServiceMember.selectedMember ?? [];
 
-        await GServiceExtraWork.create(
+        List<MCurrentWork?> results = await GServiceExtraWork.create(
             members: members.map((e) => e.uuid).toList());
-        // 무조건 빈값을 set해줘야 함
-        GServiceExtraWork.selectedStream.sink([]);
+        if (results.isEmpty) return;
+
+        // GServiceWorklist.select(results[0]!);
+        GServiceWorklist.selectWorkId(results[0]!.uuid);
       },
     );
+    // return buildElevatedButton(
+    //   child: Text('test'),
+    //   onPressed: () async {
+    //     List<MMember> members = GServiceMember.selectedMember ?? [];
+
+    //     await GServiceExtraWork.create(
+    //         members: members.map((e) => e.uuid).toList());
+    //     // 무조건 빈값을 set해줘야 함
+    //     // GServiceExtraWork.selectedStream.sink([]);
+    //   },
+    // );
   }
 
   @override

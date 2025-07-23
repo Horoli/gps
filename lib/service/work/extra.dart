@@ -10,7 +10,7 @@ class ServiceExtraWork extends CommonService {
   final CustomStream<List<String>> selectedStream =
       CustomStream<List<String>>();
 
-  Future<void> create({
+  Future<List<MCurrentWork?>> create({
     required List<String> members,
   }) async {
     try {
@@ -24,7 +24,7 @@ class ServiceExtraWork extends CommonService {
 
       if (selectedStream.lastValue == null) {
         debugPrint('ServiceExtraWork error : selectedStream is null');
-        return;
+        return [];
       }
 
       Map<String, dynamic> postData = {
@@ -50,6 +50,10 @@ class ServiceExtraWork extends CommonService {
 
       final List<dynamic> data = response.data as List<dynamic>;
       print('extrawork response : $data');
+
+      List<MCurrentWork> extraWorks =
+          data.map((cur) => MCurrentWork.fromMap(cur)).toList();
+      return extraWorks;
     } catch (e) {
       if (e is DioException) {
         if (e.response != null) {
@@ -57,6 +61,7 @@ class ServiceExtraWork extends CommonService {
           debugPrint('error data : ${e.response?.data}');
         }
       }
+      return [];
     }
   }
 }

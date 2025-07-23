@@ -17,7 +17,6 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
       body: StreamBuilder<MWorkList?>(
         stream: GServiceWorklist.stream,
         builder: (context, snapshot) {
-          print('workDetail snapshot $snapshot');
           if (snapshot.connectionState == ConnectionState.waiting) {
             return StreamExceptionWidgets.waiting(context: context);
           }
@@ -44,25 +43,37 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
                 context: context, title: '해당 작업 정보가 없습니다');
           }
 
-          String departureTime = '';
-          String name = '';
+          bool isExtra = false;
+
+          String type = '';
+          String aircraftDepartureTime = '';
+          String aircraftName = '';
+          String extraName = '';
+          String extraDescription = '';
           List<MUser> users = [];
 
           bool isMyWork = selectedWork.runtimeType == MCurrentWork;
+
           if (isMyWork) {
             selectedWork as MCurrentWork;
-            name = selectedWork.aircraft.name;
-            departureTime = selectedWork.aircraft.departureTime;
+            aircraftName = selectedWork.aircraft!.name;
+            type = selectedWork.type;
+            aircraftDepartureTime = selectedWork.aircraft!.departureTime;
             users = selectedWork.users;
+            extraName = selectedWork.extra?.name ?? "-";
+            extraDescription = selectedWork.extra?.description ?? "-";
+            isExtra = type == 'extra';
           }
           if (selectedWork.runtimeType == MWorkingData) {
             selectedWork as MWorkingData;
-            name = selectedWork.name;
-            departureTime = selectedWork.departureTime;
+            aircraftName = selectedWork.name;
+            aircraftDepartureTime = selectedWork.departureTime;
             users = selectedWork.users!;
+            isExtra = type == 'extra';
           }
 
           final List<MProcedure> procedures = selectedWork.procedures ?? [];
+          print('procedures $procedures');
 
           if (procedures.isEmpty) {
             return Container();
@@ -85,10 +96,17 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
           print('selectedWork $selectedWork');
           print('selectedWork ${snapshot.data?.currentWork}');
 
+          // bool isExtra = type == 'extra';
+
           return Column(
             children: [
-              buildWorkInfo(name: name, departureTime: departureTime)
-                  .flex(flex: 2),
+              isExtra
+                  ? buildExtraWorkInfo(extraName, extraDescription)
+                      .flex(flex: 2)
+                  : buildWorkInfo(
+                          name: aircraftName,
+                          departureTime: aircraftDepartureTime)
+                      .flex(flex: 2),
               buildCurrentWork(procedures[getProcedureIndexByWorkId])
                   .flex(flex: 2),
               buildWorkHistory(procedures, getProcedureIndexByWorkId)
@@ -186,6 +204,67 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
                     ).expand(),
                     buildFittedText(
                       text: departureTime,
+                      fontSize: SIZE.WORK_DETAIL_CHILD,
+                      color: COLOR.GREY,
+                    ).expand(),
+                  ],
+                ).expand(),
+              ],
+            ).expand(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildExtraWorkInfo(
+    String name,
+    String description,
+  ) {
+    return Padding(
+      padding: SIZE.WORK_DETAIL_PADDING,
+      child: Container(
+        decoration: commonDecoration,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const AutoSizeText(
+              '작업 정보',
+              minFontSize: SIZE.WORK_DETAIL_HEADER,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                // fontSize: SIZE.WORK_DETAIL_HEADER,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
+            ).expand(),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  children: [
+                    buildFittedText(
+                      text: '작업명',
+                      fontSize: SIZE.WORK_DETAIL_CHILD,
+                      color: COLOR.GREY,
+                    ).expand(),
+                    buildFittedText(
+                      text: name,
+                      fontSize: SIZE.WORK_DETAIL_CHILD,
+                      color: COLOR.GREY,
+                    ).expand(),
+                  ],
+                ).expand(),
+                Column(
+                  children: [
+                    buildFittedText(
+                      text: '비고',
+                      fontSize: SIZE.WORK_DETAIL_CHILD,
+                      color: COLOR.GREY,
+                    ).expand(),
+                    buildFittedText(
+                      text: description,
                       fontSize: SIZE.WORK_DETAIL_CHILD,
                       color: COLOR.GREY,
                     ).expand(),
@@ -403,7 +482,7 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
       String selectedWorkId = GServiceWorklist.selectedUuidLastValue;
       await GServiceWorklist.completeProcedure(selectedWorkId);
       debugPrint(
-          'GServiceWorklist.lastValue?.currentWork == null ${GServiceWorklist.lastValue?.currentWork == null}');
+          'GServiceWorklist.lastValue?.currentWork == null ${GServiceWorklist.workListLastValue?.currentWork == null}');
       // MCurrentWork? getCurrentWork = GServiceWorklist.getCurrentWork;
       // if (getCurrentWork == null) {
       //   if (mounted && Navigator.canPop(context)) {

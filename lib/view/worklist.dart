@@ -110,7 +110,7 @@ class ViewWorklistState extends State<ViewWorklist> {
                   String workString =
                       '${workData.name}_${workData.departureTime}_${workData.type}';
                   String currentString =
-                      '${currentWork.aircraft.name}_${currentWork.aircraft.departureTime}_${currentWork.aircraft.type}';
+                      '${currentWork.aircraft!.name}_${currentWork.aircraft!.departureTime}_${currentWork.aircraft!.type}';
                   return workString == currentString;
                 },
               ).firstOrNull; // firstOrNull 사용

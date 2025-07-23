@@ -17,10 +17,11 @@ class MExtraWorkData extends CommonModel<MExtraWorkData> {
 
   factory MExtraWorkData.fromMap(Map<String, dynamic> item) {
     return MExtraWorkData(
-      uuid: item['uuid'] as String,
-      name: item['name'] as String,
-      description: item['description'] as String,
-      step: (item['step'] as List<dynamic>).map((e) => e as String).toList(),
+      uuid: item['uuid'] ?? '',
+      name: item['name'] ?? '',
+      description: item['description'] ?? '',
+      // step: (item['step'] ?? []).map((e) => e as String).toList(),
+      step: List.from(item['step'] ?? []),
       state: item['state'] ?? '',
     );
   }

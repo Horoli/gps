@@ -5,7 +5,8 @@ part of FlightSteps;
 class MCurrentWork extends CommonModel<MCurrentWork> {
   final String uuid;
   final List<MUser> users;
-  final MAircraftInCurrentWork aircraft;
+  final MAircraftInCurrentWork? aircraft; // only default
+  final MExtraWorkData? extra; // only extra
   final String type;
   final String plateNumber;
   final List<MProcedure> procedures;
@@ -15,7 +16,8 @@ class MCurrentWork extends CommonModel<MCurrentWork> {
   MCurrentWork({
     required this.uuid,
     required this.users,
-    required this.aircraft,
+    this.aircraft,
+    this.extra,
     required this.type,
     required this.procedures,
     required this.plateNumber,
@@ -32,8 +34,8 @@ class MCurrentWork extends CommonModel<MCurrentWork> {
       users: (item['users'] as List<dynamic>)
           .map((e) => MUser.fromMap(e as Map<String, dynamic>))
           .toList(),
-      aircraft: MAircraftInCurrentWork.fromMap(
-          item['aircraft'] as Map<String, dynamic>),
+      aircraft: MAircraftInCurrentWork.fromMap(item['aircraft'] ?? {}),
+      extra: MExtraWorkData.fromMap(item['extra'] ?? {}),
       type: item['type'] as String,
       plateNumber: item['plateNumber'] as String,
       procedures: (item['procedures'] as List<dynamic>)
@@ -49,7 +51,8 @@ class MCurrentWork extends CommonModel<MCurrentWork> {
     return {
       'uuid': uuid,
       'users': users.map((e) => e.toMap()).toList(),
-      'aircraft': aircraft.toMap(),
+      'aircraft': aircraft ?? {},
+      'extra': extra ?? {},
       'type': type,
       'plateNumber': plateNumber,
       'procedures': procedures.map((e) => e.toMap()).toList(),
@@ -160,9 +163,9 @@ class MAircraftInCurrentWork extends CommonModel<MAircraftInCurrentWork> {
 
   factory MAircraftInCurrentWork.fromMap(Map<String, dynamic> item) {
     return MAircraftInCurrentWork(
-      name: item['name'] as String,
-      departureTime: item['departureTime'] as String,
-      type: item['type'] as String,
+      name: item['name'] ?? "",
+      departureTime: item['departureTime'] ?? "",
+      type: item['type'] ?? "",
     );
   }
 
