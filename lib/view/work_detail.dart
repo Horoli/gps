@@ -57,13 +57,16 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
 
           if (isMyWork) {
             selectedWork as MCurrentWork;
+            print('selectedWork step 1 $selectedWork');
             aircraftName = selectedWork.aircraft!.name;
             type = selectedWork.type;
+            isExtra = type == 'extra';
             aircraftDepartureTime = selectedWork.aircraft!.departureTime;
             users = selectedWork.users;
-            extraName = selectedWork.extra?.name ?? "-";
-            extraDescription = selectedWork.extra?.description ?? "-";
-            isExtra = type == 'extra';
+            if (isExtra) {
+              extraName = selectedWork.extra?.name ?? '-';
+              extraDescription = selectedWork.extra?.description ?? '-';
+            }
           }
           if (selectedWork.runtimeType == MWorkingData) {
             selectedWork as MWorkingData;
@@ -96,8 +99,6 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
 
           print('selectedWork $selectedWork');
           print('selectedWork ${snapshot.data?.currentWork}');
-
-          // bool isExtra = type == 'extra';
 
           return Column(
             children: [
@@ -260,7 +261,7 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
                 Column(
                   children: [
                     buildFittedText(
-                      text: '비고',
+                      text: '상세',
                       fontSize: SIZE.WORK_DETAIL_CHILD,
                       color: COLOR.GREY,
                     ).expand(),

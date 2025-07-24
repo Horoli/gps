@@ -27,7 +27,7 @@ class MCurrentWork extends CommonModel<MCurrentWork> {
 
   factory MCurrentWork.fromMap(Map<String, dynamic> item) {
     print('aaaaaaaaaaaaaaaa');
-    print('${item['users']}');
+    print('${item['extra']}');
     print('aaaaaaaaaaaaaaaa');
     return MCurrentWork(
       uuid: item['uuid'] as String,
@@ -70,6 +70,7 @@ class MCurrentWork extends CommonModel<MCurrentWork> {
     String? plateNumber,
     List<MProcedure>? procedures,
     String? description,
+    MExtraWorkData? extra,
     DateTime? date,
   }) {
     return MCurrentWork(
@@ -81,12 +82,13 @@ class MCurrentWork extends CommonModel<MCurrentWork> {
       procedures: procedures ?? this.procedures,
       description: description ?? this.description,
       date: date ?? this.date,
+      extra: extra ?? this.extra,
     );
   }
 
   @override
   String toString() {
-    return 'CurrentWork(uuid: $uuid, users: $users, aircraft: $aircraft, type: $type, procedures: $procedures, description: $description, date: $date, plateNumber :$plateNumber)';
+    return 'CurrentWork(uuid: $uuid, users: $users, aircraft: $aircraft, type: $type, procedures: $procedures, description: $description, date: $date, plateNumber: $plateNumber, extra: $extra)';
   }
 }
 

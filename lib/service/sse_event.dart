@@ -258,7 +258,7 @@ class ServiceSSE extends CommonService {
 
     // procedures 데이터가 없으면 처리 중단
     if (!unflattenedData.containsKey('procedures') ||
-        !(unflattenedData['procedures'] is List)) {
+        unflattenedData['procedures'] is! List) {
       return;
     }
 
@@ -273,10 +273,15 @@ class ServiceSSE extends CommonService {
       }
     }
 
+    print('processWorkUpdate $currentWork');
     if (getIndex < 0) return; // 유효한 인덱스가 없으면 중단
 
+    bool isExtra = currentWork.type == 'extra';
+    bool goWorkList = getIndex == 4 || (isExtra && getIndex == 2);
+    bool isUpdateProcedure = getIndex < 4;
+
     // 마지막 작업 완료 처리 (이동 로직)
-    if (getIndex == 4) {
+    if (goWorkList) {
       getIndex = -1;
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -290,7 +295,7 @@ class ServiceSSE extends CommonService {
     }
 
     // 작업 업데이트 처리 (getIndex < 4)
-    if (getIndex < 4) {
+    if (isUpdateProcedure) {
       _updateProcedureData(currentWork, updatedProcedures, getIndex);
     }
   }
