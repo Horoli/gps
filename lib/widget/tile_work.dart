@@ -63,17 +63,27 @@ class TileWork extends StatelessWidget {
           });
     }
 
-    if (workData.state == STATE.WORKSTATE_WORKING
-        //  && currentWork != null
-        ) {
+    if (workData.state == STATE.WORKSTATE_WORKING) {
+      List<String> getUserNames = workData.users!.map((user) {
+        return user.username;
+      }).toList();
+
+      int count = getUserNames.length > 1
+          ? getUserNames.length - 1
+          : getUserNames.length;
+
+      String label = getUserNames.length > 1
+          ? '작업 중(${getUserNames[0]} 외 $count명)'
+          : '작업 중(${getUserNames[0]})';
+
       return buildNavigationButton(
         context: context,
-        title: '작업 진행 중',
+        title: label,
         usePadding: false,
         routerName: PATH.ROUTE_WORK_DETAIL,
+        backgroundColor:
+            currentWork != null ? COLOR.MY_WORK : COLOR.NOT_MY_WORK,
         onPressed: () async {
-          // print('currentWork $currentWork');
-          // print('workData ${workData}');
           if (currentWork != null) {
             // GServiceWorklist.select(currentWork!);
             GServiceWorklist.selectWorkId(currentWork!.uuid);

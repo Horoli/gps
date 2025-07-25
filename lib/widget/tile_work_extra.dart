@@ -45,7 +45,6 @@ class TileExtraWork extends StatelessWidget {
   }
 
   Widget buildStartButton(BuildContext context) {
-    // if (extraWorkItem.state == STATE.WORKSTATE_NORMAL) {
     if (extraWorkItem.state == '') {
       return buildNavigationButton(
         context: context,
@@ -60,23 +59,30 @@ class TileExtraWork extends StatelessWidget {
     }
 
     if (extraWorkItem.state == STATE.WORKSTATE_WORKING) {
-      // return buildElevatedButton(
-      //   child: Text('aa'),
-      //   onPressed: () async {
-      //     // print(extraWorkItem.uuid);
+      print('extraWorkItem $extraWorkItem');
 
-      //   },
-      // );
+      List<String> getUserNames = extraWorkItem.users!.map((user) {
+        return user.username;
+      }).toList();
+
+      List<MUser> myWorks = extraWorkItem.users!.where((e) {
+        return e.uuid == GServiceUser.getUuid;
+      }).toList();
+
+      int count = getUserNames.length > 1
+          ? getUserNames.length - 1
+          : getUserNames.length;
+
+      String label = getUserNames.length > 1
+          ? '작업 중(${getUserNames[0]} 외 $count명)'
+          : '작업 중(${getUserNames[0]})';
       return buildNavigationButton(
         context: context,
-        title: '작업 진행 중',
+        title: label,
         usePadding: false,
+        backgroundColor: myWorks.isNotEmpty ? COLOR.MY_WORK : COLOR.NOT_MY_WORK,
         routerName: PATH.ROUTE_WORK_DETAIL,
         onPressed: () async {
-          // print('currentWork $currentWork');
-          // print('workData ${workData}');
-          // GServiceWorklist.select(currentWork!);
-          // dynamic asd = GServiceWorklist.getWork(uuid: workData.uuid!);
           GServiceWorklist.selectWorkId(extraWorkItem.uuid);
         },
       );

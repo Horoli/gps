@@ -48,7 +48,6 @@ part 'service/checklist.dart';
 part 'service/member.dart';
 part 'service/sse_event.dart';
 part 'service/route_manager.dart';
-part 'service/gps_interval.dart';
 part 'service/location.dart';
 
 part 'extensions.dart';
@@ -70,6 +69,7 @@ part 'view/create/aircraft.dart';
 part 'view/create/group.dart';
 part 'view/create/group_extra.dart';
 part 'view/create/group_shift.dart';
+part 'view/create/plate.dart';
 
 part 'global.dart';
 

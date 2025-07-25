@@ -8,6 +8,12 @@ const String CHECKLIST = '체크리스트';
 const String CONFIRM = '확인';
 const String WORKLIST = '작업리스트';
 const String CREATE_GROUP = '그룹 생성';
+const String GROUP_AIRCRAFT = '항공편';
+const String GROUP_EXTRA = '비 연계 작업';
+const String GROUP_PLATE = '차량번호';
+const String GROUP_SHIFT = '교대';
+const String GROUP_MEMEBERS = '인원';
+
 const String WORK = '작업';
 
 const String PREFERENCES = '설정';

@@ -10,6 +10,8 @@ class ViewCreateGroupShift extends ViewCreateAbstract {
 class ViewCreateGroupShiftState
     extends ViewCreateAbstractState<ViewCreateGroupShift> {
   @override
+  String get appBarTitle => '${TITLE.CREATE_GROUP} - ${TITLE.GROUP_SHIFT}';
+  @override
   Widget buildContent() {
     return isLoading
         ? StreamExceptionWidgets.waiting(context: context)
@@ -48,7 +50,7 @@ class ViewCreateGroupShiftState
   @override
   void initState() {
     super.initState();
-    searchController.addListener(filterMembers);
+    textController.addListener(filterMembers);
     loadData();
   }
 
@@ -59,28 +61,29 @@ class ViewCreateGroupShiftState
       context: context,
       title: '교대',
       useReplacement: true,
-      routerName: PATH.ROUTE_WORK_DETAIL,
+      routerName: PATH.ROUTE_CREATE_GROUP_PLATE,
       onPressed: () async {
-        List<MMember> members = GServiceMember.selectedMember ?? [];
+        createGroupType = createGroupTypeMap['shift'] ?? 'shift';
+        // List<MMember> members = GServiceMember.selectedMember ?? [];
 
-        print('shift button step 1');
-        await GServiceWork.shift(
-          members: members.map((e) => e.uuid).toList(),
-          works: [GServiceWorklist.selectedUuidLastValue],
-        );
-        print('shift button step 2');
+        // print('shift button step 1');
+        // await GServiceWork.shift(
+        //   members: members.map((e) => e.uuid).toList(),
+        //   works: [GServiceWorklist.selectedUuidLastValue],
+        // );
+        // print('shift button step 2');
 
-        // await GServiceWorklist.get();
+        // // await GServiceWorklist.get();
 
-        print('shift button step 3');
-        dynamic getWork = GServiceWorklist.getWorkByDivision(
-            uuid: GServiceWorklist.selectedUuidLastValue);
+        // print('shift button step 3');
+        // dynamic getWork = GServiceWorklist.getWorkByDivision(
+        //     uuid: GServiceWorklist.selectedUuidLastValue);
 
-        print('shift button step 4 $getWork');
-        if (getWork == null) return;
+        // print('shift button step 4 $getWork');
+        // if (getWork == null) return;
 
-        // GServiceWorklist.select(getWork);
-        GServiceWorklist.selectWorkId(GServiceWorklist.selectedUuidLastValue);
+        // // GServiceWorklist.select(getWork);
+        // GServiceWorklist.selectWorkId(GServiceWorklist.selectedUuidLastValue);
       },
     );
   }
@@ -89,7 +92,6 @@ class ViewCreateGroupShiftState
   Future<void> loadData() async {
     setState(() {
       isLoading = true;
-      print('GServiceWork.selectedWorks ${GServiceWork.selectedWorks}');
     });
 
     try {
@@ -109,7 +111,7 @@ class ViewCreateGroupShiftState
 
   // 검색어 필터링
   void filterMembers() {
-    final String query = searchController.text.toLowerCase();
+    final String query = textController.text.toLowerCase();
     setState(() {
       if (query.isEmpty) {
         setFilteredMembers = setMembers;
@@ -124,7 +126,7 @@ class ViewCreateGroupShiftState
 
   @override
   void dispose() {
-    searchController.dispose();
+    textController.dispose();
     super.dispose();
   }
 }

@@ -10,6 +10,8 @@ class ViewCreateAircraft extends ViewCreateAbstract {
 class ViewCreateAircraftState
     extends ViewCreateAbstractState<ViewCreateAircraft> {
   @override
+  String get appBarTitle => '${TITLE.CREATE_GROUP} - ${TITLE.GROUP_AIRCRAFT}';
+  @override
   Widget buildContent() {
     return StreamBuilder<List<MWorkData>>(
       stream: GServiceWork.availableSubject.browse,

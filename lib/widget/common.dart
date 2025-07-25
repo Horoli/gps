@@ -91,6 +91,7 @@ Widget buildNavigationButton({
   bool useReplacement = false,
   bool usePadding = true,
   Future<void> Function()? onPressed,
+  Color? backgroundColor,
 }) {
   return Padding(
     padding: usePadding ? SIZE.BUTTON_PADDING : EdgeInsets.zero,
@@ -100,7 +101,11 @@ Widget buildNavigationButton({
       child: ElevatedButton(
         onPressed: () async {
           if (onPressed != null) {
-            await onPressed();
+            try {
+              await onPressed();
+            } catch (e) {
+              print('Error in onPressed: $e');
+            }
           }
 
           useReplacement
@@ -113,10 +118,10 @@ Widget buildNavigationButton({
                   GNavigationKey.currentContext!, routerName);
         },
         style: ElevatedButton.styleFrom(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(4),
-          ),
-        ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(4),
+            ),
+            backgroundColor: backgroundColor ?? COLOR.BASE),
         child: Text(
           title,
           style: const TextStyle(
@@ -159,10 +164,15 @@ Widget buildNavigationButtonWithDialog({
   );
 }
 
-Widget buildTextField(TextEditingController controller, String hint) {
+Widget buildTextField(
+  TextEditingController controller,
+  String hint,
+  int maxLength,
+) {
   return Padding(
     padding: const EdgeInsets.all(16.0),
     child: TextField(
+      maxLength: maxLength,
       controller: controller,
       decoration: InputDecoration(
         hintText: hint,

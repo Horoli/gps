@@ -94,6 +94,7 @@ class ServiceWork extends CommonService {
 
   Future<List<MCurrentWork?>> create({
     required List<String> members,
+    required String plateNumber,
   }) async {
     try {
       if (selectedWorks.isEmpty) {
@@ -124,7 +125,7 @@ class ServiceWork extends CommonService {
         "lng": position.longitude,
         "lat": position.latitude,
         "aircraft": aircraft,
-        "plateNumber": tmpPlateNumber,
+        "plateNumber": plateNumber,
         "timestamp": DateTime.now().toIso8601String(),
         // "aircraftName": selectedWork!.name,
         // "aircraftDepartureTime": selectedWork!.departureTime,
@@ -182,6 +183,7 @@ class ServiceWork extends CommonService {
   Future<void> shift({
     required List<String> members,
     required List<String> works,
+    required String plateNumber,
   }) async {
     try {
       print('shift step 1');
@@ -200,7 +202,7 @@ class ServiceWork extends CommonService {
         "lng": position.longitude,
         "lat": position.latitude,
         "works": works,
-        "plateNumber": tmpPlateNumber,
+        "plateNumber": plateNumber,
         "timestamp": DateTime.now().toIso8601String(),
       };
 

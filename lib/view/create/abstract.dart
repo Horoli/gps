@@ -8,13 +8,18 @@ abstract class ViewCreateAbstract extends StatefulWidget {
 }
 
 class ViewCreateAbstractState<T extends ViewCreateAbstract> extends State<T> {
-  final TextEditingController searchController = TextEditingController();
+  final TextEditingController textController = TextEditingController();
   List<MMember> setMembers = [];
   List<MMember> setFilteredMembers = [];
 
   bool isLoading = true;
+  String get textFieldValue => 'search';
+  int get textFieldMaxLength => 20;
 
-  PreferredSizeWidget appBar = commonAppBar(title: TITLE.CREATE_GROUP);
+  String get appBarTitle =>
+      throw UnimplementedError('title must be implemented in the subclass');
+
+  late PreferredSizeWidget appBar = commonAppBar(title: appBarTitle);
 
   Widget buildContent() {
     throw UnimplementedError(
@@ -28,7 +33,11 @@ class ViewCreateAbstractState<T extends ViewCreateAbstract> extends State<T> {
       body: Column(
         children: [
           // 검색 입력 필드
-          buildTextField(searchController, 'search'),
+          buildTextField(
+            textController,
+            textFieldValue,
+            textFieldMaxLength,
+          ),
           buildContent().expand(),
           buildNavButton(),
           // buildNavigationButtonWithDialog(

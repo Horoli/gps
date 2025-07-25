@@ -1,5 +1,7 @@
 part of FlightSteps;
 
+final GlobalKey<NavigatorState> GNavigationKey = GlobalKey();
+
 late ServiceUser GServiceUser;
 late ServiceChecklist GServiceChecklist;
 late ServiceWorklist GServiceWorklist;
@@ -18,9 +20,15 @@ bool nowShowingDialog = false;
 
 const String tmpNumber = "01041850688";
 const String tmpID = "devel";
-const String tmpPlateNumber = "1234";
+// const String tmpPlateNumber = "1234";
 
-final GlobalKey<NavigatorState> GNavigationKey = GlobalKey();
+String createGroupType = '';
+
+const Map<String, String> createGroupTypeMap = {
+  'default': 'default', // aircraft
+  'shift': 'shift',
+  'extra': 'extra',
+};
 
 // key : currentWork.uuid
 // value : procedure index

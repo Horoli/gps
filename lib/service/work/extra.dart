@@ -12,6 +12,7 @@ class ServiceExtraWork extends CommonService {
 
   Future<List<MCurrentWork?>> create({
     required List<String> members,
+    required String plateNumber,
   }) async {
     try {
       final List<String> cookies = await CookieManager.load();
@@ -32,7 +33,7 @@ class ServiceExtraWork extends CommonService {
         "lng": position.longitude,
         "lat": position.latitude,
         "extra": selectedStream.lastValue,
-        "plateNumber": tmpPlateNumber,
+        "plateNumber": plateNumber,
         "timestamp": DateTime.now().toIso8601String(),
         // "aircraftName": selectedWork!.name,
         // "aircraftDepartureTime": selectedWork!.departureTime,

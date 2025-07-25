@@ -6,4 +6,5 @@ const String ROUTE_CREATE_GROUP_AIRCRAFT = 'createAircraftGroup';
 const String ROUTE_CREATE_GROUP_SHIFT = 'createShiftGroup';
 const String ROUTE_CREATE_GROUP_EXTRA = 'createExtraGroup';
 const String ROUTE_WORK_DETAIL = 'workDetail';
+const String ROUTE_CREATE_GROUP_PLATE = 'createPlate';
 const String ROUTE_PREFERENCES = 'preferences';

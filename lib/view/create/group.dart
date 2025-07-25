@@ -9,6 +9,9 @@ class ViewCreateGroup extends ViewCreateAbstract {
 
 class ViewCreateGroupState extends ViewCreateAbstractState<ViewCreateGroup> {
   @override
+  String get appBarTitle => '${TITLE.CREATE_GROUP} - ${TITLE.GROUP_MEMEBERS}';
+
+  @override
   Widget buildContent() {
     return isLoading
         ? StreamExceptionWidgets.waiting(context: context)
@@ -47,7 +50,7 @@ class ViewCreateGroupState extends ViewCreateAbstractState<ViewCreateGroup> {
   @override
   void initState() {
     super.initState();
-    searchController.addListener(filterMembers);
+    textController.addListener(filterMembers);
     loadData();
   }
 
@@ -58,18 +61,18 @@ class ViewCreateGroupState extends ViewCreateAbstractState<ViewCreateGroup> {
       context: context,
       title: '완료',
       useReplacement: true,
-      routerName: PATH.ROUTE_WORK_DETAIL,
+      routerName: PATH.ROUTE_CREATE_GROUP_PLATE,
       onPressed: () async {
-        List<MMember> members = GServiceMember.selectedMember ?? [];
+        createGroupType = createGroupTypeMap['default'] ?? 'default';
+        // List<MMember> members = GServiceMember.selectedMember ?? [];
 
-        List<MCurrentWork?> results = await GServiceWork.create(
-            members: members.map((e) => e.uuid).toList());
-        print('GServiceWork step 3 $results');
+        // List<MCurrentWork?> results = await GServiceWork.create(
+        //     members: members.map((e) => e.uuid).toList());
+        // print('GServiceWork step 3 $results');
 
-        if (results.isEmpty) return;
+        // if (results.isEmpty) return;
 
-        // GServiceWorklist.select(results[0]!);
-        GServiceWorklist.selectWorkId(results[0]!.uuid);
+        // GServiceWorklist.selectWorkId(results[0]!.uuid);
       },
     );
   }
@@ -102,7 +105,7 @@ class ViewCreateGroupState extends ViewCreateAbstractState<ViewCreateGroup> {
 
   // 검색어 필터링
   void filterMembers() {
-    final String query = searchController.text.toLowerCase();
+    final String query = textController.text.toLowerCase();
     setState(() {
       if (query.isEmpty) {
         setFilteredMembers = setMembers;
@@ -117,7 +120,7 @@ class ViewCreateGroupState extends ViewCreateAbstractState<ViewCreateGroup> {
 
   @override
   void dispose() {
-    searchController.dispose();
+    textController.dispose();
     super.dispose();
   }
 }

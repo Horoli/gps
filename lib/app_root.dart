@@ -22,6 +22,8 @@ class AppRootState extends State<AppRoot> {
           const ViewCreateGroupExtra(),
       PATH.ROUTE_CREATE_GROUP_AIRCRAFT: (BuildContext context) =>
           const ViewCreateAircraft(),
+      PATH.ROUTE_CREATE_GROUP_PLATE: (BuildContext context) =>
+          const ViewCreatePlate(),
       PATH.ROUTE_WORK_DETAIL: (BuildContext context) => const ViewWorkDetail(),
       PATH.ROUTE_PREFERENCES: (BuildContext context) => const ViewPreferences(),
     };
