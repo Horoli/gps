@@ -10,6 +10,7 @@
 analyzer:
   errors:
     constant_identifier_names: ignore ignore
+    collection_methods_unrelated_type: ignore
 include: package:flutter_lints/flutter.yaml
 
 linter:

@@ -200,13 +200,18 @@ class ServiceSSE extends CommonService {
 
         dynamic getWork = GServiceWorklist.getWork;
         debugPrint('getWork ${getWork.runtimeType}');
-        if (getWork.runtimeType == MWorkData || getWork == null) {
+        if (getWork.runtimeType == MWorkData ||
+            getWork.runtimeType == MWorkingData ||
+            getWork == null) {
           // Navigator.of(GNavigationKey.currentState!.context)
           //     .pushReplacementNamed(PATH.ROUTE_WORKLIST);
           return;
         }
 
-        getWork as MCurrentWork;
+        // getWork as MCurrentWork;
+        if (getWork is MCurrentWork) {
+          _processWorkUpdate(data, getWork);
+        }
 
         // stream을 구독하고 있으면서
         // currentWork를 갖고 있지만 WORK_DETAIL 화면이 아닌 user는
@@ -217,8 +222,6 @@ class ServiceSSE extends CommonService {
         //         .pushReplacementNamed(PATH.ROUTE_WORK_DETAIL);
         //   }
         // }
-
-        _processWorkUpdate(data, getWork);
       } finally {
         stopwatch.stop();
         debugPrint('stopwatch end : ${DateTime.now().millisecondsSinceEpoch}');

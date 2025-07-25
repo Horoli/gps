@@ -64,13 +64,6 @@ class ViewCreateGroupExtraState
       routerName: PATH.ROUTE_CREATE_GROUP_PLATE,
       onPressed: () async {
         createGroupType = createGroupTypeMap['extra'] ?? 'extra';
-        // List<MMember> members = GServiceMember.selectedMember ?? [];
-        // List<MCurrentWork?> results = await GServiceExtraWork.create(
-        //     members: members.map((e) => e.uuid).toList());
-        // if (results.isEmpty) return;
-
-        // // GServiceWorklist.select(results[0]!);
-        // GServiceWorklist.selectWorkId(results[0]!.uuid);
       },
     );
     // return buildElevatedButton(

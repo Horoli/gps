@@ -62,7 +62,7 @@ class ViewChecklistState extends State<ViewChecklist> {
                     },
                   );
                 }).expand(),
-            buildNavigationButtonWithDialog(
+            buildNavigationButtonWithCustom(
               title: '확인',
               onPressed: () async {
                 bool falseInSubjects = await getSubjectResult();

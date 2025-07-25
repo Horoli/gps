@@ -105,6 +105,7 @@ Widget buildNavigationButton({
               await onPressed();
             } catch (e) {
               print('Error in onPressed: $e');
+              return;
             }
           }
 
@@ -134,7 +135,7 @@ Widget buildNavigationButton({
   );
 }
 
-Widget buildNavigationButtonWithDialog({
+Widget buildNavigationButtonWithCustom({
   required String title,
   bool useReplacement = false,
   VoidCallback? onPressed,
@@ -164,18 +165,24 @@ Widget buildNavigationButtonWithDialog({
   );
 }
 
-Widget buildTextField(
-  TextEditingController controller,
-  String hint,
-  int maxLength,
-) {
+Widget buildSearchTextField({
+  required TextEditingController controller,
+  String? hint,
+  int? maxLength,
+  void Function(String)? onSubmitted,
+}) {
   return Padding(
     padding: const EdgeInsets.all(16.0),
     child: TextField(
+      // onSubmitted: (String value) => onSubmitted,
+      onSubmitted: onSubmitted,
       maxLength: maxLength,
       controller: controller,
       decoration: InputDecoration(
         hintText: hint,
+        hintStyle: const TextStyle(
+          color: Colors.grey,
+        ),
         prefixIcon: const Icon(Icons.search),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8.0),

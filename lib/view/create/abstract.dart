@@ -12,6 +12,9 @@ class ViewCreateAbstractState<T extends ViewCreateAbstract> extends State<T> {
   List<MMember> setMembers = [];
   List<MMember> setFilteredMembers = [];
 
+  List<MWorkData> setWorks = [];
+  List<MWorkData> setFilteredWorks = [];
+
   bool isLoading = true;
   String get textFieldValue => 'search';
   int get textFieldMaxLength => 20;
@@ -26,17 +29,21 @@ class ViewCreateAbstractState<T extends ViewCreateAbstract> extends State<T> {
         'buildContent() must be implemented in the subclass');
   }
 
+  void onSubmitted(String value) {}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: appBar,
+      resizeToAvoidBottomInset: false,
       body: Column(
         children: [
           // 검색 입력 필드
-          buildTextField(
-            textController,
-            textFieldValue,
-            textFieldMaxLength,
+          buildSearchTextField(
+            controller: textController,
+            hint: textFieldValue,
+            maxLength: textFieldMaxLength,
+            onSubmitted: (String value) => onSubmitted(value),
           ),
           buildContent().expand(),
           buildNavButton(),

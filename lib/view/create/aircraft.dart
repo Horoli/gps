@@ -23,13 +23,13 @@ class ViewCreateAircraftState
           );
         }
 
-        final List<MWorkData> aircrafts = snapshot.data!;
+        // final List<MWorkData> aircrafts = snapshot.data ?? [];
 
         return ListView.separated(
           separatorBuilder: (context, index) => const Divider(),
-          itemCount: aircrafts.length,
+          itemCount: setFilteredWorks.length,
           itemBuilder: (context, index) {
-            final MWorkData aircraft = aircrafts[index];
+            final MWorkData aircraft = setFilteredWorks[index];
             bool isSelected = GServiceWork.isSelected(aircraft);
             return ListTile(
               // title: buildFittedText(
@@ -57,6 +57,13 @@ class ViewCreateAircraftState
   }
 
   @override
+  void initState() {
+    super.initState();
+    textController.addListener(filteringQuery);
+    loadData();
+  }
+
+  @override
   Widget buildNavButton() {
     return buildNavigationButton(
       context: context,
@@ -68,7 +75,24 @@ class ViewCreateAircraftState
 
   @override
   Future<void> loadData() async {
-    await GServiceWork.getAvailableWorks();
+    List<MWorkData> works = await GServiceWork.getAvailableWorks();
+    setState(() {
+      setWorks = works;
+      setFilteredWorks = works;
+    });
+  }
+
+  void filteringQuery() {
+    final String query = textController.text.toUpperCase();
+    setState(() {
+      if (query.isEmpty) {
+        setFilteredWorks = setWorks;
+      } else {
+        setFilteredWorks = setWorks.where((work) {
+          return work.name.toUpperCase().contains(query);
+        }).toList();
+      }
+    });
   }
 
   @override

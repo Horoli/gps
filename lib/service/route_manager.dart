@@ -20,6 +20,7 @@ class RouterManager {
       // GServiceSSE.disconnect();
       GServiceWorklist.get();
       procedureMap = {};
+      createGroupType = '';
 
       print('WORKLIST 화면 활성화 - clearSelection 실행됨');
     }

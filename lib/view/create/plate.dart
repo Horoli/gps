@@ -21,6 +21,14 @@ class ViewCreatePlateState extends ViewCreateAbstractState<ViewCreatePlate> {
 
   @override
   String get appBarTitle => '${TITLE.CREATE_GROUP} - ${TITLE.GROUP_PLATE}';
+
+  @override
+  void onSubmitted(String value) {
+    setState(() {
+      selectedPlate = value;
+    });
+  }
+
   @override
   Widget buildContent() {
     return StreamBuilder<List<String>>(
@@ -44,19 +52,14 @@ class ViewCreatePlateState extends ViewCreateAbstractState<ViewCreatePlate> {
             bool isSelected = plate == selectedPlate;
 
             return ListTile(
+              onTap: () {
+                setState(() {
+                  selectedPlate = plate;
+                  textController.text = plate;
+                });
+              },
               title: Text(plate),
               textColor: isSelected ? COLOR.BASE : null,
-              trailing: Checkbox(
-                activeColor: COLOR.BASE,
-                checkColor: COLOR.WHITE,
-                value: isSelected,
-                onChanged: (value) async {
-                  setState(() {
-                    selectedPlate = value == true ? plate : '';
-                    textController.text = plate;
-                  });
-                },
-              ),
             );
           },
         );
@@ -127,10 +130,12 @@ class ViewCreatePlateState extends ViewCreateAbstractState<ViewCreatePlate> {
   Future<void> setPreferences() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final List<String> plates = prefs.getStringList('plates') ?? [];
-    plates.add(textController.text);
-    streamController.sink(plates);
 
-    await prefs.setStringList('plates', Set<String>.from(plates).toList());
+    plates.add(textController.text);
+    final List<String> platesResult = Set<String>.from(plates).toList();
+
+    await prefs.setStringList('plates', platesResult);
+    streamController.sink(platesResult);
     textController.text = '';
   }
 

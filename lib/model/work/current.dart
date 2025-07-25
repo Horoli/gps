@@ -237,7 +237,7 @@ class MProcedure extends CommonModel<MProcedure> {
     }
 
     return MProcedure(
-      name: item['name'] as String,
+      name: item['name'] ?? '',
       date:
           item['date'] != null ? DateTime.parse(item['date'] as String) : null,
       location: locationList,

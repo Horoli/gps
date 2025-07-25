@@ -8,12 +8,14 @@ class ViewWorkDetail extends StatefulWidget {
 }
 
 class ViewWorkDetailState extends State<ViewWorkDetail> {
+  TextEditingController descriptionTextController = TextEditingController();
   int currentProcedureIndex = 0;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: commonAppBar(title: TITLE.WORK),
+      resizeToAvoidBottomInset: false,
       body: StreamBuilder<MWorkList?>(
         stream: GServiceWorklist.stream,
         builder: (context, snapshot) {
@@ -100,6 +102,17 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
           print('selectedWork $selectedWork');
           print('selectedWork ${snapshot.data?.currentWork}');
 
+          List<Widget> isWorkingWidgets = [
+            buildCurrentWork(procedures[getProcedureIndexByWorkId])
+                .flex(flex: 2),
+            buildWorkHistory(procedures, getProcedureIndexByWorkId)
+                .flex(flex: 2),
+          ];
+
+          List<Widget> isLastProdcedureWidgets = [
+            buildDescriptionField().flex(flex: 4),
+          ];
+
           return Column(
             children: [
               isExtra
@@ -109,11 +122,12 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
                           name: aircraftName,
                           departureTime: aircraftDepartureTime)
                       .flex(flex: 2),
-              buildCurrentWork(procedures[getProcedureIndexByWorkId])
-                  .flex(flex: 2),
-              buildWorkHistory(procedures, getProcedureIndexByWorkId)
-                  .flex(flex: 2),
+              if (currentProcedureIndex < 4) ...isWorkingWidgets,
+              if (currentProcedureIndex == 4) ...isLastProdcedureWidgets,
+
+              //
               buildWorkers(users).flex(flex: 3),
+
               //
               isMyWork
                   ? buildElevatedButton(
@@ -157,6 +171,46 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
             ],
           );
         },
+      ),
+    );
+  }
+
+  Widget buildDescriptionField() {
+    return Padding(
+      padding: SIZE.WORK_DETAIL_PADDING,
+      child: Container(
+        decoration: commonDecoration,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const AutoSizeText(
+              '특이사항 / 비고',
+              minFontSize: SIZE.WORK_DETAIL_HEADER,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                // fontSize: SIZE.WORK_DETAIL_HEADER,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
+            ),
+            const Divider(
+              indent: 10,
+              endIndent: 10,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: TextField(
+                controller: descriptionTextController,
+                maxLines: 20,
+                decoration: const InputDecoration(
+                  hintText: '내용을 작성해주세요.',
+                  hintStyle: TextStyle(color: Colors.grey),
+                  border: InputBorder.none,
+                ),
+              ),
+            ).expand(),
+          ],
+        ),
       ),
     );
   }
@@ -482,7 +536,10 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
       // 작업 완료 API 호출
       debugPrint('완료 처리 ${DateTime.now().millisecondsSinceEpoch}');
       String selectedWorkId = GServiceWorklist.selectedUuidLastValue;
-      await GServiceWorklist.completeProcedure(selectedWorkId);
+      await GServiceWorklist.completeProcedure(
+        uuid: selectedWorkId,
+        description: descriptionTextController.text,
+      );
       debugPrint(
           'GServiceWorklist.lastValue?.currentWork == null ${GServiceWorklist.workListLastValue?.currentWork == null}');
       // MCurrentWork? getCurrentWork = GServiceWorklist.getCurrentWork;

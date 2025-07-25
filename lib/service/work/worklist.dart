@@ -84,7 +84,10 @@ class ServiceWorklist extends CommonService {
   }
 
   // 현재 작업 완료 함수
-  Future<void> completeProcedure(String uuid) async {
+  Future<void> completeProcedure({
+    required String uuid,
+    String? description,
+  }) async {
     try {
       final List<String> cookies = await CookieManager.load();
       // final Map<String, dynamic> headers =
@@ -113,7 +116,7 @@ class ServiceWorklist extends CommonService {
           data: {
             "lng": position.longitude,
             "lat": position.latitude,
-            "description": '',
+            "description": description ?? '',
             "timestamp": timestamp
           });
     } on DioException catch (e) {

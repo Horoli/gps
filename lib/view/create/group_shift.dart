@@ -30,7 +30,7 @@ class ViewCreateGroupShiftState
                     itemBuilder: (context, index) {
                       final MMember member = setFilteredMembers[index];
 
-                      print(selectedMember);
+                      print('selectedMember $selectedMember');
 
                       final bool isSelected = GServiceMember.isSelected(member);
 
@@ -50,40 +50,35 @@ class ViewCreateGroupShiftState
   @override
   void initState() {
     super.initState();
-    textController.addListener(filterMembers);
+    textController.addListener(filteringQuery);
     loadData();
   }
 
   @override
   // TODO : replacement가 아니라, 2단계 이전의 route만 제거가 돼야함
   Widget buildNavButton() {
-    return buildNavigationButton(
-      context: context,
+    return buildNavigationButtonWithCustom(
       title: '교대',
       useReplacement: true,
-      routerName: PATH.ROUTE_CREATE_GROUP_PLATE,
       onPressed: () async {
         createGroupType = createGroupTypeMap['shift'] ?? 'shift';
-        // List<MMember> members = GServiceMember.selectedMember ?? [];
 
-        // print('shift button step 1');
-        // await GServiceWork.shift(
-        //   members: members.map((e) => e.uuid).toList(),
-        //   works: [GServiceWorklist.selectedUuidLastValue],
-        // );
-        // print('shift button step 2');
+        MWorkingData getWork = GServiceWorklist.getWork as MWorkingData;
 
-        // // await GServiceWorklist.get();
+        List<MMember> alreadySelectedWorkers = GServiceMember.selectedMember!
+            .where((user) => getWork.users!
+                .any((workInUser) => user.uuid == workInUser.uuid))
+            .toList();
 
-        // print('shift button step 3');
-        // dynamic getWork = GServiceWorklist.getWorkByDivision(
-        //     uuid: GServiceWorklist.selectedUuidLastValue);
+        if (alreadySelectedWorkers.isNotEmpty) {
+          ShowInformationWidgets.snackbar(context, '기존 작업자가 이미 존재합니다');
+          return;
+        }
 
-        // print('shift button step 4 $getWork');
-        // if (getWork == null) return;
-
-        // // GServiceWorklist.select(getWork);
-        // GServiceWorklist.selectWorkId(GServiceWorklist.selectedUuidLastValue);
+        await Navigator.pushNamed(
+          GNavigationKey.currentContext!,
+          PATH.ROUTE_CREATE_GROUP_PLATE,
+        );
       },
     );
   }
@@ -110,7 +105,7 @@ class ViewCreateGroupShiftState
   }
 
   // 검색어 필터링
-  void filterMembers() {
+  void filteringQuery() {
     final String query = textController.text.toLowerCase();
     setState(() {
       if (query.isEmpty) {
