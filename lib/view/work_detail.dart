@@ -471,7 +471,7 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
   }
 
   Future<void> sseDisconnect() async {
-    await GServiceSSE.disconnect();
+    // await GServiceSSE.disconnect();
   }
 
   Future<void> showConfirmationDialog(

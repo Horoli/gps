@@ -13,45 +13,66 @@ class ViewWorklistState extends State<ViewWorklist> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: commonAppBar(
-          title: TITLE.WORKLIST,
-          automaticallyImplyLeading: false,
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: _currentIndex,
-          onTap: (index) {
-            setState(() {
-              _currentIndex = index;
-            });
-            _pageController.animateToPage(
-              index,
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
-            );
-          },
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.airplanemode_active),
-              label: '항공편 연계작업',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.work),
-              label: '비 연계 작업',
-            ),
-          ],
-        ),
-        body: PageView(
-          physics: const NeverScrollableScrollPhysics(),
-          controller: _pageController,
-          onPageChanged: (index) {},
-          children: [
-            buildWorkListPage(),
-            buildExtraListPage(),
-          ],
-        ));
+      appBar: commonAppBar(
+        title: TITLE.WORKLIST,
+        automaticallyImplyLeading: false,
+      ),
+      bottomNavigationBar: buildBottomNavigationBar(),
+      body: PageView(
+        physics: const NeverScrollableScrollPhysics(),
+        controller: _pageController,
+        onPageChanged: (index) {},
+        children: [
+          buildWorkListPage(state: STATE.WORKSTATE_NORMAL),
+          buildExtraListPage(),
+          buildWorkListPage(state: STATE.WORKSTATE_WORKING),
+          buildWorkListPage(state: STATE.WORKSTATE_COMPLETE),
+        ],
+      ),
+    );
   }
 
-  Widget buildWorkListPage() {
+  Widget buildBottomNavigationBar() {
+    return BottomNavigationBar(
+      currentIndex: _currentIndex,
+      type: BottomNavigationBarType.fixed,
+      backgroundColor: COLOR.BASE,
+      selectedItemColor: COLOR.WHITE,
+      unselectedItemColor: Colors.grey.withOpacity(0.6),
+      onTap: (index) {
+        setState(() {
+          _currentIndex = index;
+        });
+        _pageController.animateToPage(
+          index,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      },
+      items: const [
+        BottomNavigationBarItem(
+          // backgroundColor: COLOR.BASE,
+          icon: Icon(Icons.airplanemode_active),
+          label: '항공편 연계작업',
+        ),
+        BottomNavigationBarItem(
+          // backgroundColor: Colors.red,
+          icon: Icon(Icons.work),
+          label: '비 연계 작업',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.fire_truck),
+          label: '작업 중',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.check),
+          label: '작업완료',
+        ),
+      ],
+    );
+  }
+
+  Widget buildWorkListPage({required String state}) {
     return StreamBuilder<MWorkList?>(
       stream: GServiceWorklist.stream,
       builder: (context, snapshot) {
@@ -74,7 +95,15 @@ class ViewWorklistState extends State<ViewWorklist> {
 
         // 데이터가 있지만 works 리스트가 비어있는 경우
         final MWorkList worklist = snapshot.data!;
-        final List<MWorkData> works = worklist.workList;
+        final List<MWorkData> works = worklist.workList.where((work) {
+          return work.state == state;
+          // if (state == WORKSTATE_WORKING) {
+          //   return work.state == WORKSTATE_WORKING;
+          // } else if (state == WORKSTATE_COMPLETE) {
+          //   return work.state == WORKSTATE_COMPLETE;
+          // }
+          // return work.state == WORKSTATE_NORMAL;
+        }).toList();
 
         if (works.isEmpty) {
           return const Center(

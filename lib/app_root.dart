@@ -35,14 +35,18 @@ class AppRootState extends State<AppRoot> {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: COLOR.BASE,
-          // primary: Colors.white,
-          onPrimary: COLOR.WHITE,
+          onPrimary: COLOR.BASE,
         ),
         appBarTheme: const AppBarTheme(
           backgroundColor: COLOR.BASE,
           foregroundColor: Colors.white,
           elevation: 0,
         ),
+        // bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+        //   backgroundColor: COLOR.BASE,
+        //   selectedItemColor: Colors.white,
+        //   unselectedItemColor: Colors.grey,
+        // ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             backgroundColor: COLOR.BASE,

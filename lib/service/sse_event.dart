@@ -140,7 +140,7 @@ class ServiceSSE extends CommonService {
 
   Future<void> connect({bool reconnect = true}) async {
     if (_isConnected) {
-      await disconnect(ignoreErrors: true);
+      // await disconnect(ignoreErrors: true);
     }
     if (connectivitySubscription == null) {
       setNetworkListener();
@@ -451,6 +451,7 @@ class ServiceSSE extends CommonService {
           // 지연 후 재연결 시도
           await Future.delayed(delay);
           try {
+            await disconnect(ignoreErrors: true);
             await connect();
             _reconnectAttempts = 0; // 성공 시 재시도 횟수 초기화
             debugPrint('SSE reconnection successful');
