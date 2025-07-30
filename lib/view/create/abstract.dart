@@ -33,28 +33,25 @@ class ViewCreateAbstractState<T extends ViewCreateAbstract> extends State<T> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: appBar,
-      resizeToAvoidBottomInset: false,
-      body: Column(
-        children: [
-          // 검색 입력 필드
-          buildSearchTextField(
-            controller: textController,
-            hint: textFieldValue,
-            maxLength: textFieldMaxLength,
-            onSubmitted: (String value) => onSubmitted(value),
-          ),
-          buildContent().expand(),
-          buildNavButton(),
-          // buildNavigationButtonWithDialog(
-          //   // context: context,
-          //   title: '완료',
-          //   onPressed: () async {
-          //     // 완료 버튼 클릭 시 동작 구현
-          //   },
-          // ),
-        ],
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus() // 키보드 내리기
+      ,
+      child: Scaffold(
+        appBar: appBar,
+        resizeToAvoidBottomInset: false,
+        body: Column(
+          children: [
+            // 검색 입력 필드
+            buildSearchTextField(
+              controller: textController,
+              hint: textFieldValue,
+              maxLength: textFieldMaxLength,
+              onSubmitted: (String value) => onSubmitted(value),
+            ),
+            buildContent().expand(),
+            buildNavButton(),
+          ],
+        ),
       ),
     );
   }

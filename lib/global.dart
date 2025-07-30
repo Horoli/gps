@@ -8,7 +8,6 @@ late ServiceWorklist GServiceWorklist;
 late ServiceWork GServiceWork;
 late ServiceMember GServiceMember;
 late ServiceSSE GServiceSSE;
-// late ServiceGPSInterval GServiceGPSInterval;
 late ServiceLocation GServiceLocation;
 late ServiceExtraWork GServiceExtraWork;
 
@@ -20,7 +19,6 @@ bool nowShowingDialog = false;
 
 const String tmpNumber = "01041850688";
 const String tmpID = "devel";
-// const String tmpPlateNumber = "1234";
 
 String createGroupType = '';
 
@@ -28,6 +26,13 @@ const Map<String, String> createGroupTypeMap = {
   'default': 'default', // aircraft
   'shift': 'shift',
   'extra': 'extra',
+};
+
+Map<int, String> workListSearchTextMap = {
+  0: '',
+  1: '',
+  2: '',
+  3: '',
 };
 
 // key : currentWork.uuid
@@ -122,27 +127,6 @@ class HttpConnector {
     });
     return response;
   }
-
-  // static Future<EventSource> eventStream({
-  //   required EventSource eventSource,
-  //   required String url,
-  //   List<String>? cookies,
-  // }) async {
-  //   Map<String, dynamic> headers = _defaultHeaders;
-
-  //   if (cookies != null) {
-  //     headers = HttpConnector.streamHeadersByCookie(cookies);
-  //   }
-
-  //   Map<String, String> convertHeaders = headers.map((k, v) {
-  //     return MapEntry(k, v.toString());
-  //   });
-
-  //   return await eventSource.connect(
-  //     url,
-  //     headers: convertHeaders,
-  //   );
-  // }
 
   static Future<Response> stream({
     required Dio dio,

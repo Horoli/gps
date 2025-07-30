@@ -13,164 +13,172 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: commonAppBar(title: TITLE.WORK),
-      resizeToAvoidBottomInset: false,
-      body: StreamBuilder<MWorkList?>(
-        stream: GServiceWorklist.stream,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return StreamExceptionWidgets.waiting(context: context);
-          }
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus() // 키보드 내리기
+      ,
+      child: Scaffold(
+        appBar: commonAppBar(title: TITLE.WORK),
+        resizeToAvoidBottomInset: false,
+        body: StreamBuilder<MWorkList?>(
+          stream: GServiceWorklist.stream,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return StreamExceptionWidgets.waiting(context: context);
+            }
 
-          if (snapshot.hasError) {
-            return StreamExceptionWidgets.hasError(
-              context: context,
-              refreshPressed: () async {
-                await GServiceWorklist.get();
-              },
+            if (snapshot.hasError) {
+              return StreamExceptionWidgets.hasError(
+                context: context,
+                refreshPressed: () async {
+                  await GServiceWorklist.get();
+                },
+              );
+            }
+
+            if (!snapshot.hasData) {
+              return StreamExceptionWidgets.noData(
+                  context: context, title: '작업 정보가 없습니다');
+            }
+
+            dynamic selectedWork = GServiceWorklist.getWorkByDivision(
+                uuid: GServiceWorklist.selectedUuidLastValue);
+
+            if (selectedWork == null) {
+              return StreamExceptionWidgets.noData(
+                  context: context, title: '해당 작업 정보가 없습니다');
+            }
+
+            bool isExtra = false;
+
+            // TODO : 분기코드 전체적으로 손 봐야함
+            String type = '';
+            String aircraftDepartureTime = '';
+            String aircraftName = '';
+            String extraName = '';
+            String extraDescription = '';
+            String plateNumber = '';
+            List<MUser> users = [];
+
+            bool isMyWork = selectedWork.runtimeType == MCurrentWork;
+
+            if (isMyWork) {
+              selectedWork as MCurrentWork;
+              print('selectedWork step 1 $selectedWork');
+              aircraftName = selectedWork.aircraft!.name;
+              type = selectedWork.type;
+              isExtra = type == 'extra';
+              aircraftDepartureTime = selectedWork.aircraft!.departureTime;
+              plateNumber = selectedWork.plateNumber;
+              users = selectedWork.users;
+              if (isExtra) {
+                extraName = selectedWork.extra?.name ?? '-';
+                extraDescription = selectedWork.extra?.description ?? '-';
+              }
+            }
+            if (selectedWork.runtimeType == MWorkingData) {
+              selectedWork as MWorkingData;
+              aircraftName = selectedWork.name;
+              aircraftDepartureTime = selectedWork.departureTime;
+              plateNumber = selectedWork.plateNumber;
+              users = selectedWork.users!;
+              isExtra = type == 'extra';
+            }
+
+            final List<MProcedure> procedures = selectedWork.procedures ?? [];
+            print('procedures $procedures');
+
+            if (procedures.isEmpty) {
+              return Container();
+            }
+
+            // 현재 진행 중인 절차 찾기
+            for (int index = 0; index < procedures.length; index++) {
+              if (procedures[index].date == null ||
+                  procedures[index].date!.year == 1970) {
+                // 기본값 날짜 체크
+                currentProcedureIndex = index;
+                break;
+              }
+            }
+
+            procedureMap[selectedWork.uuid] = currentProcedureIndex;
+
+            int getProcedureIndexByWorkId = procedureMap[selectedWork.uuid]!;
+
+            print('selectedWork $selectedWork');
+            print('selectedWork ${snapshot.data?.currentWork}');
+
+            List<Widget> isWorkingWidgets = [
+              buildCurrentWork(procedures[getProcedureIndexByWorkId])
+                  .flex(flex: 2),
+              buildWorkHistory(procedures, getProcedureIndexByWorkId)
+                  .flex(flex: 2),
+            ];
+
+            List<Widget> isLastProdcedureWidgets = [
+              buildDescriptionField().flex(flex: 4),
+            ];
+
+            return Column(
+              children: [
+                isExtra
+                    ? buildExtraWorkInfo(extraName, extraDescription)
+                        .flex(flex: 2)
+                    : buildWorkInfo(
+                        name: aircraftName,
+                        departureTime: aircraftDepartureTime,
+                        plateNumber: plateNumber,
+                      ).flex(flex: 2),
+                if (currentProcedureIndex < 4) ...isWorkingWidgets,
+                if (currentProcedureIndex == 4) ...isLastProdcedureWidgets,
+
+                //
+                buildWorkers(users).flex(flex: 3),
+
+                //
+                isMyWork
+                    ? buildElevatedButton(
+                        onPressed: () async {
+                          await showConfirmationDialog(
+                            context,
+                            procedures[getProcedureIndexByWorkId].name,
+                          );
+                        },
+                        child: const Text(
+                          '현재 작업 완료',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      )
+                    : buildElevatedButton(
+                        onPressed: () async {
+                          // TODO : 현재 선택된 currentWork.uuid를
+                          // print(GServiceWorklist.selectedCurrentWorkLastValue);
+                          // TODO : createGroupView로 이동
+                          await Navigator.pushNamed(
+                            GNavigationKey.currentContext!,
+                            PATH.ROUTE_CREATE_GROUP_SHIFT,
+                          );
+
+                          // TODO : sse disconnect
+                          // await GServiceSSE.disconnect();
+                        },
+                        child: const Text(
+                          '교대하기',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      )
+              ],
             );
-          }
-
-          if (!snapshot.hasData) {
-            return StreamExceptionWidgets.noData(
-                context: context, title: '작업 정보가 없습니다');
-          }
-
-          dynamic selectedWork = GServiceWorklist.getWorkByDivision(
-              uuid: GServiceWorklist.selectedUuidLastValue);
-
-          if (selectedWork == null) {
-            return StreamExceptionWidgets.noData(
-                context: context, title: '해당 작업 정보가 없습니다');
-          }
-
-          bool isExtra = false;
-
-          // TODO : 분기코드 전체적으로 손 봐야함
-          String type = '';
-          String aircraftDepartureTime = '';
-          String aircraftName = '';
-          String extraName = '';
-          String extraDescription = '';
-          List<MUser> users = [];
-
-          bool isMyWork = selectedWork.runtimeType == MCurrentWork;
-
-          if (isMyWork) {
-            selectedWork as MCurrentWork;
-            print('selectedWork step 1 $selectedWork');
-            aircraftName = selectedWork.aircraft!.name;
-            type = selectedWork.type;
-            isExtra = type == 'extra';
-            aircraftDepartureTime = selectedWork.aircraft!.departureTime;
-            users = selectedWork.users;
-            if (isExtra) {
-              extraName = selectedWork.extra?.name ?? '-';
-              extraDescription = selectedWork.extra?.description ?? '-';
-            }
-          }
-          if (selectedWork.runtimeType == MWorkingData) {
-            selectedWork as MWorkingData;
-            aircraftName = selectedWork.name;
-            aircraftDepartureTime = selectedWork.departureTime;
-            users = selectedWork.users!;
-            isExtra = type == 'extra';
-          }
-
-          final List<MProcedure> procedures = selectedWork.procedures ?? [];
-          print('procedures $procedures');
-
-          if (procedures.isEmpty) {
-            return Container();
-          }
-
-          // 현재 진행 중인 절차 찾기
-          for (int index = 0; index < procedures.length; index++) {
-            if (procedures[index].date == null ||
-                procedures[index].date!.year == 1970) {
-              // 기본값 날짜 체크
-              currentProcedureIndex = index;
-              break;
-            }
-          }
-
-          procedureMap[selectedWork.uuid] = currentProcedureIndex;
-
-          int getProcedureIndexByWorkId = procedureMap[selectedWork.uuid]!;
-
-          print('selectedWork $selectedWork');
-          print('selectedWork ${snapshot.data?.currentWork}');
-
-          List<Widget> isWorkingWidgets = [
-            buildCurrentWork(procedures[getProcedureIndexByWorkId])
-                .flex(flex: 2),
-            buildWorkHistory(procedures, getProcedureIndexByWorkId)
-                .flex(flex: 2),
-          ];
-
-          List<Widget> isLastProdcedureWidgets = [
-            buildDescriptionField().flex(flex: 4),
-          ];
-
-          return Column(
-            children: [
-              isExtra
-                  ? buildExtraWorkInfo(extraName, extraDescription)
-                      .flex(flex: 2)
-                  : buildWorkInfo(
-                          name: aircraftName,
-                          departureTime: aircraftDepartureTime)
-                      .flex(flex: 2),
-              if (currentProcedureIndex < 4) ...isWorkingWidgets,
-              if (currentProcedureIndex == 4) ...isLastProdcedureWidgets,
-
-              //
-              buildWorkers(users).flex(flex: 3),
-
-              //
-              isMyWork
-                  ? buildElevatedButton(
-                      onPressed: () async {
-                        await showConfirmationDialog(
-                          context,
-                          procedures[getProcedureIndexByWorkId].name,
-                        );
-                      },
-                      child: const Text(
-                        '현재 작업 완료',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    )
-                  : buildElevatedButton(
-                      onPressed: () async {
-                        // TODO : 현재 선택된 currentWork.uuid를
-                        // print(GServiceWorklist.selectedCurrentWorkLastValue);
-                        // TODO : createGroupView로 이동
-                        await Navigator.pushNamed(
-                          GNavigationKey.currentContext!,
-                          PATH.ROUTE_CREATE_GROUP_SHIFT,
-                        );
-
-                        // TODO : sse disconnect
-                        // await GServiceSSE.disconnect();
-                      },
-                      child: const Text(
-                        '교대하기',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    )
-            ],
-          );
-        },
+          },
+        ),
       ),
     );
   }
@@ -215,7 +223,11 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
     );
   }
 
-  Widget buildWorkInfo({required String name, required String departureTime}) {
+  Widget buildWorkInfo({
+    required String name,
+    required String departureTime,
+    required String plateNumber,
+  }) {
     return Padding(
       padding: SIZE.WORK_DETAIL_PADDING,
       child: Container(
@@ -260,6 +272,20 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
                     ).expand(),
                     buildFittedText(
                       text: departureTime,
+                      fontSize: SIZE.WORK_DETAIL_CHILD,
+                      color: COLOR.GREY,
+                    ).expand(),
+                  ],
+                ).expand(),
+                Column(
+                  children: [
+                    buildFittedText(
+                      text: '차량번호',
+                      fontSize: SIZE.WORK_DETAIL_CHILD,
+                      color: COLOR.GREY,
+                    ).expand(),
+                    buildFittedText(
+                      text: plateNumber,
                       fontSize: SIZE.WORK_DETAIL_CHILD,
                       color: COLOR.GREY,
                     ).expand(),
@@ -400,14 +426,12 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      procedures[index].name,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight:
-                            isCurrent ? FontWeight.bold : FontWeight.normal,
-                        color: isCurrent ? COLOR.BASE : Colors.black,
-                      ),
+                    buildFittedText(
+                      text: procedures[index].name,
+                      fontSize: 12,
+                      fontWeight:
+                          isCurrent ? FontWeight.bold : FontWeight.normal,
+                      color: isCurrent ? COLOR.BASE : Colors.black,
                     ),
                   ],
                 );
@@ -471,7 +495,7 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
   }
 
   Future<void> sseDisconnect() async {
-    // await GServiceSSE.disconnect();
+    await GServiceSSE.disconnect();
   }
 
   Future<void> showConfirmationDialog(

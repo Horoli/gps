@@ -170,12 +170,14 @@ Widget buildSearchTextField({
   String? hint,
   int? maxLength,
   void Function(String)? onSubmitted,
+  void Function(String)? onChanged,
 }) {
   return Padding(
     padding: const EdgeInsets.all(16.0),
     child: TextField(
       // onSubmitted: (String value) => onSubmitted,
       onSubmitted: onSubmitted,
+      onChanged: onChanged,
       maxLength: maxLength,
       controller: controller,
       decoration: InputDecoration(
@@ -184,6 +186,17 @@ Widget buildSearchTextField({
           color: Colors.grey,
         ),
         prefixIcon: const Icon(Icons.search),
+        suffixIcon: controller.text.isNotEmpty
+            ? IconButton(
+                icon: const Icon(Icons.clear),
+                onPressed: () {
+                  controller.clear();
+                  if (onChanged != null) {
+                    onChanged('');
+                  }
+                },
+              )
+            : null,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8.0),
         ),
