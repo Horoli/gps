@@ -30,6 +30,13 @@ class ViewCreatePlateState extends ViewCreateAbstractState<ViewCreatePlate> {
   }
 
   @override
+  TextInputType? get keyboardType => TextInputType.number;
+
+  @override
+  List<TextInputFormatter>? get inputFormatters =>
+      [FilteringTextInputFormatter.digitsOnly];
+
+  @override
   Widget buildContent() {
     return StreamBuilder<List<String>>(
       stream: streamController.browse,
@@ -147,11 +154,14 @@ class ViewCreatePlateState extends ViewCreateAbstractState<ViewCreatePlate> {
 
   @override
   Future<void> loadData() async {
-    // TODO : localStorage에서 plate list를 불러와서
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final List<String> plates = prefs.getStringList('plates') ?? [];
 
-    streamController.sink(plates);
+    // 가져온 다음 빈문자열 혹은 공백만 있는 문자열 제외
+    final List<String> filteredPlates =
+        plates.where((plate) => plate.trim().isNotEmpty).toList();
+
+    streamController.sink(filteredPlates);
 
     if (createGroupType == createGroupTypeMap['shift']) {
       MWorkingData getWorkingData = GServiceWorklist.getWork as MWorkingData;

@@ -24,14 +24,16 @@ class ViewCreateAbstractState<T extends ViewCreateAbstract> extends State<T> {
 
   late PreferredSizeWidget appBar = commonAppBar(title: appBarTitle);
 
+  // textController options
+  void onSubmitted(String value) {}
+  void onChanged(String value) {}
+  TextInputType? keyboardType;
+  List<TextInputFormatter>? inputFormatters;
+
   Widget buildContent() {
     throw UnimplementedError(
         'buildContent() must be implemented in the subclass');
   }
-
-  void onSubmitted(String value) {}
-
-  void onChanged(String value) {}
 
   @override
   Widget build(BuildContext context) {
@@ -47,6 +49,8 @@ class ViewCreateAbstractState<T extends ViewCreateAbstract> extends State<T> {
             buildSearchTextField(
               controller: textController,
               hint: textFieldValue,
+              keyboardType: keyboardType,
+              inputFormatters: inputFormatters,
               maxLength: textFieldMaxLength,
               onSubmitted: (String value) => onSubmitted(value),
               onChanged: (String value) => onChanged(value),

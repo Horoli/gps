@@ -164,8 +164,10 @@ Widget buildSearchTextField({
   required TextEditingController controller,
   String? hint,
   int? maxLength,
+  TextInputType? keyboardType,
   void Function(String)? onSubmitted,
   void Function(String)? onChanged,
+  List<TextInputFormatter>? inputFormatters,
 }) {
   return Padding(
     padding: const EdgeInsets.all(16.0),
@@ -174,6 +176,8 @@ Widget buildSearchTextField({
       onSubmitted: onSubmitted,
       onChanged: onChanged,
       maxLength: maxLength,
+      keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
       controller: controller,
       decoration: InputDecoration(
         hintText: hint,
