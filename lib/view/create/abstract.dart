@@ -31,6 +31,8 @@ class ViewCreateAbstractState<T extends ViewCreateAbstract> extends State<T> {
 
   void onSubmitted(String value) {}
 
+  void onChanged(String value) {}
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -47,6 +49,7 @@ class ViewCreateAbstractState<T extends ViewCreateAbstract> extends State<T> {
               hint: textFieldValue,
               maxLength: textFieldMaxLength,
               onSubmitted: (String value) => onSubmitted(value),
+              onChanged: (String value) => onChanged(value),
             ),
             buildContent().expand(),
             buildNavButton(),

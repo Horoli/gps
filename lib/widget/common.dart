@@ -24,7 +24,7 @@ Widget buildFittedText({
   return FittedBox(
     fit: BoxFit.scaleDown,
     child: Text(
-      text,
+      text.isEmpty ? ' ' : text,
       style: TextStyle(
         color: color ?? Colors.black,
         fontSize: fontSize,
@@ -44,8 +44,9 @@ PreferredSizeWidget commonAppBar({
       ? [
           IconButton(
             onPressed: () async {
-              Navigator.of(GNavigationKey.currentState!.context)
-                  .pushNamed(PATH.ROUTE_PREFERENCES);
+              // Navigator.of(GNavigationKey.currentState!.context)
+              //     .pushNamed(PATH.ROUTE_PREFERENCES);
+              CustomNavigator.pushNamed(PATH.ROUTE_PREFERENCES);
             },
             icon: const Icon(Icons.settings),
           )
@@ -110,13 +111,8 @@ Widget buildNavigationButton({
           }
 
           useReplacement
-              ? await Navigator.pushNamedAndRemoveUntil(
-                  GNavigationKey.currentContext!, routerName, (route) {
-                  return route.settings.name == PATH.ROUTE_WORKLIST;
-                })
-              // ModalRoute.withName(('/')))
-              : await Navigator.pushNamed(
-                  GNavigationKey.currentContext!, routerName);
+              ? await CustomNavigator.pushNamedAndRemoveUntilToWorkList()
+              : await CustomNavigator.pushNamed(routerName);
         },
         style: ElevatedButton.styleFrom(
             shape: RoundedRectangleBorder(
@@ -137,7 +133,6 @@ Widget buildNavigationButton({
 
 Widget buildNavigationButtonWithCustom({
   required String title,
-  bool useReplacement = false,
   VoidCallback? onPressed,
 }) {
   return Padding(

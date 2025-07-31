@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
@@ -81,3 +82,4 @@ part 'widget/tile_member.dart';
 part 'widget/stream_exception.dart';
 
 part 'utils/custom_stream.dart';
+part 'utils/custom_navigator.dart';

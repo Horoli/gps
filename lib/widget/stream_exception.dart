@@ -58,8 +58,9 @@ class StreamExceptionWidgets {
           if (useToWorkList)
             ElevatedButton(
               child: Text('작업목록으로 가기'),
-              onPressed: () {
-                Navigator.of(context).pushReplacementNamed(PATH.ROUTE_WORKLIST);
+              onPressed: () async {
+                await CustomNavigator.pushReplacementNamed(PATH.ROUTE_WORKLIST);
+                // Navigator.of(context).pushReplacementNamed(PATH.ROUTE_WORKLIST);
               },
             ),
         ],

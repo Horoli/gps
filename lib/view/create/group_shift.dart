@@ -59,7 +59,6 @@ class ViewCreateGroupShiftState
   Widget buildNavButton() {
     return buildNavigationButtonWithCustom(
       title: '교대',
-      useReplacement: true,
       onPressed: () async {
         createGroupType = createGroupTypeMap['shift'] ?? 'shift';
 

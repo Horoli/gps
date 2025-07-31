@@ -23,7 +23,7 @@ class ViewCreatePlateState extends ViewCreateAbstractState<ViewCreatePlate> {
   String get appBarTitle => '${TITLE.CREATE_GROUP} - ${TITLE.GROUP_PLATE}';
 
   @override
-  void onSubmitted(String value) {
+  void onChanged(String value) {
     setState(() {
       selectedPlate = value;
     });
@@ -54,8 +54,8 @@ class ViewCreatePlateState extends ViewCreateAbstractState<ViewCreatePlate> {
             return ListTile(
               onTap: () {
                 setState(() {
-                  selectedPlate = plate;
                   textController.text = plate;
+                  selectedPlate = plate;
                 });
               },
               title: Text(plate),
@@ -69,12 +69,15 @@ class ViewCreatePlateState extends ViewCreateAbstractState<ViewCreatePlate> {
 
   @override
   Widget buildNavButton() {
-    return buildNavigationButton(
-        context: context,
+    return buildNavigationButtonWithCustom(
         title: '작업시작',
-        useReplacement: true,
-        routerName: PATH.ROUTE_WORK_DETAIL,
+        // routerName: PATH.ROUTE_WORK_DETAIL,
         onPressed: () async {
+          if (textController.text.length != 4 || selectedPlate.length != 4) {
+            return await ShowInformationWidgets.snackbar(
+                context, '차량번호 4자리를 입력하세요.');
+          }
+
           List<MMember> members = GServiceMember.selectedMember ?? [];
 
           List<MCurrentWork?> results = [];
@@ -82,6 +85,7 @@ class ViewCreatePlateState extends ViewCreateAbstractState<ViewCreatePlate> {
           if (createGroupType == createGroupTypeMap['shift']) {
             await createShift(members);
             await setPreferences();
+            await CustomNavigator.pushNamedAndRemoveUntilToWorkList();
             return;
           }
 
@@ -95,6 +99,8 @@ class ViewCreatePlateState extends ViewCreateAbstractState<ViewCreatePlate> {
 
           GServiceWorklist.selectWorkId(results[0]!.uuid);
           await setPreferences();
+
+          await CustomNavigator.pushNamedAndRemoveUntilToWorkList();
         });
   }
 

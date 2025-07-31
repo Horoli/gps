@@ -55,15 +55,23 @@ class ViewCreateGroupState extends ViewCreateAbstractState<ViewCreateGroup> {
   }
 
   @override
-  // TODO : replacement가 아니라, 2단계 이전의 route만 제거가 돼야함
   Widget buildNavButton() {
-    return buildNavigationButton(
-      context: context,
+    return buildNavigationButtonWithCustom(
+      // context: context,
       title: '완료',
-      useReplacement: true,
-      routerName: PATH.ROUTE_CREATE_GROUP_PLATE,
+      // useReplacement: true,
+      // routerName: PATH.ROUTE_CREATE_GROUP_PLATE,
       onPressed: () async {
+        // if (GServiceMember.selectedMember!.isEmpty) {
+        //   return ShowInformationWidgets.snackbar(
+        //     context,
+        //     '선택된 인원이 없습니다',
+        //   );
+        // }
         createGroupType = createGroupTypeMap['default'] ?? 'default';
+        await CustomNavigator.pushNamed(
+          PATH.ROUTE_CREATE_GROUP_PLATE,
+        );
         // List<MMember> members = GServiceMember.selectedMember ?? [];
 
         // List<MCurrentWork?> results = await GServiceWork.create(

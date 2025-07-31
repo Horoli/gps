@@ -65,12 +65,20 @@ class ViewCreateAircraftState
 
   @override
   Widget buildNavButton() {
-    return buildNavigationButton(
-      context: context,
-      title: '완료',
-      routerName: PATH.ROUTE_CREATE_GROUP,
-      // onPressed: () {},
-    );
+    return buildNavigationButtonWithCustom(
+        // context: context,
+        // routerName: PATH.ROUTE_CREATE_GROUP,
+        // onPressed: () {},
+        title: '완료',
+        onPressed: () async {
+          if (GServiceWork.selectedWorks.isEmpty) {
+            return ShowInformationWidgets.snackbar(
+              context,
+              '선택된 항공편이 없습니다',
+            );
+          }
+          await CustomNavigator.pushNamed(PATH.ROUTE_CREATE_GROUP);
+        });
   }
 
   @override
