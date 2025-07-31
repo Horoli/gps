@@ -28,11 +28,11 @@ const Map<String, String> createGroupTypeMap = {
   'extra': 'extra',
 };
 
-Map<int, String> workListSearchTextMap = {
-  0: '',
-  1: '',
-  2: '',
-  3: '',
+Map<String, dynamic> workListSearchTextMap = {
+  "0": '',
+  "1": '',
+  "2": '',
+  "3": '',
 };
 
 // key : currentWork.uuid

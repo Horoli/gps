@@ -49,6 +49,7 @@ class ViewWorklistState extends State<ViewWorklist> {
       onTap: (index) {
         setState(() {
           currentIndex = index;
+          searchController.text = workListSearchTextMap['$index'];
         });
         pageController.animateToPage(
           index,
@@ -206,6 +207,7 @@ class ViewWorklistState extends State<ViewWorklist> {
                 setState(() {
                   // 필터링 로직 추가
                   works.retainWhere((work) => work.name.contains(value));
+                  workListSearchTextMap['$currentIndex'] = value;
                 });
               },
             ),
@@ -252,7 +254,8 @@ class ViewWorklistState extends State<ViewWorklist> {
   void initState() {
     super.initState();
     pageController = PageController();
-    searchController.addListener(() {});
+    // searchController.addListener(() {
+    // });
     getData();
   }
 
