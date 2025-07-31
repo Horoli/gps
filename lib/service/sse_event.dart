@@ -212,16 +212,6 @@ class ServiceSSE extends CommonService {
         if (getWork is MCurrentWork) {
           _processWorkUpdate(data, getWork);
         }
-
-        // stream을 구독하고 있으면서
-        // currentWork를 갖고 있지만 WORK_DETAIL 화면이 아닌 user는
-        // WORK_DETAIL 화면으로 이동
-        // if (getCurrentWork != null && getCurrentWork.uuid == data['uuid']) {
-        //   if (!RouterManager().isWorkDetail()) {
-        //     Navigator.of(GNavigationKey.currentState!.context)
-        //         .pushReplacementNamed(PATH.ROUTE_WORK_DETAIL);
-        //   }
-        // }
       } finally {
         stopwatch.stop();
         debugPrint('stopwatch end : ${DateTime.now().millisecondsSinceEpoch}');

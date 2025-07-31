@@ -17,7 +17,7 @@ class RouterManager {
       GServiceWork.clearSelection();
       GServiceMember.clearSelection();
       GServiceWorklist.clearSelection();
-      // GServiceSSE.disconnect();
+      GServiceSSE.disconnect();
       GServiceWorklist.get();
       procedureMap = {};
       createGroupType = '';

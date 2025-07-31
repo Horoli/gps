@@ -36,7 +36,7 @@ class ViewCreatePlateState extends ViewCreateAbstractState<ViewCreatePlate> {
       builder: (context, snapshot) {
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return StreamExceptionWidgets.noData(
-            title: 'No available plates',
+            title: '등록된 차량번호가 없습니다.',
             context: context,
             useToWorkList: false,
           );

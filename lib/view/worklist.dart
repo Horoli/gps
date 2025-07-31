@@ -46,16 +46,20 @@ class ViewWorklistState extends State<ViewWorklist> {
       backgroundColor: COLOR.BASE,
       selectedItemColor: COLOR.WHITE,
       unselectedItemColor: Colors.grey.withOpacity(0.6),
-      onTap: (index) {
+      onTap: (index) async {
         setState(() {
           currentIndex = index;
           searchController.text = workListSearchTextMap['$index'];
+          print(currentIndex);
         });
-        pageController.animateToPage(
-          index,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
+
+        await pageController.animateToPage(
+          currentIndex,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeIn,
         );
+
+        // pageController.jumpToPage(currentIndex);
       },
       items: const [
         BottomNavigationBarItem(
@@ -127,6 +131,8 @@ class ViewWorklistState extends State<ViewWorklist> {
                 setState(() {
                   // 필터링 로직 추가
                   works.retainWhere((work) => work.name.contains(value));
+
+                  workListSearchTextMap['$currentIndex'] = value;
                 });
               },
             ),
