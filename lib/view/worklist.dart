@@ -45,7 +45,7 @@ class ViewWorklistState extends State<ViewWorklist> {
       type: BottomNavigationBarType.fixed,
       backgroundColor: COLOR.BASE,
       selectedItemColor: COLOR.WHITE,
-      unselectedItemColor: Colors.grey.withOpacity(0.6),
+      unselectedItemColor: COLOR.UNSELECTED,
       onTap: (index) async {
         setState(() {
           currentIndex = index;
