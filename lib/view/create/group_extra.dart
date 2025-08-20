@@ -57,15 +57,26 @@ class ViewCreateGroupExtraState
   @override
   // TODO : replacement가 아니라, 2단계 이전의 route만 제거가 돼야함
   Widget buildNavButton() {
-    return buildNavigationButton(
-      context: context,
-      title: '작업시작',
-      useReplacement: true,
-      routerName: PATH.ROUTE_CREATE_GROUP_PLATE,
+    return buildNavigationButtonWithCustom(
+      title: '완료',
       onPressed: () async {
         createGroupType = createGroupTypeMap['extra'] ?? 'extra';
+
+        await Navigator.pushNamed(
+          GNavigationKey.currentContext!,
+          PATH.ROUTE_CREATE_GROUP_PLATE,
+        );
       },
     );
+    // return buildNavigationButton(
+    //   context: context,
+    //   title: '작업시작',
+    //   useReplacement: true,
+    //   routerName: PATH.ROUTE_CREATE_GROUP_PLATE,
+    //   onPressed: () async {
+    //     createGroupType = createGroupTypeMap['extra'] ?? 'extra';
+    //   },
+    // );
     // return buildElevatedButton(
     //   child: Text('test'),
     //   onPressed: () async {
