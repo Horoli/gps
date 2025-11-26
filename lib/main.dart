@@ -3,6 +3,7 @@ import 'package:flight_steps/preset/title.dart' as TITLE;
 import 'package:flutter/material.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'flight_steps.dart';
 
 Future<void> main() async {
@@ -125,6 +126,8 @@ Future<void> initService() async {
   // GServiceGPSInterval = ServiceGPSInterval.getInstance();
   GServiceLocation = ServiceLocation.getInstance();
   GServiceExtraWork = ServiceExtraWork.getInstance();
+  PackageInfo packageInfo = await PackageInfo.fromPlatform();
+  appVersion = packageInfo.version;
 }
 
 Future<LocationPermission> checkAndRequestLocationPermission() async {

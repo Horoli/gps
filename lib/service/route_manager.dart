@@ -11,30 +11,66 @@ class RouterManager {
 
   Future setCurrentRoute(String routeName) async {
     _currentRouteName = routeName;
-
-    // if (GServiceUser.currentUser != null) {
-    //   if (GServiceUser.currentUser?.config != null &&
-    //       _currentRouteName != PATH.ROUTE_PREFERENCES) {
-    //     if (_currentRouteName != PATH.ROUTE_LOGIN) {
-    //       print('aaaa ${GServiceUser.currentUser?.config['functionEnabled']}');
-    //       WidgetsBinding.instance.addPostFrameCallback((_) {
-    //         CustomNavigator.pushReplacementNamed(PATH.ROUTE_PREFERENCES);
-    //       });
-    //     }
-    //   }
-    // }
+    _checkUserPermission(routeName);
+    _handleWorklistInitialization(routeName);
 
     // WORKLIST 화면이 활성화되었을 때 실행
-    if (_currentRouteName == PATH.ROUTE_WORKLIST) {
+    // if (_currentRouteName == PATH.ROUTE_WORKLIST) {
+    //   GServiceWork.clearSelection();
+    //   GServiceMember.clearSelection();
+    //   GServiceWorklist.clearSelection();
+    //   GServiceSSE.disconnect();
+    //   GServiceWorklist.get();
+    //   procedureMap = {};
+    //   createGroupType = '';
+
+    //   print('WORKLIST 화면 활성화 - clearSelection 실행됨');
+    // }
+  }
+
+  /// 사용자 권한('work') 체크 및 리다이렉트 로직
+  void _checkUserPermission(String routeName) {
+    final MUser? user = GServiceUser.currentUser;
+
+    // 1. 로그인이 안 된 상태면 권한 체크 패스
+    if (user == null) return;
+
+    // 2. 권한 체크를 건너뛸 라우트 정의 (로그인, 환경설정 등)
+    // 이미 환경설정 화면이거나 로그인 화면이라면 체크하지 않음
+    if (routeName == PATH.ROUTE_PREFERENCES || routeName == PATH.ROUTE_LOGIN) {
+      return;
+    }
+
+    // 3. 'work' 권한 확인
+    // MUser 모델에 추가한 getter(functionEnabled) 사용
+    final bool hasWork = user.functionEnabled.contains('work');
+
+    // 4. 권한이 '없으면' 환경설정 화면으로 이동 (요청하신 로직)
+    if (!hasWork) {
+      print('Work 권한 없음: Preferences로 이동합니다.');
+      // 빌드/네비게이션 충돌 방지를 위해 프레임 이후 실행
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        // 중복 이동 방지
+        if (_currentRouteName != PATH.ROUTE_PREFERENCES) {
+          CustomNavigator.pushReplacementNamed(PATH.ROUTE_PREFERENCES);
+        }
+      });
+    }
+  }
+
+  void _handleWorklistInitialization(String routeName) {
+    if (routeName == PATH.ROUTE_WORKLIST) {
+      print('WORKLIST 화면 활성화 - 초기화 실행');
+
       GServiceWork.clearSelection();
       GServiceMember.clearSelection();
       GServiceWorklist.clearSelection();
       GServiceSSE.disconnect();
       GServiceWorklist.get();
+
+      // 전역 변수 초기화 (가능하면 클래스 내부 상태로 관리하는 것이 좋음)
       procedureMap = {};
       createGroupType = '';
-
-      print('WORKLIST 화면 활성화 - clearSelection 실행됨');
     }
   }
 

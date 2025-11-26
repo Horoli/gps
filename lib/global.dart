@@ -12,6 +12,7 @@ late ServiceLocation GServiceLocation;
 late ServiceExtraWork GServiceExtraWork;
 
 late RouterManager GServiceRouterManager;
+String appVersion = '';
 
 bool useForeground = true;
 

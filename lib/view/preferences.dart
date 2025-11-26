@@ -103,31 +103,51 @@ class ViewPreferencesState extends State<ViewPreferences> {
                 const SizedBox(height: 16),
 
                 // 앱 버전
-                FutureBuilder<PackageInfo>(
-                  future: PackageInfo.fromPlatform(),
-                  builder: (context, snapshot) {
-                    final version =
-                        snapshot.hasData ? snapshot.data!.version : '알 수 없음';
-                    return Row(
-                      children: [
-                        const Text(
-                          '앱 버전:',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.black54,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          version,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: Colors.black87,
-                          ),
-                        ),
-                      ],
-                    );
-                  },
+                // FutureBuilder<PackageInfo>(
+                //   future: PackageInfo.fromPlatform(),
+                //   builder: (context, snapshot) {
+                //     final version =
+                //         snapshot.hasData ? snapshot.data!.version : '알 수 없음';
+                //     return Row(
+                //       children: [
+                //         const Text(
+                //           '앱 버전:',
+                //           style: TextStyle(
+                //             fontSize: 14,
+                //             color: Colors.black54,
+                //           ),
+                //         ),
+                //         const SizedBox(width: 4),
+                //         Text(
+                //           version,
+                //           style: const TextStyle(
+                //             fontSize: 14,
+                //             color: Colors.black87,
+                //           ),
+                //         ),
+                //       ],
+                //     );
+                //   },
+                // ),
+
+                Row(
+                  children: [
+                    const Text(
+                      '앱 버전:',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.black54,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      appVersion,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ],
                 ),
 
                 // 하단 여백을 채우는 Spacer

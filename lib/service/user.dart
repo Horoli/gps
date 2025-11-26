@@ -36,7 +36,7 @@ class ServiceUser extends CommonService {
       await CookieManager.save(response);
       MUser getUser = MUser.fromMap(response.data);
 
-      print('getUser.config ${getUser.config['functionEnabled']}');
+      print('getUser.config ${getUser.functionEnabled}');
       _subject.add(getUser);
 
       completer.complete(getUser);
