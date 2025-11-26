@@ -6,6 +6,7 @@ class MUser extends CommonModel<MUser> {
   final String phoneNumber;
   final String? employeeId;
   final List<String>? groups;
+  final Map<String, dynamic> config;
 
   MUser({
     required this.uuid,
@@ -13,17 +14,19 @@ class MUser extends CommonModel<MUser> {
     required this.phoneNumber,
     required this.employeeId,
     required this.groups,
+    required this.config,
   });
+  // List<String> get functionEnabled => config['functionEnabled'];
 
   // JSON에서 User 객체로 변환하는 팩토리 생성자
   factory MUser.fromMap(Map<String, dynamic> item) {
     return MUser(
-      uuid: item['uuid'] as String,
-      username: item['username'] as String,
-      phoneNumber: item['phoneNumber'] as String,
-      employeeId: item['employeeId'] ?? '',
-      groups: List<String>.from(item['groups'] ?? []),
-    );
+        uuid: item['uuid'] as String,
+        username: item['username'] as String,
+        phoneNumber: item['phoneNumber'] as String,
+        employeeId: item['employeeId'] ?? '',
+        groups: List<String>.from(item['groups'] ?? []),
+        config: Map<String, dynamic>.from(item['config'] ?? {}));
   }
 
   // User 객체를 JSON으로 변환하는 메서드
@@ -35,13 +38,14 @@ class MUser extends CommonModel<MUser> {
       'phoneNumber': phoneNumber,
       'employeeId': employeeId,
       'groups': groups,
+      'config': config
     };
   }
 
   // 디버깅을 위한 toString 메서드
   @override
   String toString() {
-    return 'User(uuid: $uuid, username: $username, phoneNumber: $phoneNumber, employeeId: $employeeId, groups: $groups)';
+    return 'User(uuid: $uuid, username: $username, phoneNumber: $phoneNumber, employeeId: $employeeId, groups: $groups, config $config)';
   }
 
   // 객체 복사 및 일부 필드 변경을 위한 copyWith 메서드
@@ -52,6 +56,7 @@ class MUser extends CommonModel<MUser> {
     String? phoneNumber,
     String? employeeId,
     List<String>? groups,
+    Map<String, dynamic>? config,
   }) {
     return MUser(
       uuid: uuid ?? this.uuid,
@@ -59,6 +64,7 @@ class MUser extends CommonModel<MUser> {
       phoneNumber: phoneNumber ?? this.phoneNumber,
       employeeId: employeeId ?? this.employeeId,
       groups: groups ?? this.groups,
+      config: config ?? this.config,
     );
   }
 

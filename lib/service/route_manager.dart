@@ -9,8 +9,20 @@ class RouterManager {
 
   String get currentRouteName => _currentRouteName;
 
-  void setCurrentRoute(String routeName) {
+  Future setCurrentRoute(String routeName) async {
     _currentRouteName = routeName;
+
+    // if (GServiceUser.currentUser != null) {
+    //   if (GServiceUser.currentUser?.config != null &&
+    //       _currentRouteName != PATH.ROUTE_PREFERENCES) {
+    //     if (_currentRouteName != PATH.ROUTE_LOGIN) {
+    //       print('aaaa ${GServiceUser.currentUser?.config['functionEnabled']}');
+    //       WidgetsBinding.instance.addPostFrameCallback((_) {
+    //         CustomNavigator.pushReplacementNamed(PATH.ROUTE_PREFERENCES);
+    //       });
+    //     }
+    //   }
+    // }
 
     // WORKLIST 화면이 활성화되었을 때 실행
     if (_currentRouteName == PATH.ROUTE_WORKLIST) {
