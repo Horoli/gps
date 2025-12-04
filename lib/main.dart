@@ -106,8 +106,10 @@ Future<void> foregroundInit() async {
   if (useForeground) {
     FlutterForegroundTask.initCommunicationPort();
     debugPrint('foreground step 1');
-    FlutterForegroundTask.addTaskDataCallback(
-        ForegroundTaskHandler.onReceiveTaskData);
+    FlutterForegroundTask.addTaskDataCallback((data) {
+      debugPrint('Main received data: $data');
+      ForegroundTaskHandler.onReceiveTaskData(data);
+    });
     debugPrint('foreground step 2');
     WidgetsBinding.instance.addPostFrameCallback((_) {
       debugPrint('foreground step 3');

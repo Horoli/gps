@@ -65,7 +65,15 @@ class ForegroundTaskHandler extends TaskHandler {
     }
   }
 
-  static void onReceiveTaskData(Object data) {
+  static Future<void> onReceiveTaskData(Object data) async {
+    debugPrint('onReceiveTaskData: $data');
+    if (data == 'stop') {
+      debugPrint('App Exit Process Initiated');
+      await FlutterForegroundTask.stopService();
+      SystemNavigator.pop();
+      exit(0);
+    }
+
     if (data is Map<String, dynamic>) {
       final dynamic timestampMillis = data["timestampMillis"];
       if (timestampMillis != null) {
@@ -320,11 +328,10 @@ class ForegroundTaskHandler extends TaskHandler {
 
   @override
   Future<void> onNotificationButtonPressed(String id) async {
+    debugPrint('onNotificationButtonPressed id: $id');
     if (id == ID.NOTIFICATION_ID_FIRST &&
         await FlutterForegroundTask.isRunningService) {
       FlutterForegroundTask.sendDataToMain('stop');
-      FlutterForegroundTask.stopService();
-      debugPrint('stopService : $id');
     }
   }
 
