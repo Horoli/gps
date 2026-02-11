@@ -95,6 +95,12 @@ class HttpConnector {
       return result;
     }).catchError((e) {
       debugPrint('$url get error : ${e}');
+      return Response(
+        requestOptions: RequestOptions(path: url),
+        data: [],
+        statusCode: 500,
+        statusMessage: '$e',
+      );
     });
     return response;
   }
@@ -125,6 +131,12 @@ class HttpConnector {
       return result;
     }).catchError((e) {
       debugPrint('$url post error : ${e}');
+      return Response(
+        requestOptions: RequestOptions(path: url),
+        data: {}, // Post의 경우 data가 Map 형태일 가능성이 높아 비어있는 Map 반환
+        statusCode: 500,
+        statusMessage: '$e',
+      );
     });
     return response;
   }

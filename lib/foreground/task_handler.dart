@@ -129,9 +129,11 @@ class ForegroundTaskHandler extends TaskHandler {
   /// 해당 코드 수정 시 [ServiceLocation]의 setLocationListener() 코드도 같이 수정해야함
   @override
   void onRepeatEvent(DateTime timestamp) async {
+    final List<String> cookies = await CookieManager.load();
     final Response response = await HttpConnector.get(
       dio: _dio,
       url: '${URL.BASE_URL}/${URL.CONFIG_GPS}',
+      cookies: cookies,
     );
 
     debugPrint('initTask response ${response.data}');
