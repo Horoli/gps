@@ -485,7 +485,7 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
   @override
   void dispose() {
     super.dispose();
-    sseDisconnect();
+    // sseDisconnect();
   }
 
   Future<void> getData() async {
@@ -493,9 +493,9 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
     await GServiceWorklist.get();
   }
 
-  Future<void> sseDisconnect() async {
-    // await GServiceSSE.disconnect();
-  }
+  // Future<void> sseDisconnect() async {
+  // await GServiceSSE.disconnect();
+  // }
 
   Future<void> showConfirmationDialog(
       BuildContext context, String procedureName) async {

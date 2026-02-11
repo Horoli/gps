@@ -1,5 +1,7 @@
 # Project Context: Flight Steps
 
+> **CRITICAL:** 모든 작업을 시작하기 전, 반드시 프로젝트 루트의 [PROJECT_OUTLINE.md](./PROJECT_OUTLINE.md)를 읽고 현재 시스템의 아키텍처, 상태 관리 방식, 그리고 SSE/GPS 관련 핵심 비즈니스 로직을 숙지하십시오.
+
 ## Project Overview
 **Flight Steps** is a Flutter-based mobile application designed for tracking workflow steps and geolocation, likely for airport or airline operations. It features real-time location tracking (foreground and background), task management, and communication with a backend server via REST APIs.
 

@@ -16,6 +16,15 @@
     *   로직: 현재 캐시된 위치(`currentPosition`)가 있으면 즉시 반환하고, 없으면 `Geolocator.getCurrentPosition()`을 호출하여 값을 가져와 캐시(`_subject`)를 업데이트한 후 반환.
 *   이는 단순 치환 시 발생할 수 있는 초기화 타이밍 이슈나 `null` 참조 에러를 방지하기 위함입니다.
 
+## SSE 이벤트 처리 로직 개선
+
+**1. SSE 수신 시 UUID 필터링 로직 추가:**
+*   **현상:** 서버에서 `work.event` 수신 시 특정 작업(`uuid`)에 대한 업데이트 정보를 보내주지만, 현재 클라이언트(`ServiceSSE._processWorkUpdate`)는 수신된 `uuid`를 확인하지 않고 무조건 현재 선택된 작업 모델에 데이터를 적용함.
+*   **문제:** 이로 인해 'A' 작업 화면을 보고 있는 도중 'B' 작업에 대한 이벤트가 발생하면, 'A' 작업의 UI에 'B' 작업의 상태가 반영되는 데이터 오염(Bug) 발생.
+*   **해결 방안:** 
+    *   `lib/service/sse_event.dart`의 `_processWorkUpdate` 메서드 진입 시 `if (data['uuid'] != currentWork.uuid) return;` 형태의 필터링 로직 추가.
+    *   로그를 남겨 필터링되는 상황을 모니터링할 수 있도록 함.
+
 **2. 대상 파일 및 수정 필요 내역 (치환 작업):**
 *   **`lib/service/user.dart` (`ServiceUser`):**
     *   `login`, `location` 등의 메서드 호출 전후로 위치 정보가 필요한 경우, `Geolocator` 직접 사용을 지양하고 `ServiceLocation`을 참조하도록 변경 필요. (여기서는 `location` 메서드가 미사용으로 주석 처리되었으므로 직접 `Geolocator`를 사용하는 부분은 없음)

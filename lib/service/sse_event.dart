@@ -243,6 +243,13 @@ class ServiceSSE extends CommonService {
 
   // 이벤트 데이터 처리 로직을 별도 메서드로 분리
   void _processWorkUpdate(Map<String, dynamic> data, MCurrentWork currentWork) {
+    // uuid 필터링 추가: 수신된 이벤트의 uuid와 현재 작업의 uuid가 일치하는지 확인
+    if (data['uuid'] != currentWork.uuid) {
+      debugPrint(
+          'Ignoring event for different work: ${data['uuid']} (current: ${currentWork.uuid})');
+      return;
+    }
+
     // unflatten 작업은 비용이 큰 작업이므로 필요한 경우에만 수행
     if (!data.containsKey('update')) return;
 
