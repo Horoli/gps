@@ -17,6 +17,17 @@ class ServiceLocation extends CommonService {
 
   Position? get currentPosition => _subject.valueOrNull;
 
+  /// 현재 위치가 있으면 반환하고, 없으면 새로 가져와서 스트림에 추가 후 반환
+  Future<Position> ensureCurrentPosition() async {
+    if (_subject.valueOrNull != null) {
+      return _subject.value!;
+    }
+    // 권한은 이미 확인되었다고 가정하거나, Geolocator가 예외를 던지도록 함
+    Position currentPosition = await Geolocator.getCurrentPosition();
+    _subject.add(currentPosition);
+    return currentPosition;
+  }
+
   /// 해당 코드는 foreground에서 사용할 수없어서 해당 코드 수정 시
   /// [ForegroundTaskHandler]의 onRepeatEvent() 코드도 같이 수정해야함
   Future<void> setLocationListener() async {
@@ -63,10 +74,10 @@ class ServiceLocation extends CommonService {
     if (isConnected) {
       await disconnect();
     }
-    if (_subject.value == null) {
-      Position currentPosition = await Geolocator.getCurrentPosition();
-      _subject.add(currentPosition);
-    }
+    
+    // ensureCurrentPosition을 사용하여 초기 위치 설정 및 캐싱
+    await ensureCurrentPosition();
+    
     subscription ??= Geolocator.getPositionStream(
         locationSettings: LocationSettings(
       accuracy: accuracy,
@@ -78,38 +89,38 @@ class ServiceLocation extends CommonService {
     });
   }
 
-  Future<void> foregroundPost(Position position) async {
-    bool internetAvailable = await isInternetAvailable();
+  // Future<void> foregroundPost(Position position) async {
+  //   bool internetAvailable = await isInternetAvailable();
 
-    if (!internetAvailable) {
-      debugPrint('인터넷 연결이 없습니다.');
-    }
+  //   if (!internetAvailable) {
+  //     debugPrint('인터넷 연결이 없습니다.');
+  //   }
 
-    print(position);
+  //   print(position);
 
-    final List<String> cookies = await CookieManager.load();
-    debugPrint('cookies $cookies');
-    dio.options.extra['withCredentials'] = true;
+  //   final List<String> cookies = await CookieManager.load();
+  //   debugPrint('cookies $cookies');
+  //   dio.options.extra['withCredentials'] = true;
 
-    final Response response = await HttpConnector.post(
-      dio: dio,
-      url: '${URL.BASE_URL}/${URL.USER_LOCATION}',
-      data: {
-        "lng": position.longitude,
-        "lat": position.latitude,
-        "timestamp": DateTime.now().toIso8601String(),
-      },
-      cookies: cookies,
-    );
+  //   final Response response = await HttpConnector.post(
+  //     dio: dio,
+  //     url: '${URL.BASE_URL}/${URL.USER_LOCATION}',
+  //     data: {
+  //       "lng": position.longitude,
+  //       "lat": position.latitude,
+  //       "timestamp": DateTime.now().toIso8601String(),
+  //     },
+  //     cookies: cookies,
+  //   );
 
-    if (response.statusCode == 200) {
-      debugPrint('위치 전송 성공 : $response');
-    } else {
-      // TODO : 서버에 전송 실패 시, localstorage에 저장된 datas는 그대로 유지
-      debugPrint('위치 전송 실패: ${response}');
-      return;
-    }
-  }
+  //   if (response.statusCode == 200) {
+  //     debugPrint('위치 전송 성공 : $response');
+  //   } else {
+  //     // TODO : 서버에 전송 실패 시, localstorage에 저장된 datas는 그대로 유지
+  //     debugPrint('위치 전송 실패: ${response}');
+  //     return;
+  //   }
+  // }
 
   Future<bool> isInternetAvailable() async {
     final List<ConnectivityResult> connectivityResult =

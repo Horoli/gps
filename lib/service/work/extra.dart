@@ -20,8 +20,9 @@ class ServiceExtraWork extends CommonService {
       final Map<String, dynamic> headers =
           HttpConnector.headersByCookie(cookies);
       dio.options.extra['withCredentials'] = true;
-      Position? position = await Geolocator.getLastKnownPosition();
-      position ??= await Geolocator.getCurrentPosition();
+      // Position? position = await Geolocator.getLastKnownPosition();
+      // position ??= await Geolocator.getCurrentPosition();
+      Position position = await GServiceLocation.ensureCurrentPosition();
 
       if (selectedStream.lastValue == null) {
         debugPrint('ServiceExtraWork error : selectedStream is null');

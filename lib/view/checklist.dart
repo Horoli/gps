@@ -109,7 +109,8 @@ class ViewChecklistState extends State<ViewChecklist> {
         children: [
           // 체크리스트 제목
           Text(
-            '체크리스트 ${number + 1}',
+            item.name,
+            // '체크리스트 ${number + 1}',
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,

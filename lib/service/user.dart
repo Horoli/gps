@@ -53,28 +53,28 @@ class ServiceUser extends CommonService {
     _subject.add(null);
   }
 
-  Future<void> location({
-    required double lng,
-    required double lat,
-    required DateTime timestamp,
-  }) async {
-    Completer completer = Completer();
+  // Future<void> location({
+  //   required double lng,
+  //   required double lat,
+  //   required DateTime timestamp,
+  // }) async {
+  //   Completer completer = Completer();
 
-    final Response response = await HttpConnector.post(
-      dio: dio,
-      url: '${URL.BASE_URL}/${URL.USER_LOCATION}',
-      data: {
-        "lng": lng,
-        "lat": lat,
-        "timestamp": timestamp.toIso8601String(),
-      },
-    );
+  //   final Response response = await HttpConnector.post(
+  //     dio: dio,
+  //     url: '${URL.BASE_URL}/${URL.USER_LOCATION}',
+  //     data: {
+  //       "lng": lng,
+  //       "lat": lat,
+  //       "timestamp": timestamp.toIso8601String(),
+  //     },
+  //   );
 
-    if (!completer.isCompleted) {
-      debugPrint('gps complete $response');
-      completer.complete(response);
-    }
+  //   if (!completer.isCompleted) {
+  //     debugPrint('gps complete $response');
+  //     completer.complete(response);
+  //   }
 
-    return completer.future;
-  }
+  //   return completer.future;
+  // }
 }

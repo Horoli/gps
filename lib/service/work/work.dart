@@ -110,8 +110,9 @@ class ServiceWork extends CommonService {
       // Position position = await Geolocator.getCurrentPosition();
       // Position position = GServiceLocation.currentPosition!;
       // print('position $position');
-      Position? position = await Geolocator.getLastKnownPosition();
-      position ??= await Geolocator.getCurrentPosition();
+      // Position? position = await Geolocator.getLastKnownPosition();
+      // position ??= await Geolocator.getCurrentPosition();
+      Position position = await GServiceLocation.ensureCurrentPosition();
 
       List<Map<String, dynamic>> aircraft = selectedWorks
           .map((work) => {
@@ -194,8 +195,9 @@ class ServiceWork extends CommonService {
       //     HttpConnector.headersByCookie(cookies);
       dio.options.extra['withCredentials'] = true;
 
-      Position? position = await Geolocator.getLastKnownPosition();
-      position ??= await Geolocator.getCurrentPosition();
+      // Position? position = await Geolocator.getLastKnownPosition();
+      // position ??= await Geolocator.getCurrentPosition();
+      Position position = await GServiceLocation.ensureCurrentPosition();
 
       Map<String, dynamic> postData = {
         "members": members,
