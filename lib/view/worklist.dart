@@ -30,7 +30,7 @@ class ViewWorklistState extends State<ViewWorklist> {
           onPageChanged: (index) {},
           children: [
             buildWorkListPage(state: STATE.WORKSTATE_NORMAL),
-            buildExtraListPage(),
+            // buildExtraListPage(),
             buildWorkListPage(state: STATE.WORKSTATE_WORKING),
             buildWorkListPage(state: STATE.WORKSTATE_COMPLETE),
           ],
@@ -65,13 +65,13 @@ class ViewWorklistState extends State<ViewWorklist> {
         BottomNavigationBarItem(
           // backgroundColor: COLOR.BASE,
           icon: Icon(Icons.airplanemode_active),
-          label: '항공편 연계작업',
+          label: '조업 시작',
         ),
-        BottomNavigationBarItem(
-          // backgroundColor: Colors.red,
-          icon: Icon(Icons.work),
-          label: '비 연계 작업',
-        ),
+        // BottomNavigationBarItem(
+        //   // backgroundColor: Colors.red,
+        //   icon: Icon(Icons.work),
+        //   label: '비 연계 작업',
+        // ),
         BottomNavigationBarItem(
           icon: Icon(Icons.local_shipping),
           label: '작업 중',
