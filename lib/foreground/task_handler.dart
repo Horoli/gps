@@ -182,6 +182,9 @@ class ForegroundTaskHandler extends TaskHandler {
     ).listen(
       (Position position) async {
         debugPrint('foreground position $position');
+        debugPrint(
+            'foreground position.timestamp ${position.timestamp.toIso8601String()}');
+        debugPrint('foreground timestamp ${timestamp.toIso8601String()}');
         bool internetAvailable = await isInternetAvailable();
         final List<String> cookies = await CookieManager.load();
         _dio.options.extra['withCredentials'] = true;
@@ -189,7 +192,7 @@ class ForegroundTaskHandler extends TaskHandler {
         Map<String, dynamic> data = {
           "lng": position.longitude,
           "lat": position.latitude,
-          "timestamp": timestamp.toIso8601String()
+          "timestamp": position.timestamp.toIso8601String()
         };
 
         if (!internetAvailable) {

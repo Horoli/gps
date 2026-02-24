@@ -26,9 +26,6 @@ class MCurrentWork extends CommonModel<MCurrentWork> {
   });
 
   factory MCurrentWork.fromMap(Map<String, dynamic> item) {
-    print('aaaaaaaaaaaaaaaa');
-    print('${item['extra']}');
-    print('aaaaaaaaaaaaaaaa');
     return MCurrentWork(
       uuid: item['uuid'] as String,
       users: (item['users'] as List<dynamic>)
