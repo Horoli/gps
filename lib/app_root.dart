@@ -29,6 +29,9 @@ class AppRootState extends State<AppRoot> {
     };
 
     return MaterialApp(
+      useInheritedMediaQuery: true,
+      locale: DevicePreview.locale(context),
+      builder: DevicePreview.appBuilder,
       title: TITLE.APP_TITLE,
       navigatorKey: GNavigationKey,
       navigatorObservers: [AppRouteObserver()],

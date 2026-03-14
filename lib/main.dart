@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:device_preview/device_preview.dart';
+import 'package:flutter/foundation.dart';
 import 'flight_steps.dart';
 
 Future<void> main() async {
@@ -13,7 +15,12 @@ Future<void> main() async {
   await checkAndRequestLocationPermission();
   WidgetsBinding.instance.addObserver(AppLifcycleObserver());
 
-  runApp(const AppRoot());
+  runApp(
+    DevicePreview(
+      enabled: !kReleaseMode,
+      builder: (context) => const AppRoot(),
+    ),
+  );
 
   bool insufficientPermissions = await checkPermissions();
   do {

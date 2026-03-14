@@ -80,9 +80,11 @@ class ViewCreatePlateState extends ViewCreateAbstractState<ViewCreatePlate> {
         title: '작업시작',
         // routerName: PATH.ROUTE_WORK_DETAIL,
         onPressed: () async {
-          if (textController.text.length != 4 || selectedPlate.length != 4) {
+          final String plate = textController.text.trim();
+
+          if (plate.length < 2) {
             return await ShowInformationWidgets.snackbar(
-                context, '차량번호 4자리를 입력하세요.');
+                context, '차량번호를 2자리 이상으로 입력하세요.');
           }
 
           List<MMember> members = GServiceMember.selectedMember ?? [];
