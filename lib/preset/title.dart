@@ -18,4 +18,6 @@ const String WORK = '작업';
 
 const String PREFERENCES = '설정';
 
+const String STD = 'STD';
+
 const String LOCATION_PERMISSION = '백그라운드 위치 권한';

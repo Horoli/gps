@@ -36,9 +36,9 @@ class ViewCreateAircraftState
               //   text: '${aircraft.name}(${aircraft.type})',
               //   textAlign: TextAlign.left,
               // ),
-              title: Text('${aircraft.name}(${aircraft.type})'),
+              title: Text(aircraft.name),
               textColor: isSelected ? COLOR.BASE : null,
-              subtitle: Text('출발시간: ${aircraft.departureTime}',
+              subtitle: Text('${TITLE.STD}: ${aircraft.departureTime}',
                   style: const TextStyle(color: Colors.grey)),
               trailing: Checkbox(
                 activeColor: COLOR.BASE,

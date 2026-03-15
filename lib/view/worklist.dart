@@ -126,7 +126,7 @@ class ViewWorklistState extends State<ViewWorklist> {
           children: [
             buildSearchTextField(
               controller: searchController,
-              hint: '검색(작업명, 출발시간)',
+              hint: '검색(작업명, ${TITLE.STD})',
               onChanged: (value) {
                 setState(() {
                   // 필터링 로직 추가

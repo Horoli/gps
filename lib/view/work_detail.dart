@@ -403,10 +403,10 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
                     title: Text(users[index].username,
                         style: const TextStyle(fontWeight: FontWeight.bold)),
                     subtitle: Text(users[index].phoneNumber),
-                    leading: const CircleAvatar(
-                      radius: 14,
-                      child: Icon(Icons.person, size: 16),
-                    ),
+                    // leading: const CircleAvatar(
+                    //   radius: 14,
+                    //   child: Icon(Icons.person, size: 16),
+                    // ),
                   );
                 },
               ),
@@ -437,8 +437,8 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
           title: const Text('작업 완료',
               textAlign: TextAlign.center,
               style: TextStyle(fontWeight: FontWeight.bold)),
-          content: Text('$procedureName 작업을 완료하시겠습니까?',
-              textAlign: TextAlign.center),
+          content:
+              Text('$procedureName 작업을 완료하시겠습니까?', textAlign: TextAlign.center),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           actions: [

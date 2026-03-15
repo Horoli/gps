@@ -28,14 +28,15 @@ class TileWork extends StatelessWidget {
               children: [
                 // 항공편 정보 행
                 buildFittedText(
-                  text: '${workData.name} (${workData.type})',
+                  // text: '${workData.name} (${workData.type})',
+                  text: workData.name,
                   fontSize: 24,
                   fontWeight: FontWeight.w500,
                 ),
                 const SizedBox(height: 8),
                 // 출발 시간 행
                 buildFittedText(
-                  text: '출발시간: ${workData.departureTime}',
+                  text: '${TITLE.STD}: ${workData.departureTime}',
                   color: Colors.grey,
                   fontSize: 18,
                   fontWeight: FontWeight.w500,
