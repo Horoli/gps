@@ -40,6 +40,7 @@ class ViewChecklistState extends State<ViewChecklist> {
                     return StreamExceptionWidgets.noData(
                       context: context,
                       title: '체크리스트가 없습니다',
+                      useToWorkList: false,
                     );
                   }
 

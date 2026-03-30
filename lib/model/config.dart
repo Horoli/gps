@@ -3,8 +3,8 @@ part of FlightSteps;
 class MConfig extends CommonModel<MConfig> {
   final String name;
   final String description;
-  final dynamic value;
-  final dynamic? options;
+  final String value;
+  final String? options;
 
   MConfig({
     required this.name,
@@ -17,8 +17,8 @@ class MConfig extends CommonModel<MConfig> {
     return MConfig(
       name: item['name'] as String,
       description: item['description'] as String,
-      value: item['value'] as dynamic,
-      options: item['options'] as dynamic,
+      value: item['value'].toString(),
+      options: item['options']?.toString(),
     );
   }
 
@@ -40,7 +40,7 @@ class MConfig extends CommonModel<MConfig> {
     String? name,
     String? description,
     String? options,
-    bool? value,
+    String? value,
   }) {
     return MConfig(
       name: name ?? this.name,

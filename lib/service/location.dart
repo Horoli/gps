@@ -74,14 +74,14 @@ class ServiceLocation extends CommonService {
     if (isConnected) {
       await disconnect();
     }
-    
+
     // ensureCurrentPosition을 사용하여 초기 위치 설정 및 캐싱
     await ensureCurrentPosition();
-    
+
     subscription ??= Geolocator.getPositionStream(
         locationSettings: LocationSettings(
       accuracy: accuracy,
-      distanceFilter: distanceFilter.value,
+      distanceFilter: kDebugMode ? 1 : int.parse(distanceFilter.value.toString()),
     )).listen((Position? position) {
       debugPrint('positionStream $position');
       _subject.add(position);

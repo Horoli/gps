@@ -177,7 +177,7 @@ class ForegroundTaskHandler extends TaskHandler {
     subscription ??= Geolocator.getPositionStream(
       locationSettings: LocationSettings(
         accuracy: accuracy,
-        distanceFilter: distanceFilter.value,
+        distanceFilter: kDebugMode ? 1 : int.parse(distanceFilter.value.toString()),
       ),
     ).listen(
       (Position position) async {
