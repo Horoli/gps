@@ -84,6 +84,33 @@ The project follows a Service-oriented architecture with a separation between th
     *   기존 '출발시간'으로 표기되던 UI 텍스트를 전문 용어인 'STD'로 일괄 변경.
     *   `TITLE.STD` 상수를 도입하여 `preset/title.dart`에서 중앙 관리할 수 있도록 리팩토링.
 
+## Recent Updates (2026-03-30)
+
+### 1. MConfig 모델 타입 안전성 개선
+*   **파일:** `lib/model/config.dart`
+*   **내용:**
+    *   `value` 필드를 `dynamic`에서 `String`으로 변경.
+    *   `options` 필드를 `dynamic?`에서 `String?`으로 변경.
+    *   `fromMap`에서 `toString()`을 사용하여 안전하게 변환.
+    *   `copyWith`의 `value` 파라미터 타입을 `bool?`에서 `String?`으로 수정하여 일관성 확보.
+
+### 2. GPS distanceFilter 타입 에러 수정
+*   **파일:** `lib/service/location.dart`, `lib/foreground/task_handler.dart`
+*   **내용:**
+    *   서버에서 `distance` 설정값이 `String`으로 내려와 `LocationSettings.distanceFilter`(`int`)에 전달 시 `_TypeError` 발생하던 버그 수정.
+    *   `int.parse(distanceFilter.value.toString())`으로 명시적 변환 적용.
+
+### 3. 디버그 모드 distanceFilter 고정
+*   **파일:** `lib/service/location.dart`, `lib/foreground/task_handler.dart`
+*   **내용:**
+    *   `kDebugMode`일 때 `distanceFilter`를 `1`(미터)로 고정하여 개발 중 GPS 테스트 용이성 확보.
+    *   Release 빌드에서는 기존대로 서버 설정값 사용.
+
+### 4. 체크리스트 빈 화면 UI 개선
+*   **파일:** `lib/view/checklist.dart`
+*   **내용:**
+    *   체크리스트가 없을 경우 "작업목록으로 가기" 버튼이 표시되지 않도록 `useToWorkList: false` 적용.
+
 ---
 
 ## Output Language
