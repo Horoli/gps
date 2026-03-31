@@ -65,8 +65,9 @@ class ServiceLocation extends CommonService {
       'reduced': LocationAccuracy.reduced,
     };
 
-    LocationAccuracy accuracy =
-        accuracyMap[androidAccuracy.value] ?? LocationAccuracy.high; // 기본값 설정
+    LocationAccuracy accuracy = accuracyMap[
+            Platform.isIOS ? iosAccuracy.value : androidAccuracy.value] ??
+        LocationAccuracy.high; // 기본값 설정
 
     debugPrint('initTask accuracy $accuracy');
     debugPrint('initTask distanceFilter $distanceFilter');
@@ -78,11 +79,22 @@ class ServiceLocation extends CommonService {
     // ensureCurrentPosition을 사용하여 초기 위치 설정 및 캐싱
     await ensureCurrentPosition();
 
+    final int distance = kDebugMode ? 1 : int.parse(distanceFilter.value.toString());
+    final LocationSettings locationSettings = Platform.isIOS
+        ? AppleSettings(
+            accuracy: accuracy,
+            distanceFilter: distance,
+            allowBackgroundLocationUpdates: true,
+            showBackgroundLocationIndicator: true,
+          )
+        : LocationSettings(
+            accuracy: accuracy,
+            distanceFilter: distance,
+          );
+
     subscription ??= Geolocator.getPositionStream(
-        locationSettings: LocationSettings(
-      accuracy: accuracy,
-      distanceFilter: kDebugMode ? 1 : int.parse(distanceFilter.value.toString()),
-    )).listen((Position? position) {
+        locationSettings: locationSettings,
+    ).listen((Position? position) {
       debugPrint('positionStream $position');
       _subject.add(position);
       isConnected = true;

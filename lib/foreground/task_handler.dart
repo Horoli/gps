@@ -165,20 +165,28 @@ class ForegroundTaskHandler extends TaskHandler {
       'reduced': LocationAccuracy.reduced,
     };
 
-    // TODO : platform에 따라 accuracy 설정
-    // 현재는 androidAccuracy만 사용하고, iosAccuracy는 사용하지 않음
-
-    LocationAccuracy accuracy =
-        accuracyMap[androidAccuracy.value] ?? LocationAccuracy.high; // 기본값 설정
+    LocationAccuracy accuracy = accuracyMap[
+            Platform.isIOS ? iosAccuracy.value : androidAccuracy.value] ??
+        LocationAccuracy.high; // 기본값 설정
 
     debugPrint('initTask accuracy $accuracy');
     debugPrint('initTask distanceFilter $distanceFilter');
 
+    final int distance = kDebugMode ? 1 : int.parse(distanceFilter.value.toString());
+    final LocationSettings locationSettings = Platform.isIOS
+        ? AppleSettings(
+            accuracy: accuracy,
+            distanceFilter: distance,
+            allowBackgroundLocationUpdates: true,
+            showBackgroundLocationIndicator: true,
+          )
+        : LocationSettings(
+            accuracy: accuracy,
+            distanceFilter: distance,
+          );
+
     subscription ??= Geolocator.getPositionStream(
-      locationSettings: LocationSettings(
-        accuracy: accuracy,
-        distanceFilter: kDebugMode ? 1 : int.parse(distanceFilter.value.toString()),
-      ),
+      locationSettings: locationSettings,
     ).listen(
       (Position position) async {
         debugPrint('foreground position $position');

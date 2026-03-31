@@ -84,6 +84,30 @@ The project follows a Service-oriented architecture with a separation between th
     *   기존 '출발시간'으로 표기되던 UI 텍스트를 전문 용어인 'STD'로 일괄 변경.
     *   `TITLE.STD` 상수를 도입하여 `preset/title.dart`에서 중앙 관리할 수 있도록 리팩토링.
 
+## Recent Updates (2026-03-31)
+
+### 1. iOS/Android accuracy 플랫폼 분기 처리
+*   **파일:** `lib/service/location.dart`, `lib/foreground/task_handler.dart`
+*   **내용:**
+    *   `Platform.isIOS` 분기를 추가하여 iOS에서는 `iosAccuracy`, Android에서는 `androidAccuracy` 설정값을 사용하도록 수정.
+    *   기존에는 `androidAccuracy`만 사용하여 iOS 설정이 무시되던 문제 해결.
+
+### 2. iOS 백그라운드 위치 추적 지원
+*   **파일:** `lib/service/location.dart`, `lib/foreground/task_handler.dart`
+*   **내용:**
+    *   iOS에서 `AppleSettings`를 사용하도록 `LocationSettings` 플랫폼 분기 처리.
+    *   `allowBackgroundLocationUpdates: true`, `showBackgroundLocationIndicator: true` 설정 추가.
+    *   Android는 기존 `LocationSettings` 유지.
+
+### 3. iOS 빌드 설정 보완
+*   **파일:** `ios/Runner/Info.plist`, `pubspec.yaml`
+*   **내용:**
+    *   Info.plist에 위치 권한 설명 3종(`NSLocationWhenInUseUsageDescription`, `NSLocationAlwaysAndWhenInUseUsageDescription`, `NSLocationAlwaysUsageDescription`) 추가.
+    *   `UIBackgroundModes`에 `location`, `fetch` 추가.
+    *   `flutter_launcher_icons`에 `remove_alpha_ios: true` 추가.
+
+---
+
 ## Recent Updates (2026-03-30)
 
 ### 1. MConfig 모델 타입 안전성 개선
@@ -110,6 +134,19 @@ The project follows a Service-oriented architecture with a separation between th
 *   **파일:** `lib/view/checklist.dart`
 *   **내용:**
     *   체크리스트가 없을 경우 "작업목록으로 가기" 버튼이 표시되지 않도록 `useToWorkList: false` 적용.
+
+---
+
+## TODO: iOS UX 개선 (우선순위 낮음)
+
+기능적 문제는 없으나, iOS 네이티브 UX에 맞추려면 아래 항목을 플랫폼별 분기 처리 필요.
+
+1.  **Dialog:** 현재 모든 Dialog가 Material `AlertDialog` 사용. iOS에서는 `CupertinoAlertDialog`로 분기 권장.
+    *   영향 파일: `lib/service/location.dart`, `lib/view/checklist.dart`, `lib/view/work_detail.dart`, `lib/view/preferences.dart`, `lib/widget/dialog.dart`
+2.  **SnackBar:** Material `SnackBar` 사용 중. iOS에서는 Toast/Overlay가 더 자연스러움.
+    *   영향 파일: `lib/widget/dialog.dart`, `lib/view/preferences.dart`
+3.  **SafeArea:** 일부 화면에서만 적용. 노치/Dynamic Island 대응을 위해 전체 화면에 일관 적용 필요.
+    *   영향 파일: `lib/view/work_detail.dart` 등
 
 ---
 
