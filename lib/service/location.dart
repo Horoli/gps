@@ -94,45 +94,75 @@ class ServiceLocation extends CommonService {
 
     subscription ??= Geolocator.getPositionStream(
         locationSettings: locationSettings,
-    ).listen((Position? position) {
+    ).listen((Position? position) async {
       debugPrint('positionStream $position');
       _subject.add(position);
       isConnected = true;
+
+      // iOS에서는 백그라운드 태스크(플러그인) 대신 메인 아이솔레이트에서 서버 전송을 처리합니다.
+      if (Platform.isIOS && position != null) {
+        await iosBackgroundPost(position);
+      }
     });
   }
 
-  // Future<void> foregroundPost(Position position) async {
-  //   bool internetAvailable = await isInternetAvailable();
+  Future<void> iosBackgroundPost(Position position) async {
+    try {
+      bool internetAvailable = await isInternetAvailable();
+      final List<String> cookies = await CookieManager.load();
+      dio.options.extra['withCredentials'] = true;
 
-  //   if (!internetAvailable) {
-  //     debugPrint('인터넷 연결이 없습니다.');
-  //   }
+      Map<String, dynamic> data = {
+        "lng": position.longitude,
+        "lat": position.latitude,
+        "timestamp": position.timestamp.toIso8601String()
+      };
 
-  //   print(position);
+      if (!internetAvailable) {
+        debugPrint('iOS 인터넷 연결이 없습니다.');
+        await LocationManager.save(data);
+        return;
+      }
 
-  //   final List<String> cookies = await CookieManager.load();
-  //   debugPrint('cookies $cookies');
-  //   dio.options.extra['withCredentials'] = true;
+      await LocationManager.hasData().then((hasData) async {
+        if (hasData) {
+          List<Map<String, dynamic>> locationData = await LocationManager.load();
+          debugPrint('iOS 캐시된 locationData $locationData');
+          
+          for (Map<String, dynamic> item in locationData) {
+            final Response response = await HttpConnector.post(
+              dio: dio,
+              url: '${URL.BASE_URL}/${URL.USER_LOCATION}',
+              cookies: cookies,
+              data: item,
+            );
+            if (response.statusCode == 200) {
+              debugPrint('iOS 캐시 위치 전송 성공 : $response');
+            } else {
+              debugPrint('iOS 캐시 위치 전송 실패: $response');
+              return;
+            }
+          }
+          await LocationManager.clear();
+        }
+      });
 
-  //   final Response response = await HttpConnector.post(
-  //     dio: dio,
-  //     url: '${URL.BASE_URL}/${URL.USER_LOCATION}',
-  //     data: {
-  //       "lng": position.longitude,
-  //       "lat": position.latitude,
-  //       "timestamp": DateTime.now().toIso8601String(),
-  //     },
-  //     cookies: cookies,
-  //   );
+      final Response response = await HttpConnector.post(
+        dio: dio,
+        url: '${URL.BASE_URL}/${URL.USER_LOCATION}',
+        data: data,
+        cookies: cookies,
+      );
 
-  //   if (response.statusCode == 200) {
-  //     debugPrint('위치 전송 성공 : $response');
-  //   } else {
-  //     // TODO : 서버에 전송 실패 시, localstorage에 저장된 datas는 그대로 유지
-  //     debugPrint('위치 전송 실패: ${response}');
-  //     return;
-  //   }
-  // }
+      if (response.statusCode == 200) {
+        debugPrint('iOS 현재 위치 전송 성공 : $response');
+      } else {
+        debugPrint('iOS 현재 위치 전송 실패: $response');
+      }
+    } catch (e) {
+      debugPrint('iOS Background Post Error: $e');
+    }
+  }
 
   Future<bool> isInternetAvailable() async {
     final List<ConnectivityResult> connectivityResult =

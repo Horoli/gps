@@ -124,137 +124,152 @@ class ForegroundTaskHandler extends TaskHandler {
   @override
   Future<void> onStart(DateTime timestamp, TaskStarter starter) async {
     debugPrint('onStart : $timestamp');
+    FlutterForegroundTask.sendDataToMain('onStart Executed: $timestamp');
   }
 
   /// 해당 코드 수정 시 [ServiceLocation]의 setLocationListener() 코드도 같이 수정해야함
   @override
   void onRepeatEvent(DateTime timestamp) async {
-    final List<String> cookies = await CookieManager.load();
-    final Response response = await HttpConnector.get(
-      dio: _dio,
-      url: '${URL.BASE_URL}/${URL.CONFIG_GPS}',
-      cookies: cookies,
-    );
+    FlutterForegroundTask.sendDataToMain('onRepeatEvent Started: $timestamp');
+    try {
+      final List<String> cookies = await CookieManager.load();
+      final Response response = await HttpConnector.get(
+        dio: _dio,
+        url: '${URL.BASE_URL}/${URL.CONFIG_GPS}',
+        cookies: cookies,
+      );
 
-    debugPrint('initTask response ${response.data}');
+      debugPrint('initTask response ${response.data}');
 
-    List<MConfig> result = List.from(response.data ?? [])
-        .map((item) => MConfig.fromMap(item))
-        .toList();
+      List<MConfig> result = List.from(response.data ?? [])
+          .map((item) => MConfig.fromMap(item))
+          .toList();
 
-    MConfig androidAccuracy =
-        result.firstWhere((item) => item.name == 'accuracy.android');
+      MConfig androidAccuracy =
+          result.firstWhere((item) => item.name == 'accuracy.android');
 
-    MConfig iosAccuracy =
-        result.firstWhere((item) => item.name == 'accuracy.ios');
+      MConfig iosAccuracy =
+          result.firstWhere((item) => item.name == 'accuracy.ios');
 
-    MConfig distanceFilter =
-        result.firstWhere((item) => item.name == 'distance');
-    debugPrint('initTask androidAccuracy $androidAccuracy');
+      MConfig distanceFilter =
+          result.firstWhere((item) => item.name == 'distance');
+      debugPrint('initTask androidAccuracy $androidAccuracy');
 
-    Map<String, dynamic> accuracyMap = {
-      // android
-      'high': LocationAccuracy.high,
-      'medium': LocationAccuracy.medium,
-      'low': LocationAccuracy.low,
-      'lowest': LocationAccuracy.lowest,
+      Map<String, dynamic> accuracyMap = {
+        // android
+        'high': LocationAccuracy.high,
+        'medium': LocationAccuracy.medium,
+        'low': LocationAccuracy.low,
+        'lowest': LocationAccuracy.lowest,
 
-      // ios
-      'best': LocationAccuracy.best,
-      'navigation': LocationAccuracy.bestForNavigation,
-      'reduced': LocationAccuracy.reduced,
-    };
+        // ios
+        'best': LocationAccuracy.best,
+        'navigation': LocationAccuracy.bestForNavigation,
+        'reduced': LocationAccuracy.reduced,
+      };
 
-    LocationAccuracy accuracy = accuracyMap[
-            Platform.isIOS ? iosAccuracy.value : androidAccuracy.value] ??
-        LocationAccuracy.high; // 기본값 설정
+      LocationAccuracy accuracy = accuracyMap[
+              Platform.isIOS ? iosAccuracy.value : androidAccuracy.value] ??
+          LocationAccuracy.high; // 기본값 설정
 
-    debugPrint('initTask accuracy $accuracy');
-    debugPrint('initTask distanceFilter $distanceFilter');
+      debugPrint('initTask accuracy $accuracy');
+      debugPrint('initTask distanceFilter $distanceFilter');
 
-    final int distance = kDebugMode ? 1 : int.parse(distanceFilter.value.toString());
-    final LocationSettings locationSettings = Platform.isIOS
-        ? AppleSettings(
-            accuracy: accuracy,
-            distanceFilter: distance,
-            allowBackgroundLocationUpdates: true,
-            showBackgroundLocationIndicator: true,
-          )
-        : LocationSettings(
-            accuracy: accuracy,
-            distanceFilter: distance,
-          );
+      final int distance = kDebugMode ? 1 : int.parse(distanceFilter.value.toString());
+      final LocationSettings locationSettings = Platform.isIOS
+          ? AppleSettings(
+              accuracy: accuracy,
+              distanceFilter: distance,
+              allowBackgroundLocationUpdates: true,
+              showBackgroundLocationIndicator: true,
+            )
+          : LocationSettings(
+              accuracy: accuracy,
+              distanceFilter: distance,
+            );
 
-    subscription ??= Geolocator.getPositionStream(
-      locationSettings: locationSettings,
-    ).listen(
-      (Position position) async {
-        debugPrint('foreground position $position');
-        debugPrint(
-            'foreground position.timestamp ${position.timestamp.toIso8601String()}');
-        debugPrint('foreground timestamp ${timestamp.toIso8601String()}');
-        bool internetAvailable = await isInternetAvailable();
-        final List<String> cookies = await CookieManager.load();
-        _dio.options.extra['withCredentials'] = true;
+      subscription ??= Geolocator.getPositionStream(
+        locationSettings: locationSettings,
+      ).listen(
+        (Position position) async {
+          FlutterForegroundTask.sendDataToMain('Foreground Position Received: ${position.latitude}, ${position.longitude}');
+          debugPrint('foreground position $position');
+          debugPrint(
+              'foreground position.timestamp ${position.timestamp.toIso8601String()}');
+          debugPrint('foreground timestamp ${timestamp.toIso8601String()}');
+          
+          try {
+            bool internetAvailable = await isInternetAvailable();
+            final List<String> cookies = await CookieManager.load();
+            _dio.options.extra['withCredentials'] = true;
 
-        Map<String, dynamic> data = {
-          "lng": position.longitude,
-          "lat": position.latitude,
-          "timestamp": position.timestamp.toIso8601String()
-        };
+            Map<String, dynamic> data = {
+              "lng": position.longitude,
+              "lat": position.latitude,
+              "timestamp": position.timestamp.toIso8601String()
+            };
 
-        if (!internetAvailable) {
-          debugPrint('인터넷 연결이 없습니다.');
-          await LocationManager.save(data);
-          return;
-        }
-
-        await LocationManager.hasData().then((hasData) async {
-          if (hasData) {
-            // localStorage에 저장된 datas가 있으면, 서버에 모두 post
-            List<Map<String, dynamic>> locationData =
-                await LocationManager.load();
-
-            debugPrint('locationData $locationData');
-            for (Map<String, dynamic> item in locationData) {
-              final Response response = await HttpConnector.post(
-                dio: _dio,
-                url: '${URL.BASE_URL}/${URL.USER_LOCATION}',
-                cookies: cookies,
-                data: item,
-              );
-              // 응답 확인
-              if (response.statusCode == 200) {
-                debugPrint('위치 전송 성공 : $response');
-              } else {
-                // TODO : 서버에 전송 실패 시, localstorage에 저장된 datas는 그대로 유지
-                debugPrint('위치 전송 실패: ${response}');
-                return;
-              }
+            if (!internetAvailable) {
+              debugPrint('인터넷 연결이 없습니다.');
+              await LocationManager.save(data);
+              return;
             }
-            // 서버에 전송 완료 시, localstorage에 저장된 datas 삭제
-            await LocationManager.clear();
+
+            await LocationManager.hasData().then((hasData) async {
+              if (hasData) {
+                // localStorage에 저장된 datas가 있으면, 서버에 모두 post
+                List<Map<String, dynamic>> locationData =
+                    await LocationManager.load();
+
+                debugPrint('locationData $locationData');
+                for (Map<String, dynamic> item in locationData) {
+                  final Response response = await HttpConnector.post(
+                    dio: _dio,
+                    url: '${URL.BASE_URL}/${URL.USER_LOCATION}',
+                    cookies: cookies,
+                    data: item,
+                  );
+                  // 응답 확인
+                  if (response.statusCode == 200) {
+                    debugPrint('위치 전송 성공 : $response');
+                  } else {
+                    // TODO : 서버에 전송 실패 시, localstorage에 저장된 datas는 그대로 유지
+                    debugPrint('위치 전송 실패: ${response}');
+                    return;
+                  }
+                }
+                // 서버에 전송 완료 시, localstorage에 저장된 datas 삭제
+                await LocationManager.clear();
+              }
+            });
+
+            final Response response = await HttpConnector.post(
+              dio: _dio,
+              url: '${URL.BASE_URL}/${URL.USER_LOCATION}',
+              data: data,
+              cookies: cookies,
+            );
+
+            if (response.statusCode == 200) {
+              debugPrint('위치 전송 성공 : $response');
+            } else {
+              debugPrint('위치 전송 실패: ${response}');
+              return;
+            }
+          } catch (e) {
+            debugPrint('Position processing error: $e');
+            FlutterForegroundTask.sendDataToMain('Position processing error: $e');
           }
-        });
-
-        final Response response = await HttpConnector.post(
-          dio: _dio,
-          url: '${URL.BASE_URL}/${URL.USER_LOCATION}',
-          data: data,
-          cookies: cookies,
-        );
-
-        if (response.statusCode == 200) {
-          debugPrint('위치 전송 성공 : $response');
-        } else {
-          debugPrint('위치 전송 실패: ${response}');
-          return;
-        }
-      },
-      onError: (e) {
-        debugPrint('foreground onRepeatEvent error $e');
-      },
-    );
+        },
+        onError: (e) {
+          debugPrint('foreground onRepeatEvent error $e');
+          FlutterForegroundTask.sendDataToMain('Foreground Stream error: $e');
+        },
+      );
+    } catch (e, stackTrace) {
+      debugPrint('onRepeatEvent Crashed: $e');
+      FlutterForegroundTask.sendDataToMain('onRepeatEvent CRITICAL ERROR: $e');
+    }
     return;
   }
 

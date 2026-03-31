@@ -44,6 +44,9 @@
 ### 4.3 중앙 집중식 위치 정보 관리 (GPS)
 - `ServiceLocation`을 통해 모든 위치 정보 접근을 일원화합니다.
 - `ensureCurrentPosition()`을 사용하여 위치 권한 및 초기화 타이밍 이슈를 해결하고, 항상 최신 GPS 값을 보장합니다.
+- **플랫폼별 백그라운드 서버 전송 전략 (핵심):**
+  - **Android:** 시스템 메모리 종료 및 Doze 모드를 방어하기 위해 `flutter_foreground_task`를 사용하여 Background Isolate(`ForegroundTaskHandler`)에서 위치 수집 빛 API 전송을 전담합니다.
+  - **iOS:** OS 네이티브(`Geolocator`의 `allowBackgroundLocationUpdates`)가 메인 스레드를 살려 유지해주므로, 불필요한 이중 Isolate 생성을 피하고 Main Isolate(`ServiceLocation.iosBackgroundPost`)에서 직접 캐싱 및 서버 전송을 완전히 처리합니다.
 
 ## 5. Directory Structure (디렉토리 구조)
 - `lib/foreground`: 백그라운드/포그라운드 작업 및 위치 추적 로직.

@@ -167,10 +167,15 @@ class ViewChecklistState extends State<ViewChecklist> {
   }
 
   Future<void> initForegroundTask() async {
+    if (Platform.isIOS) {
+      debugPrint('iOS: Skipping flutter_foreground_task init. Using native Main Isolate background location tracking.');
+      return;
+    }
     debugPrint('foreground step 4');
     await ForegroundTaskHandler.initTask();
     debugPrint('foreground step 5');
-    await ForegroundTaskHandler.startService();
+    final result = await ForegroundTaskHandler.startService();
+    debugPrint('foreground step 6 - startService result: $result');
   }
 
   Future<bool> getSubjectResult() async {

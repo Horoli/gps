@@ -57,6 +57,21 @@ The project follows a Service-oriented architecture with a separation between th
 *   **Isolate Safety:**
     *   Remember that `lib/foreground/` code cannot access variables in `lib/service/` or `lib/global.dart` directly. Changes to logic (like API URLs or Configuration parsing) often need to be duplicated or shared carefully between `ServiceLocation` and `ForegroundTaskHandler`.
 
+## Recent Updates (2026-04-01)
+
+### 1. iOS 백그라운드 위치 추적 구조 분리 및 최적화
+*   **파일:** `ios/Runner/AppDelegate.swift`, `lib/service/location.dart`, `lib/view/checklist.dart`
+*   **내용:** 
+    *   `AppDelegate.swift`에 누락되었던 `FlutterForegroundTaskPlugin` 셋업 코드를 추가하여 iOS 백그라운드 아이솔레이트 크래시를 근본적으로 해결.
+    *   iOS 환경에서는 듀얼 전송 버그를 막고 최적화를 위해 메인 아이솔레이트 하나만 사용하도록 `flutter_foreground_task` 가동 방지 (`checklist.dart`).
+    *   `ServiceLocation.iosBackgroundPost`를 새롭게 구현하여 iOS의 고유한 백그라운드 GPS 캐싱 및 전송 전담.
+
+### 2. 로그아웃 시 리소스 완전 해제 (401 무한 전송 버그 픽스)
+*   **파일:** `lib/service/user.dart`
+*   **내용:** 
+    *   로그아웃 후에도 남아있는 백그라운드 GPS 추적 스트림이 계속해서 지워진 쿠키로 API를 호출하여 `401 Unauthorized` 예외가 무한 발생하던 크리티컬 버그 수정.
+    *   로그아웃 시 `GServiceLocation.disconnect()` 호출, `FlutterForegroundTask.stopService()` 강제 종료 및 `LocationManager.clear()` 호출을 통해 모든 백그라운드 리소스가 완벽히 파괴되도록 로직 개선.
+
 ## Recent Updates (2026-03-14)
 
 ### 1. UI/UX 레이아웃 및 반응형 디자인 최적화
