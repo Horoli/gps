@@ -51,16 +51,16 @@ class ServiceUser extends CommonService {
   Future<void> logout() async {
     // 1. 메인 아이솔레이트의 위치 추적 스트림 종료 (iOS / Android 공통)
     await GServiceLocation.disconnect();
-    
+
     // 2. 안드로이드 백그라운드 아이솔레이트 서비스 강제 종료
     if (!Platform.isIOS) {
       await FlutterForegroundTask.stopService();
     }
-    
+
     // 3. 캐시된 위치 정보 및 세션/쿠키 삭제
     await LocationManager.clear();
     await CookieManager.clear();
-    
+
     _subject.add(null);
   }
 

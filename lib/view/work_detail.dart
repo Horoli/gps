@@ -108,14 +108,14 @@ class ViewWorkDetailState extends State<ViewWorkDetail> {
                       ),
 
                 // 2. 현재 작업 및 기록 (유동적 높이)
-                if (currentProcedureIndex < 4) ...[
-                  buildCurrentWork(procedures[getProcedureIndexByWorkId]),
-                  buildWorkHistory(procedures, getProcedureIndexByWorkId),
-                ],
+                // if (currentProcedureIndex < 4) ...[
+                buildCurrentWork(procedures[getProcedureIndexByWorkId]),
+                buildWorkHistory(procedures, getProcedureIndexByWorkId),
+                // ],
 
-                // 3. 특이사항 입력 필드 (가변 영역: 공간 차지)
-                if (currentProcedureIndex == 4)
-                  Expanded(child: buildDescriptionField()),
+                // // 3. 특이사항 입력 필드 (가변 영역: 공간 차지)
+                // if (currentProcedureIndex == 4)
+                //   Expanded(child: buildDescriptionField()),
 
                 // 4. 작업자 리스트 (가변 영역: 공간 차지)
                 Expanded(child: buildWorkers(users)),
