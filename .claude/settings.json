@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(git add:*)",
-      "Bash(find /c/Users/BCRH/Desktop/study/gps/lib -name \"*.dart\" -type f ! -name \"main.dart\" ! -name \"task_handler.dart\" -exec wc -l {} +)"
+      "Bash(find /c/Users/BCRH/Desktop/study/gps/lib -name \"*.dart\" -type f ! -name \"main.dart\" ! -name \"task_handler.dart\" -exec wc -l {} +)",
+      "Bash(git mv *)"
     ]
   }
 }

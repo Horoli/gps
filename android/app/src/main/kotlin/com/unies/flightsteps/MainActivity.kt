@@ -1,4 +1,4 @@
-package com.example.flight_steps
+package com.unies.flightsteps
 
 import io.flutter.embedding.android.FlutterActivity
 
